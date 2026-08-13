@@ -1,0 +1,8 @@
+{
+  "appId": "com.paisainminutes.app",
+  "appName": "Paisa in Minutes",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  }
+}

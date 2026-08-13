@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Paisa in Minutes</string>
+    <string name="title_activity_main">Paisa in Minutes</string>
+    <string name="package_name">com.paisainminutes.app</string>
+    <string name="custom_url_scheme">com.paisainminutes.app</string>
+</resources>

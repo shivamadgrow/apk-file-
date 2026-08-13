@@ -1,0 +1,16 @@
+node_modules/
+server/node_modules/
+.env
+*.log
+uploads/
+backups/
+/.idea
+/.vscode
+dist/
+build/
+.DS_Store
+npm-debug.log*
+coverage/
+coverage-final.json
+/.next
+/.env.local

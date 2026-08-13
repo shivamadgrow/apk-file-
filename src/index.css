@@ -1,0 +1,92 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    background-color: #F1F5F9;
+    color: #1E293B;
+    font-family: 'Inter', 'Poppins', sans-serif;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: #E4EEFF;
+}
+::-webkit-scrollbar-thumb {
+  background: #4A8DFF;
+  border-radius: 9999px;
+}
+
+/* High-End Fintech UI Tokens */
+.paisa-hero-card {
+  background: linear-gradient(135deg, #1E293B 0%, #223981 50%, #1E3A8A 100%);
+  box-shadow: 0 20px 40px -15px rgba(34, 57, 129, 0.4);
+}
+
+.paisa-glass-card {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(228, 238, 255, 0.8);
+  box-shadow: 0 10px 30px -10px rgba(34, 57, 129, 0.07);
+}
+
+.paisa-glass-dark {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.paisa-glow-button {
+  background: linear-gradient(135deg, #4A8DFF 0%, #2563EB 100%);
+  box-shadow: 0 10px 25px -5px rgba(74, 141, 255, 0.5);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.paisa-glow-button:active {
+  transform: scale(0.98);
+  box-shadow: 0 5px 15px -3px rgba(74, 141, 255, 0.6);
+}
+
+.paisa-affiliate-card {
+  background: linear-gradient(135deg, #0F172A 0%, #1E293B 60%, #312E81 100%);
+  border: 2px solid #F59E0B;
+  box-shadow: 0 14px 35px -10px rgba(245, 158, 11, 0.3);
+}
+
+.paisa-text-gradient {
+  background: linear-gradient(135deg, #6FA8FF 0%, #FFFFFF 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.paisa-gold-text {
+  background: linear-gradient(135deg, #FBBF24 0%, #F59E0B 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.85; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.02); }
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 2.5s infinite ease-in-out;
+}
+
+@keyframes floatIcon {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-4px); }
+}
+
+.animate-float {
+  animation: floatIcon 3s infinite ease-in-out;
+}

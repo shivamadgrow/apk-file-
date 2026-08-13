@@ -1,0 +1,21 @@
+{
+  "short_name": "PaisaInMinutes",
+  "name": "Paisa in Minutes — Personal Loan & Affiliate App",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/logo.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#223981",
+  "theme_color": "#4A8DFF",
+  "display": "standalone",
+  "orientation": "portrait"
+}
