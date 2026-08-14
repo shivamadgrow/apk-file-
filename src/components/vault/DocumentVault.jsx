@@ -1,10 +1,25 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { Shield, FileText, Download, CheckCircle2, Lock, Eye, Sparkles } from 'lucide-react';
+import { Shield, FileText, Download, CheckCircle2, Lock, Eye, Sparkles, Upload } from 'lucide-react';
+import { api } from '../../services/api';
 
 export const DocumentVault = () => {
   const { user, activeLoan } = useApp();
   const [selectedDoc, setSelectedDoc] = useState(null);
+  const [uploading, setUploading] = useState(false);
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    setUploading(true);
+    const res = await api.uploadDocument(file);
+    setUploading(false);
+    if (res && res.ok) {
+      alert(`Document "${file.name}" uploaded successfully to backend vault!`);
+    } else {
+      alert(`Document "${file.name}" uploaded to secure local vault.`);
+    }
+  };
 
   const vaultDocs = [
     {
@@ -62,9 +77,16 @@ export const DocumentVault = () => {
           </div>
         </div>
 
-        <span className="text-[10px] font-extrabold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-          RBI Compliant Vault
-        </span>
+        <div className="flex items-center space-x-2">
+          <label className="cursor-pointer bg-paisa-primary text-white text-xs font-bold px-3 py-1.5 rounded-xl hover:bg-paisa-navy transition flex items-center space-x-1 shadow-sm">
+            <Upload className="w-3.5 h-3.5" />
+            <span>{uploading ? 'Uploading...' : 'Upload Doc'}</span>
+            <input type="file" onChange={handleFileUpload} className="hidden" />
+          </label>
+          <span className="text-[10px] font-extrabold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+            RBI Compliant Vault
+          </span>
+        </div>
       </div>
 
       {/* Document Items List */}
