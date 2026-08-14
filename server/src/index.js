@@ -244,6 +244,7 @@ app.use('/api/documents', documentsRouter);
 app.use('/api/kyc', kycRouter);
 app.use('/api/credit-score', creditRouter);
 
+app.get('/', (req, res) => res.redirect('/api/docs'));
 app.get('/api/health', (req, res) => res.json({ ok: true }));
 
 const port = process.env.PORT || 4000;
