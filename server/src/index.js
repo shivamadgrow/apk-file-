@@ -71,6 +71,6 @@ app.use('/api/credit-score', creditRouter);
 app.get('/api/health', (req, res) => res.json({ ok: true }));
 
 const port = process.env.PORT || 4000;
-app.listen(port, () => console.log(`Server running on port ${port}`));
+app.listen(port, '0.0.0.0', () => console.log(`Server running on port ${port}`));
 
 module.exports = app;
