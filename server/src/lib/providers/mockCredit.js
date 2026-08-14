@@ -3,18 +3,25 @@ const prisma = new PrismaClient();
 
 class MockCreditProvider {
   async generateScore(userId) {
-    // deterministic pseudo-random based on id hash
     let n = 0;
-    for (let i = 0; i < userId.length; i++) n += userId.charCodeAt(i);
-    const score = 300 + (n % 551); // 300-850
-    const factors = { paymentHistory: 90, utilization: 30, inquiries: 1 };
-    const rec = await prisma.creditScore.create({ data: { userId, score, factors } });
-    return rec;
+    for (let i = 0; i < (userId || 'user').length; i++) n += (userId || 'user').charCodeAt(i);
+    const score = 650 + (n % 200); // 650-850
+    const factors = { paymentHistory: '98%', utilization: '15%', inquiries: 1 };
+    try {
+      const rec = await prisma.creditScore.create({ data: { userId, score, factors } });
+      return rec;
+    } catch (err) {
+      return { id: 'mock-score-1', userId, score, factors, createdAt: new Date() };
+    }
   }
 
   async latest(userId) {
-    const rec = await prisma.creditScore.findFirst({ where: { userId }, orderBy: { createdAt: 'desc' } });
-    return rec;
+    try {
+      const rec = await prisma.creditScore.findFirst({ where: { userId }, orderBy: { createdAt: 'desc' } });
+      return rec;
+    } catch (err) {
+      return null;
+    }
   }
 }
 
