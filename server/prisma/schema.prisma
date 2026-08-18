@@ -21,6 +21,8 @@ model User {
   documents Document[]
   loanApplications LoanApplication[]
   creditScores CreditScore[]
+  refreshTokens RefreshToken[]
+  kycSessions KycSession[]
 }
 
 model OTPCode {
