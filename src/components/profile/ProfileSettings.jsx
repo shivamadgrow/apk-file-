@@ -14,6 +14,7 @@ export const ProfileSettings = () => {
 
   const [showRbiModal, setShowRbiModal] = useState(false);
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+  const [showSecurityConsentModal, setShowSecurityConsentModal] = useState(false);
   const [showHowToApplyModal, setShowHowToApplyModal] = useState(false);
   const [showAboutModal, setShowAboutModal] = useState(false);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
@@ -246,7 +247,7 @@ export const ProfileSettings = () => {
 
         {/* 4. Data Privacy & Security Consent */}
         <div 
-          onClick={() => setShowPrivacyModal(true)}
+          onClick={() => setShowSecurityConsentModal(true)}
           className="p-3.5 bg-white rounded-2xl border border-slate-200 hover:bg-slate-50 cursor-pointer flex items-center justify-between transition group shadow-2xs"
         >
           <div className="flex items-center space-x-2.5">
@@ -568,9 +569,60 @@ export const ProfileSettings = () => {
 
             <button
               onClick={() => setShowPrivacyModal(false)}
-              className="w-full py-2.5 bg-[#223981] text-white text-xs font-bold rounded-xl"
+              className="w-full py-2.5 bg-[#223981] text-white text-xs font-bold rounded-xl hover:bg-[#1E3A8A] transition"
             >
               Understand & Close
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 3B: DATA PRIVACY & SECURITY CONSENT MODAL */}
+      {showSecurityConsentModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-5 max-w-md w-full space-y-3.5 shadow-2xl text-left border border-slate-200">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center space-x-2">
+                <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+                  <Shield className="w-4.5 h-4.5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-extrabold text-[#223981]">Data Privacy & Security Consent</h3>
+                  <p className="text-[10px] text-[#717983]">RBI Digital Lending Architecture 2026</p>
+                </div>
+              </div>
+              <button onClick={() => setShowSecurityConsentModal(false)} className="p-1 hover:bg-slate-100 rounded-lg">
+                <X className="w-4 h-4 text-[#717983]" />
+              </button>
+            </div>
+
+            <div className="text-xs text-[#717983] leading-relaxed space-y-2.5">
+              <div className="bg-[#E4EEFF]/70 p-3 rounded-2xl border border-[#6FA8FF]/30 space-y-1.5">
+                <div className="flex items-center space-x-2 text-[#223981] font-extrabold text-xs">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                  <span>256-Bit SSL/AES Bank Grade Encryption</span>
+                </div>
+                <p className="text-[10.5px] text-[#475569]">
+                  All PAN, Aadhaar OTP credentials, and mobile numbers are tokenized and protected under ISO/IEC 27001 data governance standards.
+                </p>
+              </div>
+
+              <div className="bg-slate-50 p-3 rounded-2xl border border-slate-200/80 space-y-1.5">
+                <div className="flex items-center space-x-2 text-[#223981] font-extrabold text-xs">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                  <span>Explicit Borrower Consent Policy</span>
+                </div>
+                <p className="text-[10.5px] text-[#475569]">
+                  Under RBI guidelines, user data is shared solely with the specific RBI-registered lender you choose to apply with. We never sell or distribute your private data.
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setShowSecurityConsentModal(false)}
+              className="w-full py-2.5 bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-bold rounded-xl shadow transition"
+            >
+              Acknowledge & Close
             </button>
           </div>
         </div>

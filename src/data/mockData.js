@@ -16,7 +16,7 @@ export const PARTNER_NBFCS = [
     tag: "Featured Partner",
     rating: 4.9,
     features: ["100% Instant Online Approval", "Direct Bank Account Disbursal", "Zero Paperwork Required"],
-    outboundUrl: "https://rupay91.com/applynow.php?utm_source=paisainminutesapp&utm_medium=affiliate&aff_id=PIM-812385"
+    outboundUrl: "https://www.rupay91.com/applynow.php?utm_source=paisainminutesapp&utm_medium=affiliate&aff_id=PIM-812385"
   },
   {
     id: "moneyview",
@@ -33,7 +33,7 @@ export const PARTNER_NBFCS = [
     tag: "Fast Approval",
     rating: 4.8,
     features: ["Disbursal in 2 Hours", "Paperless Documentation", "Flexible EMI Tenure"],
-    outboundUrl: "https://moneyview.in/apply?utm_source=paisainminutesapp&utm_medium=affiliate&aff_id=PIM-812385"
+    outboundUrl: "https://moneyview.in/personal-loan?utm_source=paisainminutesapp&utm_medium=affiliate&aff_id=PIM-812385"
   },
   {
     id: "kreditbee",
@@ -50,7 +50,7 @@ export const PARTNER_NBFCS = [
     tag: "Top Popular App",
     rating: 4.7,
     features: ["Direct Bank Transfer", "Low Salary Eligible", "10 Mins Disbursal"],
-    outboundUrl: "https://kreditbee.in/apply?utm_source=paisainminutesapp&utm_medium=affiliate&aff_id=PIM-812385"
+    outboundUrl: "https://www.kreditbee.in/personal-loan?utm_source=paisainminutesapp&utm_medium=affiliate&aff_id=PIM-812385"
   },
   {
     id: "cashe",
@@ -67,7 +67,7 @@ export const PARTNER_NBFCS = [
     tag: "Best for Salaried",
     rating: 4.6,
     features: ["SLQ Score Based Approval", "No Physical Visit", "Instant Disbursal"],
-    outboundUrl: "https://cashe.co.in/apply?utm_source=paisainminutesapp&utm_medium=affiliate&aff_id=PIM-812385"
+    outboundUrl: "https://www.cashe.co.in/personal-loan/?utm_source=paisainminutesapp&utm_medium=affiliate&aff_id=PIM-812385"
   },
   {
     id: "mpokket",
@@ -84,7 +84,7 @@ export const PARTNER_NBFCS = [
     tag: "Students & Freshers",
     rating: 4.7,
     features: ["Zero Income Proof Needed", "Instant Pocket Loan", "Easy UPI Disbursal"],
-    outboundUrl: "https://mpokket.in/apply?utm_source=paisainminutesapp&utm_medium=affiliate&aff_id=PIM-812385"
+    outboundUrl: "https://www.mpokket.in/?utm_source=paisainminutesapp&utm_medium=affiliate&aff_id=PIM-812385"
   },
   {
     id: "bajaj",
@@ -101,7 +101,7 @@ export const PARTNER_NBFCS = [
     tag: "High Approval Rate",
     rating: 4.9,
     features: ["No Collateral Required", "Withdraw & Prepay Anytime", "Pre-Approved Offers"],
-    outboundUrl: "https://bajajfinserv.in/apply?utm_source=paisainminutesapp&utm_medium=affiliate&aff_id=PIM-812385"
+    outboundUrl: "https://www.bajajfinserv.in/personal-loan?utm_source=paisainminutesapp&utm_medium=affiliate&aff_id=PIM-812385"
   }
 ];
 
@@ -150,24 +150,50 @@ export const MOCK_LEADS = [
   {
     id: "LD-9021",
     name: "Vikram Singh",
-    phone: "+91 98765 *****",
+    phone: "+91 98765 11223",
     type: "Personal Loan",
     amount: "₹4,00,000",
     status: "Disbursed",
     commission: "₹10,000",
     date: "24 Jul 2026",
-    nbfc: "Rupay91 Instant Loan"
+    nbfc: "Rupay91 Instant Loan",
+    payoutStatus: "Credited"
   },
   {
     id: "LD-9022",
     name: "Sunita Verma",
-    phone: "+91 94123 *****",
+    phone: "+91 94123 44556",
     type: "Business Loan",
     amount: "₹6,50,000",
-    status: "Approved - Awaiting Disbursal",
+    status: "Approved",
     commission: "₹20,800",
     date: "25 Jul 2026",
-    nbfc: "Bajaj Finserv"
+    nbfc: "Bajaj Finserv",
+    payoutStatus: "Processing"
+  },
+  {
+    id: "LD-9023",
+    name: "Amit Patel",
+    phone: "+91 98234 88990",
+    type: "Personal Loan",
+    amount: "₹2,50,000",
+    status: "In Review",
+    commission: "₹6,250",
+    date: "26 Jul 2026",
+    nbfc: "MoneyView Personal Loan",
+    payoutStatus: "Pending Disbursal"
+  },
+  {
+    id: "LD-9024",
+    name: "Pooja Sharma",
+    phone: "+91 97112 33445",
+    type: "Credit Card",
+    amount: "Card Approved",
+    status: "Disbursed",
+    commission: "₹1,500",
+    date: "27 Jul 2026",
+    nbfc: "KreditBee",
+    payoutStatus: "Credited"
   }
 ];
 

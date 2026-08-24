@@ -265,6 +265,29 @@ export const AppProvider = ({ children }) => {
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, unread: false } : n));
   };
 
+  // Add new lead in Lead Management tab
+  const addLead = (newLeadData) => {
+    const newLead = {
+      id: `LD-${Math.floor(9030 + Math.random() * 900)}`,
+      name: newLeadData.name || "New Applicant",
+      phone: newLeadData.phone || "+91 98000 00000",
+      type: newLeadData.type || "Personal Loan",
+      amount: newLeadData.amount ? `₹${Number(newLeadData.amount).toLocaleString()}` : "₹3,00,000",
+      status: "In Review",
+      commission: `₹${Math.round((Number(newLeadData.amount) || 300000) * 0.025).toLocaleString()}`,
+      date: "Today",
+      nbfc: newLeadData.nbfc || "Rupay91 Instant Loan",
+      payoutStatus: "Pending Disbursal"
+    };
+
+    setAffiliate(prev => ({
+      ...prev,
+      leads: [newLead, ...(prev.leads || [])]
+    }));
+
+    return newLead;
+  };
+
   return (
     <AppContext.Provider value={{
       activeTab,
@@ -288,6 +311,7 @@ export const AppProvider = ({ children }) => {
       setActiveLoan,
       affiliate,
       setAffiliate,
+      addLead,
       notifications,
       markNotificationRead
     }}>

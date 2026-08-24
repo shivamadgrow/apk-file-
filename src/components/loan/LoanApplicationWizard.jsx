@@ -7,13 +7,37 @@ import {
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
-export const LoanApplicationWizard = ({ preSelectedProduct, onClose }) => {
+export const LoanApplicationWizard = ({ preSelectedProduct = 'personal', onClose }) => {
   const { setActiveLoan, saveNewLoanApplication, setActiveTab } = useApp();
 
+  const productTitle = preSelectedProduct === 'business' 
+    ? 'Business Loan' 
+    : preSelectedProduct === 'gold' 
+    ? 'Gold Loan' 
+    : preSelectedProduct === 'credit_card' 
+    ? 'Instant Credit Card' 
+    : 'Personal Loan';
+
+  const defaultAmount = preSelectedProduct === 'business' 
+    ? 500000 
+    : preSelectedProduct === 'gold' 
+    ? 200000 
+    : preSelectedProduct === 'credit_card' 
+    ? 100000 
+    : 350000;
+
+  const defaultPurpose = preSelectedProduct === 'business' 
+    ? 'Business Working Capital / Inventory' 
+    : preSelectedProduct === 'gold' 
+    ? 'Instant Liquidity Against Gold' 
+    : preSelectedProduct === 'credit_card' 
+    ? 'Shopping, Cashback & Daily Expenses' 
+    : 'Home Improvement & Renovation';
+
   const [step, setStep] = useState(1);
-  const [loanAmount, setLoanAmount] = useState(350000);
+  const [loanAmount, setLoanAmount] = useState(defaultAmount);
   const [tenureMonths, setTenureMonths] = useState(36);
-  const [purpose, setPurpose] = useState('Home Improvement & Renovation');
+  const [purpose, setPurpose] = useState(defaultPurpose);
   const [employmentType, setEmploymentType] = useState('salaried');
   const [monthlyIncome, setMonthlyIncome] = useState(75000);
   const [companyName, setCompanyName] = useState('');
@@ -98,7 +122,7 @@ export const LoanApplicationWizard = ({ preSelectedProduct, onClose }) => {
       {/* Wizard Progress Bar */}
       <div className="mb-6">
         <div className="flex items-center justify-between text-xs font-bold text-[#223981] mb-2">
-          <span>Loan Application Wizard</span>
+          <span>{productTitle} Wizard</span>
           <span className="text-[#4A8DFF]">Step {step} of 5</span>
         </div>
         <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
@@ -113,7 +137,7 @@ export const LoanApplicationWizard = ({ preSelectedProduct, onClose }) => {
       {step === 1 && (
         <div className="space-y-5">
           <div>
-            <h2 className="text-lg font-extrabold text-[#223981]">Select Loan Amount & Tenure</h2>
+            <h2 className="text-lg font-extrabold text-[#223981]">Select {productTitle} Amount & Tenure</h2>
             <p className="text-xs text-[#717983]">Tailor your credit requirement with live EMI preview.</p>
           </div>
 
