@@ -6,7 +6,6 @@ import {
   FileText, Camera, Check, Lock, Landmark, Sparkles 
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { api } from '../../services/api';
 
 export const LoanApplicationWizard = ({ preSelectedProduct, onClose }) => {
   const { setActiveLoan, saveNewLoanApplication, setActiveTab } = useApp();
@@ -47,17 +46,8 @@ export const LoanApplicationWizard = ({ preSelectedProduct, onClose }) => {
     setStep(5); // Move to e-Sign
   };
 
-  const handleFinalSubmit = async () => {
+  const handleFinalSubmit = () => {
     setAgreementSigned(true);
-
-    // Call backend API /api/loan-applications
-    await api.applyLoan({
-      amount: loanAmount,
-      tenureMonths,
-      purpose,
-      employmentType,
-      monthlyIncome
-    });
 
     // Trigger celebration confetti
     try {

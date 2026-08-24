@@ -1,16 +1,51 @@
+# Dependencies
 node_modules/
-server/node_modules/
+.pnp
+.pnp.js
+
+# Testing
+/coverage
+
+# Production / Build outputs
+/dist
+/build
+*.apk
+*.aab
+
+# Local SDK & Tooling folders (placed in project root)
+/build-tools/
+/emulator/
+/licenses/
+/platform-tools/
+/platforms/
+/sources/
+.knownPackages
+.temp/
+
+# Android build outputs
+android/app/build/
+android/.gradle/
+android/build/
+android/captures/
+android/.idea/
+
+# IDE & Editor files
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Environment variables & Secrets
 .env
-*.log
-uploads/
-backups/
-/.idea
-/.vscode
-dist/
-build/
-.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
 npm-debug.log*
-coverage/
-coverage-final.json
-/.next
-/.env.local
+yarn-debug.log*
+yarn-error.log*

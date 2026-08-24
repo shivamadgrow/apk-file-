@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { Shield, Phone, ArrowRight, CheckCircle2, Lock, X, User, Mail, FileText, Sparkles } from 'lucide-react';
-import { api } from '../../services/api';
 
 export const AuthModal = () => {
   const { isAuthOpen, setIsAuthOpen, loginUser, referredBy } = useApp();
@@ -19,33 +18,22 @@ export const AuthModal = () => {
 
   if (!isAuthOpen) return null;
 
-  const handleSendOtp = async (e) => {
+  const handleSendOtp = (e) => {
     e.preventDefault();
     if (phone.length < 10) return;
 
-    const cleanPhone = phone.replace(/\D/g, '');
-    
-    // Call backend API /api/auth/send-otp
-    const res = await api.sendOtp(cleanPhone);
-    if (res && res.debug && res.debug.code) {
-      setOtp(res.debug.code);
-    }
-
     // Check if user exists in database
     const usersDb = JSON.parse(localStorage.getItem('paisainminute_users_db') || '{}');
+    const cleanPhone = phone.replace(/\D/g, '');
     const userExists = !!usersDb[cleanPhone];
 
     setIsExistingUser(userExists);
     setStep('otp');
   };
 
-  const handleVerifyOtp = async (e) => {
+  const handleVerifyOtp = (e) => {
     e.preventDefault();
     const cleanPhone = phone.replace(/\D/g, '');
-    
-    // Call backend API /api/auth/verify-otp
-    await api.verifyOtp(cleanPhone, otp);
-
     const usersDb = JSON.parse(localStorage.getItem('paisainminute_users_db') || '{}');
 
     if (isExistingUser && usersDb[cleanPhone]) {
