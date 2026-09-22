@@ -46,7 +46,7 @@ export const LoanApplicationWizard = ({ preSelectedProduct = 'personal', onClose
   const [panNumber, setPanNumber] = useState('');
   const [aadhaarNumber, setAadhaarNumber] = useState('');
   const [otpSent, setOtpSent] = useState(false);
-  const [aadhaarOtp, setAadhaarOtp] = useState('7821');
+  const [aadhaarOtp, setAadhaarOtp] = useState('782194');
   const [kycDone, setKycDone] = useState(false);
 
   // Selected Offer State
@@ -330,9 +330,10 @@ export const LoanApplicationWizard = ({ preSelectedProduct = 'personal', onClose
                 <div className="flex space-x-2">
                   <input 
                     type="text"
+                    maxLength={6}
                     value={aadhaarOtp}
                     onChange={(e) => setAadhaarOtp(e.target.value)}
-                    placeholder="Enter 4-digit OTP"
+                    placeholder="Enter 6-digit OTP"
                     className="flex-1 p-2 bg-white border border-emerald-300 rounded-xl text-xs font-bold text-center tracking-widest"
                   />
                   <button 

@@ -212,6 +212,8 @@ export const AppProvider = ({ children }) => {
   const logoutUser = () => {
     setCurrentPhone('');
     localStorage.removeItem('paisainminute_current_phone');
+    localStorage.removeItem('paisainminute_jwt_token');
+    localStorage.removeItem('paisainminute_refresh_token');
     setUser(GUEST_USER);
     setActiveTab('home');
     setIsAuthOpen(true);

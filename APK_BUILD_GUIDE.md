@@ -35,6 +35,6 @@ Since the native Android project is already generated in `c:\Users\This pc\Deskt
 ## ⚡ Method 3: Direct Web-to-APK Converters (Web2APK)
 
 1. Open **[Web2APK Converter](https://websitetoapk.com/)** or **[AppGeyser](https://www.appsgeyser.com/)**.
-2. Enter your Local Network IP URL: `http://192.168.1.15:3000/`
+2. Enter your Local Network IP URL: `http://192.168.1.17:3000/` (or your PC's current Wi-Fi IP address)
 3. Enter App Name: `Paisa in Minutes`
 4. Click **Create APK** and download your `.apk` file!
