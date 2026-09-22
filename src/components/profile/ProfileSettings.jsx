@@ -86,8 +86,13 @@ export const ProfileSettings = () => {
       {/* Profile Header Card */}
       <div className="flex items-center justify-between pb-4 border-b border-slate-100">
         <div className="flex items-center space-x-3">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#223981] to-[#4A8DFF] text-white flex items-center justify-center font-bold text-xl shadow-md">
-            <User className="w-7 h-7 text-[#6FA8FF]" />
+          <div className="relative">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#223981] to-[#4A8DFF] text-white flex items-center justify-center font-bold text-xl shadow-md">
+              <User className="w-7 h-7 text-[#6FA8FF]" />
+            </div>
+            <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-white shadow-md border border-slate-200 flex items-center justify-center p-0.5" title="Paisa in Minutes Verified">
+              <img src="/app-icon.png" alt="Paisa in Minutes Badge" className="w-full h-full object-contain" />
+            </div>
           </div>
           <div>
             <h2 className="text-lg font-extrabold text-[#223981]">{isAuthenticated ? user.name : 'Guest User'}</h2>
@@ -381,8 +386,8 @@ export const ProfileSettings = () => {
       {/* Official Brand Footer */}
       <div className="pt-2">
         <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 text-center space-y-1.5">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#223981] to-[#4A8DFF] flex items-center justify-center text-white font-black mx-auto shadow-md">
-            <Shield className="w-5 h-5 fill-white/20 text-white" />
+          <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center mx-auto shadow-md p-1 border border-slate-200/80">
+            <img src="/app-icon.png" alt="Paisa in Minutes Sign" className="w-full h-full object-contain" />
           </div>
           <h4 className="text-xs font-extrabold text-[#223981]">Paisa in Minutes</h4>
           <p className="text-[10px] text-[#4A8DFF] font-bold">Paisa Milega, Minutes Mein</p>

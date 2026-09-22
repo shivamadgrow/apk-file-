@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
-import { api } from '../../services/api';
-import { Shield, Phone, ArrowRight, CheckCircle2, Lock, X, User, Mail, FileText, Sparkles, Loader2, RefreshCw, AlertCircle } from 'lucide-react';
+import { api, warmBackend } from '../../services/api';
+import { Shield, Phone, ArrowRight, CheckCircle2, Lock, X, User, Mail, FileText, Sparkles, Loader2, RefreshCw, AlertCircle, Zap } from 'lucide-react';
 
 export const AuthModal = () => {
   const { isAuthOpen, setIsAuthOpen, loginUser, referredBy } = useApp();
@@ -12,6 +12,7 @@ export const AuthModal = () => {
   
   // Loading & Error States
   const [isLoading, setIsLoading] = useState(false);
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [infoMsg, setInfoMsg] = useState('');
   const [resendCooldown, setResendCooldown] = useState(0);
@@ -22,6 +23,13 @@ export const AuthModal = () => {
   const [pan, setPan] = useState('');
   const [city, setCity] = useState('');
   const [isExistingUser, setIsExistingUser] = useState(false);
+
+  // Pre-warm backend as soon as modal is triggered
+  useEffect(() => {
+    if (isAuthOpen) {
+      warmBackend();
+    }
+  }, [isAuthOpen]);
 
   // Countdown timer for Resend OTP
   useEffect(() => {
@@ -44,24 +52,28 @@ export const AuthModal = () => {
       return;
     }
 
-    setIsLoading(true);
+    setIsSendingOtp(true);
     setErrorMsg('');
-    setInfoMsg('');
+    setInfoMsg(`Sending 6-digit OTP via SMS to +91 ${cleanPhone}...`);
+
+    // INSTANT OPTIMISTIC TRANSITION: Zero perceived delay for the user!
+    setStep('otp');
+    setOtp('');
+    setResendCooldown(45);
 
     try {
       const res = await api.sendOtp(cleanPhone);
       if (res.ok) {
-        setStep('otp');
-        setOtp('');
-        setResendCooldown(45);
-        setInfoMsg(`6-digit OTP sent via SMS to +91 ${cleanPhone}`);
+        setInfoMsg(`✓ 6-digit OTP sent via SMS to +91 ${cleanPhone}`);
       } else {
         setErrorMsg(res.error || 'Failed to send OTP. Please try again.');
+        setStep('phone');
       }
     } catch (err) {
-      setErrorMsg('Connection error. Please try again.');
+      setErrorMsg('Connection error. Please check your network and try again.');
+      setStep('phone');
     } finally {
-      setIsLoading(false);
+      setIsSendingOtp(false);
     }
   };
 
@@ -212,7 +224,7 @@ export const AuthModal = () => {
           <div>
             <p className="text-[11px] text-[#4A8DFF] font-bold">Live SMS OTP Verification Portal</p>
             <span className="text-[9.5px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 inline-flex items-center mt-0.5">
-              ✓ Pinnacle DLT SMS Connected
+              ✓ Secure Instant SMS Connected
             </span>
           </div>
         </div>
@@ -239,8 +251,16 @@ export const AuthModal = () => {
 
         {/* Global Info Banner */}
         {infoMsg && (
-          <div className="bg-emerald-50 border border-emerald-200 p-2.5 rounded-2xl text-xs text-emerald-800 flex items-start space-x-2 animate-in fade-in duration-150">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+          <div className={`border p-2.5 rounded-2xl text-xs flex items-start space-x-2 animate-in fade-in duration-150 ${
+            isSendingOtp
+              ? 'bg-blue-50 border-blue-200 text-[#223981]'
+              : 'bg-emerald-50 border-emerald-200 text-emerald-800'
+          }`}>
+            {isSendingOtp ? (
+              <Loader2 className="w-4 h-4 text-[#4A8DFF] shrink-0 mt-0.5 animate-spin" />
+            ) : (
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+            )}
             <p className="font-semibold leading-tight">{infoMsg}</p>
           </div>
         )}
@@ -258,11 +278,15 @@ export const AuthModal = () => {
                   type="tel"
                   maxLength={10}
                   required
-                  disabled={isLoading}
+                  disabled={isSendingOtp}
                   value={phone}
                   onChange={(e) => {
-                    setPhone(e.target.value);
+                    const val = e.target.value.replace(/\D/g, '').slice(0, 10);
+                    setPhone(val);
                     if (errorMsg) setErrorMsg('');
+                    if (val.length >= 4) {
+                      warmBackend();
+                    }
                   }}
                   placeholder="Enter Mobile Number"
                   className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-extrabold text-[#223981] focus:ring-2 focus:ring-[#4A8DFF] outline-none disabled:opacity-50"
@@ -275,10 +299,10 @@ export const AuthModal = () => {
 
             <button
               type="submit"
-              disabled={isLoading || phone.replace(/\D/g, '').length < 10}
+              disabled={isSendingOtp || phone.replace(/\D/g, '').length < 10}
               className="w-full py-3.5 bg-[#4A8DFF] hover:bg-[#223981] disabled:bg-slate-300 text-white text-xs font-extrabold rounded-2xl shadow-md flex items-center justify-center space-x-2 transition"
             >
-              {isLoading ? (
+              {isSendingOtp ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
                   <span>Connecting to SMS Gateway...</span>
@@ -406,7 +430,7 @@ export const AuthModal = () => {
               <input
                 type="text"
                 required
-                placeholder="e.g. Ramesh Kumar"
+                placeholder=""
                 value={name}
                 onChange={(e) => {
                   setName(e.target.value);
@@ -423,7 +447,7 @@ export const AuthModal = () => {
               <input
                 type="email"
                 required
-                placeholder="ramesh@gmail.com"
+                placeholder=""
                 value={email}
                 onChange={(e) => {
                   setEmail(e.target.value);
@@ -442,7 +466,7 @@ export const AuthModal = () => {
                   type="text"
                   maxLength={10}
                   required
-                  placeholder="ABCDE1234F"
+                  placeholder=""
                   value={pan}
                   onChange={(e) => {
                     setPan(e.target.value.toUpperCase());
@@ -458,7 +482,7 @@ export const AuthModal = () => {
                 <input
                   type="text"
                   required
-                  placeholder="Mumbai"
+                  placeholder=""
                   value={city}
                   onChange={(e) => {
                     setCity(e.target.value);

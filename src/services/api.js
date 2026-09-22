@@ -12,11 +12,22 @@ export const getAuthHeaders = () => {
   };
 };
 
+// Active Pre-warming & Keep-Alive to eliminate Render free tier cold-start delays
+let lastWarmTime = 0;
+export const warmBackend = () => {
+  const now = Date.now();
+  if (now - lastWarmTime < 30000) return; // limit to once every 30s
+  lastWarmTime = now;
+  fetch(`${API_BASE_URL}/health`, { method: 'GET', cache: 'no-store' })
+    .then(r => r.json())
+    .catch(() => {});
+};
+
 export const api = {
   // 1. Health Check
   checkHealth: async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/health`);
+      const res = await fetch(`${API_BASE_URL}/health`, { cache: 'no-store' });
       return await res.json();
     } catch (err) {
       console.warn('Backend health check error:', err);
@@ -24,15 +35,19 @@ export const api = {
     }
   },
 
-  // 2. Auth: Send OTP (Calls live Pinnacle DLT SMS gateway via Render server)
+  // 2. Auth: Send OTP (Calls secure live SMS gateway via server)
   sendOtp: async (phone) => {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 14000); // 14s fail-safe timeout
     try {
       const cleanPhone = String(phone).replace(/\D/g, '').slice(-10);
       const res = await fetch(`${API_BASE_URL}/auth/send-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone: cleanPhone })
+        body: JSON.stringify({ phone: cleanPhone }),
+        signal: controller.signal
       });
+      clearTimeout(timeoutId);
 
       const data = await res.json();
       if (!res.ok) {
@@ -44,7 +59,14 @@ export const api = {
       }
       return { ok: true, ...data };
     } catch (err) {
+      clearTimeout(timeoutId);
       console.error('Send OTP Network Error:', err);
+      if (err.name === 'AbortError') {
+        return {
+          ok: false,
+          error: 'SMS request timed out. Please check your network and try again.'
+        };
+      }
       return {
         ok: false,
         error: 'Unable to connect to SMS server. Please check your internet connection.'

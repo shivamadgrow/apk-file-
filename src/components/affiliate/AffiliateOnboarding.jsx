@@ -13,22 +13,22 @@ export const AffiliateOnboarding = () => {
 
   // Individual Form Fields
   const [indForm, setIndForm] = useState({
-    name: 'Rohan Varma',
-    phone: '+91 98765 43210',
-    email: 'rohan.varma@paisa.in',
-    pan: 'ABCDE1234F',
-    upiId: 'rohan@okaxis'
+    name: '',
+    phone: '',
+    email: '',
+    pan: '',
+    upiId: ''
   });
 
   // Company Form Fields
   const [compForm, setCompForm] = useState({
-    companyName: 'Varma Capital Services Pvt Ltd',
-    gstin: '27AAACV1234F1Z5',
-    companyPan: 'AAACV1234F',
-    signatoryName: 'Rohan Varma',
-    signatoryPan: 'ABCDE1234F',
-    bankAccount: '918237491823',
-    ifsc: 'HDFC0000123'
+    companyName: '',
+    gstin: '',
+    companyPan: '',
+    signatoryName: '',
+    signatoryPan: '',
+    bankAccount: '',
+    ifsc: ''
   });
 
   const [acceptedTerms, setAcceptedTerms] = useState(true);

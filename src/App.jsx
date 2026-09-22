@@ -17,12 +17,22 @@ import { SupportModal } from './components/support/SupportModal';
 import { ProfileSettings } from './components/profile/ProfileSettings';
 import { ReferAndEarn } from './components/referral/ReferAndEarn';
 import { AuthModal } from './components/auth/AuthModal';
+import { warmBackend } from './services/api';
 import { X, Activity } from 'lucide-react';
 
 const MainAppContent = () => {
   const { activeTab, setActiveTab, affiliate, activeLoan } = useApp();
   const [selectedProductForLoan, setSelectedProductForLoan] = useState(null);
   const [showWizardModal, setShowWizardModal] = useState(false);
+
+  // Pre-warm Render backend immediately on app launch and keep it alive
+  useEffect(() => {
+    warmBackend();
+    const interval = setInterval(() => {
+      warmBackend();
+    }, 2.5 * 60 * 1000); // Ping every 2.5 minutes while app is in foreground
+    return () => clearInterval(interval);
+  }, []);
 
   // FIX 6: Automatically close wizard modal on activeTab change (e.g. clicking Affiliate tab on BottomNav)
   useEffect(() => {

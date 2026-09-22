@@ -584,7 +584,7 @@ export const AffiliateDashboard = () => {
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Ramesh Chandra"
+                    placeholder=""
                     value={newLeadForm.name}
                     onChange={(e) => setNewLeadForm({ ...newLeadForm, name: e.target.value })}
                     className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-[#223981] focus:outline-none focus:border-[#2563EB]"
@@ -596,7 +596,7 @@ export const AffiliateDashboard = () => {
                   <input
                     type="tel"
                     required
-                    placeholder="e.g. 9876543210"
+                    placeholder=""
                     value={newLeadForm.phone}
                     onChange={(e) => setNewLeadForm({ ...newLeadForm, phone: e.target.value })}
                     className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-[#223981] focus:outline-none focus:border-[#2563EB]"
