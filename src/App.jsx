@@ -98,7 +98,7 @@ const MainAppContent = () => {
 
       case 'affiliate':
         return (
-          <div className="max-w-lg mx-auto">
+          <div className="max-w-lg mx-auto w-full max-w-full overflow-x-hidden">
             {affiliate.isApproved ? <AffiliateDashboard /> : <AffiliateOnboarding />}
           </div>
         );
@@ -218,12 +218,12 @@ const MainAppContent = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans select-none antialiased">
+    <div className="min-h-screen bg-slate-50 flex flex-col font-sans select-none antialiased overflow-x-hidden w-full max-w-full">
       {/* Real Full Screen Mobile Header */}
       <Header />
 
       {/* Main Full Screen App Viewport */}
-      <main className="flex-1 px-3.5 py-3 pb-24 max-w-lg mx-auto w-full space-y-4">
+      <main className="flex-1 px-3.5 py-3 pb-24 max-w-lg mx-auto w-full space-y-4 overflow-x-hidden">
         {renderActiveScreen()}
 
         {/* RBI Digital Lending Compliance Disclaimer Footer (Visible on every page) */}
