@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { PARTNER_NBFCS } from '../../data/mockData';
-import { 
-  ShieldCheck, Lock, Zap, Star, CheckCircle2, ArrowRight, 
+import {
+  ShieldCheck, Lock, Zap, Star, CheckCircle2, ArrowRight,
   Sparkles, AlertCircle, Sliders, Check
 } from 'lucide-react';
 
@@ -75,16 +75,22 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
     }
   };
 
-  const eligibleLenders = PARTNER_NBFCS.filter(n => (salary || 0) >= n.minSalary).sort((a, b) => {
-    if (a.id === 'rupay91') return -1;
-    if (b.id === 'rupay91') return 1;
-    return 0;
-  });
-  const ineligibleLenders = PARTNER_NBFCS.filter(n => (salary || 0) < n.minSalary).sort((a, b) => {
-    if (a.id === 'rupay91') return -1;
-    if (b.id === 'rupay91') return 1;
-    return 0;
-  });
+  const eligibleLenders = PARTNER_NBFCS
+    .filter(n => (salary || 0) >= n.minSalary)
+    .sort((a, b) => {
+      // If Rupay91 is eligible (salary >= 50k), Rupay91 must ALWAYS be at the very top (#1)!
+      if (a.id === 'rupay91') return -1;
+      if (b.id === 'rupay91') return 1;
+      // Best matching salary tier (highest minSalary) first
+      if (b.minSalary !== a.minSalary) {
+        return b.minSalary - a.minSalary;
+      }
+      return b.maxAmount - a.maxAmount;
+    });
+
+  const ineligibleLenders = PARTNER_NBFCS
+    .filter(n => (salary || 0) < n.minSalary)
+    .sort((a, b) => a.minSalary - b.minSalary);
 
   const salaryPresets = [
     { label: '₹25,000', val: 25000 },
@@ -101,7 +107,7 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
       {/* 1. MASTER COMMAND CENTER: Salary Filter */}
       <div className="relative overflow-hidden bg-gradient-to-br from-[#1E3A8A] via-[#1E40AF] to-[#2563EB] text-white rounded-3xl p-5 sm:p-6 shadow-xl border border-white/15">
         <div className="absolute -top-12 -right-12 w-48 h-48 bg-white/10 rounded-full blur-3xl pointer-events-none" />
-        
+
         {/* Header line */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/15">
           <div>
@@ -147,7 +153,7 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
             <span className="absolute left-3.5 text-lg sm:text-xl font-black text-[#1E3A8A] pointer-events-none select-none">
               ₹
             </span>
-            <input 
+            <input
               id="manual-salary-input"
               type="text"
               inputMode="numeric"
@@ -180,11 +186,10 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
                   key={preset.val}
                   type="button"
                   onClick={() => handlePresetClick(preset.val)}
-                  className={`px-3 py-1 rounded-xl text-xs font-bold transition cursor-pointer ${
-                    isActive 
-                      ? 'bg-white text-[#1E3A8A] shadow-md font-black scale-105' 
+                  className={`px-3 py-1 rounded-xl text-xs font-bold transition cursor-pointer ${isActive
+                      ? 'bg-white text-[#1E3A8A] shadow-md font-black scale-105'
                       : 'bg-white/15 hover:bg-white/25 text-white'
-                  }`}
+                    }`}
                 >
                   {preset.label}
                 </button>
@@ -198,7 +203,7 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
               <span>Or slide to adjust income:</span>
               <span className="font-extrabold text-white">₹{(salary || 0).toLocaleString()}</span>
             </div>
-            <input 
+            <input
               type="range"
               min="20000"
               max="80000"
@@ -257,9 +262,9 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
                     {/* Clean White Logo Container */}
                     <div className="w-16 sm:w-20 h-10 sm:h-11 bg-white rounded-xl p-1 border border-slate-200/90 shadow-2xs flex items-center justify-center overflow-hidden flex-shrink-0">
                       {nbfc.logo && nbfc.logo.startsWith('/') ? (
-                        <img 
-                          src={nbfc.logo} 
-                          alt={nbfc.name} 
+                        <img
+                          src={nbfc.logo}
+                          alt={nbfc.name}
                           className="w-full h-full object-contain bg-white"
                           onError={(e) => {
                             e.target.style.display = 'none';
@@ -267,7 +272,7 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
                           }}
                         />
                       ) : null}
-                      <span 
+                      <span
                         style={{ display: nbfc.logo && nbfc.logo.startsWith('/') ? 'none' : 'flex' }}
                         className="w-full h-full items-center justify-center font-black text-xs text-[#223981] bg-white rounded-lg"
                       >
@@ -342,8 +347,8 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
                 <div className="flex items-center justify-between gap-2.5 pt-1">
                   <div className="flex flex-col sm:flex-row flex-wrap gap-1.5 text-xs text-slate-600 min-w-0 flex-1">
                     {nbfc.features.slice(0, 2).map((feat, idx) => (
-                      <span 
-                        key={idx} 
+                      <span
+                        key={idx}
                         className="inline-flex items-center px-2 py-0.5 rounded-lg bg-emerald-50/80 text-[10px] sm:text-[10.5px] font-semibold text-emerald-900 border border-emerald-100 whitespace-nowrap self-start"
                       >
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 flex-shrink-0"></span>
@@ -373,7 +378,7 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
               Salary ₹{salary.toLocaleString()} Par Koi Eligible Offer Nahi Hai
             </h4>
             <p className="text-xs text-slate-500">
-              Minimum salary criteria ₹25,000/month (Rupay91, Ticket 2 Loan) se shuru hoti hai.
+              Minimum salary criteria ₹25,000/month (Ticket 2 Loan) se shuru hoti hai.
             </p>
             <button
               onClick={() => setSalary(25000)}
@@ -418,9 +423,9 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
                   <div className="flex items-center space-x-3 min-w-0 flex-1">
                     <div className="w-16 sm:w-20 h-10 sm:h-11 bg-white rounded-xl p-1 border border-slate-200 flex items-center justify-center overflow-hidden flex-shrink-0 grayscale">
                       {nbfc.logo && nbfc.logo.startsWith('/') ? (
-                        <img 
-                          src={nbfc.logo} 
-                          alt={nbfc.name} 
+                        <img
+                          src={nbfc.logo}
+                          alt={nbfc.name}
                           className="w-full h-full object-contain bg-white"
                         />
                       ) : null}
