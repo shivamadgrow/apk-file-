@@ -237,14 +237,14 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
 
       {/* 2. SECTION A: ELIGIBLE COMPANIES (TOP - ACTIVE & CLICKABLE) */}
       <div className="space-y-3 pt-1">
-        <div className="flex items-center justify-between px-1">
-          <div className="flex items-center space-x-2">
-            <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
-            <h3 className="text-sm sm:text-base font-black text-[#1E293B]">
-              Eligible Companies ({eligibleLenders.length} Offers Available)
+        <div className="flex items-center justify-between gap-2 px-1">
+          <div className="flex items-center space-x-2 min-w-0 flex-1">
+            <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse flex-shrink-0"></div>
+            <h3 className="text-sm sm:text-base font-black text-[#1E293B] truncate">
+              Eligible Companies <span className="text-emerald-700 font-extrabold whitespace-nowrap">({eligibleLenders.length} Offers Available)</span>
             </h3>
           </div>
-          <span className="text-[11px] font-extrabold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-0.5 rounded-full shadow-2xs">
+          <span className="text-[11px] font-extrabold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-0.5 rounded-full shadow-2xs whitespace-nowrap flex-shrink-0">
             ✓ Ready to Apply
           </span>
         </div>
@@ -393,22 +393,26 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
       {/* 3. SECTION B: INELIGIBLE COMPANIES (BOTTOM - LOCKED & UNCLICKABLE) */}
       {ineligibleLenders.length > 0 && (
         <div className="pt-4 space-y-3">
-          <div className="flex items-center justify-between px-1 border-t border-slate-200 pt-4">
-            <div className="flex items-center space-x-2">
-              <div className="w-6 h-6 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center">
+          <div className="flex items-start justify-between gap-3 px-1 border-t border-slate-200 pt-4">
+            <div className="flex items-start space-x-2.5 min-w-0 flex-1">
+              <div className="w-6 h-6 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center flex-shrink-0 mt-0.5">
                 <Lock className="w-3.5 h-3.5" />
               </div>
-              <div>
-                <h3 className="text-xs sm:text-sm font-black text-slate-600">
-                  Not Eligible — Higher Salary Required ({ineligibleLenders.length} Companies)
+              <div className="min-w-0 flex-1">
+                <h3 className="text-xs sm:text-sm font-black text-slate-700 leading-snug">
+                  Not Eligible — Higher Salary Required{' '}
+                  <span className="text-slate-500 font-bold whitespace-nowrap">
+                    ({ineligibleLenders.length} Companies)
+                  </span>
                 </h3>
-                <p className="text-[10.5px] text-slate-400">
+                <p className="text-[10.5px] sm:text-[11px] text-slate-400 mt-0.5 leading-snug">
                   In companies ke liye aapki monthly income minimum criteria se kam hai (Locked)
                 </p>
               </div>
             </div>
-            <span className="text-[10px] font-black text-slate-500 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-full uppercase tracking-wider">
-              🔒 Ineligible
+            <span className="flex-shrink-0 inline-flex items-center space-x-1 text-[10px] font-black text-slate-500 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-full uppercase tracking-wider whitespace-nowrap self-start">
+              <span>🔒</span>
+              <span>Ineligible</span>
             </span>
           </div>
 
