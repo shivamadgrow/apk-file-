@@ -52,8 +52,11 @@ export const EmiCalculator = ({ onApplyWithAmount }) => {
       {/* Slider 2: Interest Rate */}
       <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200">
         <div className="flex justify-between items-center mb-1">
-          <span className="text-xs font-bold text-paisa-navy">Interest Rate (% p.a.)</span>
-          <span className="text-lg font-black text-paisa-primary">{rate}%</span>
+          <div>
+            <span className="text-xs font-bold text-paisa-navy block">Interest Rate</span>
+            <span className="text-[10px] font-extrabold text-emerald-600 block">upto 1.0% / day</span>
+          </div>
+          <span className="text-lg font-black text-paisa-primary">{rate}% <span className="text-[10px] text-slate-500 font-normal">p.a.</span></span>
         </div>
         <input 
           type="range"
@@ -100,13 +103,17 @@ export const EmiCalculator = ({ onApplyWithAmount }) => {
           <span className="text-2xl font-black text-amber-300">₹{emi.toLocaleString()}<span className="text-xs text-white">/mo</span></span>
         </div>
 
-        <div className="grid grid-cols-2 gap-2 text-xs">
+        <div className="grid grid-cols-3 gap-2 text-xs text-left">
           <div>
-            <p className="text-[10px] text-paisa-light">Principal Amount</p>
+            <p className="text-[10px] text-paisa-light">Principal</p>
             <p className="font-bold text-white">₹{amount.toLocaleString()}</p>
           </div>
           <div>
-            <p className="text-[10px] text-paisa-light">Total Interest Payable</p>
+            <p className="text-[10px] text-paisa-light">Daily Rate</p>
+            <p className="font-bold text-emerald-300">upto 1.0%/day</p>
+          </div>
+          <div>
+            <p className="text-[10px] text-paisa-light">Total Interest</p>
             <p className="font-bold text-amber-300">₹{totalInterest.toLocaleString()}</p>
           </div>
         </div>

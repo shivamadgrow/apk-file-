@@ -115,7 +115,7 @@ export const SupportModal = () => {
     // 3. SPECIFIC EMI CALCULATION INTENT ("emi", "emi kesi h", "emi kitni", "emi kaise", "per month")
     if (text.includes('emi')) {
       return {
-        text: `💰 **EMI Calculation & Breakdown:**\n\n• ₹1,00,000 Personal Loan @ 9.99% p.a. interest:\n  - 12 Months Tenure: ~₹8,791 / month EMI\n  - 24 Months Tenure: ~₹4,614 / month EMI\n  - 36 Months Tenure: ~₹3,227 / month EMI\n\nAap humare Interactive EMI Calculator par apne manpasand loan amount aur tenure ki EMI check kar sakte hain!`,
+        text: `💰 **EMI Calculation & Breakdown:**\n\n• ₹1,00,000 Personal Loan @ upto 1.0% / day interest:\n  - 12 Months Tenure: ~₹8,791 / month EMI\n  - 24 Months Tenure: ~₹4,614 / month EMI\n  - 36 Months Tenure: ~₹3,227 / month EMI\n\nAap humare Interactive EMI Calculator par apne manpasand loan amount aur tenure ki EMI check kar sakte hain!`,
         suggestions: [
           { label: '📊 Open EMI Calculator', actionType: 'calculator' },
           { label: '🚀 Apply Now', actionType: 'loans' }
@@ -159,7 +159,7 @@ export const SupportModal = () => {
     // 7. INTEREST RATES & CHARGES INTENT ("rate", "interest", "byaj", "charge", "fee")
     if (text.includes('rate') || text.includes('interest') || text.includes('byaj') || text.includes('charge') || text.includes('fee')) {
       return {
-        text: `💰 **Interest Rates & Charges:**\n• Starting Rate: 9.99% p.a. onwards\n• Loan Tenure: 6 to 60 Months\n• Processing Fee: 0% to 2% (as per partner NBFC offers)\n• 100% Transparent - Zero hidden charges!`,
+        text: `💰 **Interest Rates & Charges:**\n• Interest Rate: upto 1.0% / day\n• Loan Tenure: 6 to 60 Months\n• Processing Fee: 0% to 2% (as per partner NBFC offers)\n• 100% Transparent - Zero hidden charges!`,
         suggestions: [
           { label: '📊 Calculate My EMI', actionType: 'calculator' },
           { label: '🚀 Compare 6 NBFCs', actionType: 'loans' }

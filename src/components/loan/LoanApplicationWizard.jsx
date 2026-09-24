@@ -103,7 +103,7 @@ export const LoanApplicationWizard = ({ preSelectedProduct = 'personal', onClose
       ],
       selectedNbfc: {
         name: chosenOffer?.nbfc.name || "Rupay91",
-        rate: `${chosenOffer?.nbfc.interestRate || 10.99}%`,
+        rate: chosenOffer?.nbfc?.interestRateDisplay || "upto 1.0% / day",
         fee: `₹${chosenOffer?.fee.toLocaleString() || '5,250'}`,
         disbursalTime: "8 Minutes"
       }
@@ -206,7 +206,7 @@ export const LoanApplicationWizard = ({ preSelectedProduct = 'personal', onClose
             <div>
               <p className="text-[10px] font-bold text-[#6FA8FF] uppercase">Calculated Monthly EMI</p>
               <p className="text-2xl font-black text-white">₹{calculatedEmi.toLocaleString()}<span className="text-xs font-normal">/month</span></p>
-              <p className="text-[10px] text-slate-300">Interest starting @ 10.99% p.a.</p>
+              <p className="text-[10px] text-emerald-300 font-bold">Interest starting @ upto 1.0% / day</p>
             </div>
             <button
               onClick={handleNextStep}
@@ -419,6 +419,10 @@ export const LoanApplicationWizard = ({ preSelectedProduct = 'personal', onClose
             <div className="flex justify-between border-b pb-1">
               <span className="text-[#717983]">Tenure:</span>
               <span className="font-bold text-[#223981]">{tenureMonths} Months</span>
+            </div>
+            <div className="flex justify-between border-b pb-1">
+              <span className="text-[#717983]">Interest Rate:</span>
+              <span className="font-bold text-emerald-600">{chosenOffer?.nbfc?.interestRateDisplay || 'upto 1.0% / day'}</span>
             </div>
             <div className="flex justify-between border-b pb-1">
               <span className="text-[#717983]">Processing Fee:</span>

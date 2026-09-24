@@ -311,10 +311,10 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
                     </span>
                   </div>
                   <div className="border-x border-slate-200/80 px-1">
-                    <span className="text-[9.5px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                      INTEREST
+                    <span className="text-[9.5px] sm:text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
+                      INTEREST RATE
                     </span>
-                    <span className="text-xs sm:text-base font-black text-slate-800 mt-0.5 block truncate">
+                    <span className="text-xs sm:text-base font-black text-emerald-600 mt-0.5 block truncate">
                       {nbfc.interestRateDisplay}
                     </span>
                   </div>
@@ -448,10 +448,10 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
                     </span>
                   </div>
                   <div className="border-x border-slate-200 px-1">
-                    <span className="text-[9.5px] font-bold text-slate-400 uppercase tracking-wider block">
-                      INTEREST
+                    <span className="text-[9.5px] font-bold text-slate-500 uppercase tracking-wider block">
+                      INTEREST RATE
                     </span>
-                    <span className="text-xs sm:text-sm font-bold text-slate-600 mt-0.5 block truncate">
+                    <span className="text-xs sm:text-sm font-bold text-emerald-600 mt-0.5 block truncate">
                       {nbfc.interestRateDisplay}
                     </span>
                   </div>

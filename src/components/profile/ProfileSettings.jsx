@@ -535,7 +535,7 @@ export const ProfileSettings = () => {
               </p>
               <div className="bg-[#E4EEFF]/80 p-3 rounded-2xl border border-[#6FA8FF]/30 text-[#223981] space-y-1">
                 <p className="font-extrabold">Why Choose Paisa in Minutes?</p>
-                <p className="text-[11px] text-[#717983]">✓ Fast Under 8-Minute Bank Account Disbursal<br/>✓ Zero Physical Visit or Paperwork<br/>✓ Transparent Interest Rates Starting @ 9.99% p.a.<br/>✓ 100% RBI-Registered Regulated NBFC Partners</p>
+                <p className="text-[11px] text-[#717983]">✓ Fast Under 8-Minute Bank Account Disbursal<br/>✓ Zero Physical Visit or Paperwork<br/>✓ Transparent Interest Rates Starting @ upto 1.0% / day<br/>✓ 100% RBI-Registered Regulated NBFC Partners</p>
               </div>
             </div>
 
@@ -785,7 +785,7 @@ export const ProfileSettings = () => {
               Paisa in Minutes acts exclusively as a technology loan aggregator matching borrowers with verified lending partner companies including Ticket 2 Loan, Jhatpat Loans, Shubh Cash, Udhaar Now, Insta Rupees, Borrowera, Easy Fincare, Loan Within, and Rupay91.
             </p>
             <div className="bg-slate-50 p-3 rounded-2xl text-[11px] text-[#223981] font-semibold">
-              ✓ Annualized Interest Rates: 9.99% - 24.0% p.a.<br/>
+              ✓ Interest Rates: upto 1.0% / day (Annualized 9.99% - 24.0% p.a.)<br/>
               ✓ Loan Tenures: 6 Months to 72 Months<br/>
               ✓ Zero hidden fees or upfront processing charges
             </div>

@@ -12,7 +12,7 @@ export const ProductGrid = ({ onProductSelect }) => {
       id: 'personal',
       name: t.personalLoan,
       limit: 'Up to ₹15 Lakhs',
-      rate: 'From 10.99% p.a.',
+      rate: 'upto 1.0% / day',
       icon: UserCheck,
       color: 'bg-blue-50 text-[#4A8DFF] border-blue-200/80',
       badge: 'Popular'
@@ -30,7 +30,7 @@ export const ProductGrid = ({ onProductSelect }) => {
       id: 'gold',
       name: t.goldLoan,
       limit: 'Up to ₹25 Lakhs',
-      rate: 'From 9.99% p.a.',
+      rate: 'upto 1.0% / day',
       icon: Coins,
       color: 'bg-amber-50 text-amber-600 border-amber-200/80',
       badge: 'Lowest Rate'
@@ -131,7 +131,7 @@ export const ProductGrid = ({ onProductSelect }) => {
                 {prod.name}
               </h3>
               <p className="text-[11px] font-extrabold text-[#1E293B] mt-0.5">{prod.limit}</p>
-              <p className="text-[10px] text-slate-500 font-medium">{prod.rate}</p>
+              <p className={`text-[10px] font-bold ${prod.rate.includes('/ day') ? 'text-emerald-600' : 'text-slate-500'}`}>{prod.rate}</p>
             </div>
           );
         })}

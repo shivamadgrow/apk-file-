@@ -408,8 +408,8 @@ export const AffiliateDashboard = () => {
                       <span className="text-xs font-black text-[#2563EB]">{nbfc.maxLoanDisplay}</span>
                     </div>
                     <div>
-                      <span className="text-[9px] font-bold text-[#717983] uppercase block">Rate</span>
-                      <span className="text-xs font-black text-[#1E293B]">{nbfc.interestRateDisplay}</span>
+                      <span className="text-[9px] font-bold text-[#717983] uppercase block">INTEREST RATE</span>
+                      <span className="text-xs font-black text-emerald-600">{nbfc.interestRateDisplay}</span>
                     </div>
                   </div>
 
