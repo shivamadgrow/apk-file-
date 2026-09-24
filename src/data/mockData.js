@@ -2,6 +2,25 @@
 
 export const PARTNER_NBFCS = [
   {
+    id: "rupay91",
+    name: "Rupay91",
+    logo: "/partners/rupay91.png",
+    minSalary: 25000,
+    minSalaryDisplay: "₹25,000 /mo",
+    maxAmount: 1000000,
+    maxLoanDisplay: "₹10,00,000",
+    interestRateDisplay: "upto 1.0% / day",
+    interestRate: 11.40,
+    minTenureMonths: 12,
+    maxTenureMonths: 60,
+    processingFeePercent: 1.0,
+    approvalChance: "99% (Fastest Approval)",
+    tag: "⭐ #1 Top Choice",
+    rating: 4.9,
+    features: ["Min Salary ₹25,000 Required", "Up to ₹10 Lakhs Instant Credit", "VIP Disbursal in 6 Minutes"],
+    outboundUrl: "https://paisainminutes.com/redirect.php?partner=rupay91&lead_id={LEAD_ID}&phone={PHONE}"
+  },
+  {
     id: "ticket2loan",
     name: "Ticket 2 Loan",
     logo: "/partners/ticket2loan.png",
@@ -152,25 +171,6 @@ export const PARTNER_NBFCS = [
     rating: 4.8,
     features: ["Min Salary ₹45,000 Required", "Digital Agreement Signing", "Direct Bank IMPS Disbursal"],
     outboundUrl: "https://paisainminutes.com/redirect.php?partner=loanwithin&lead_id={LEAD_ID}&phone={PHONE}"
-  },
-  {
-    id: "rupay91",
-    name: "Rupay91",
-    logo: "/partners/rupay91.png",
-    minSalary: 50000,
-    minSalaryDisplay: "₹50,000 /mo",
-    maxAmount: 1000000,
-    maxLoanDisplay: "₹10,00,000",
-    interestRateDisplay: "upto 1.0% / day",
-    interestRate: 11.40,
-    minTenureMonths: 12,
-    maxTenureMonths: 60,
-    processingFeePercent: 1.0,
-    approvalChance: "98% (High)",
-    tag: "Top Tier Exclusive",
-    rating: 4.9,
-    features: ["Min Salary ₹50,000 Required", "Up to ₹10 Lakhs Instant Credit", "VIP Disbursal in 6 Minutes"],
-    outboundUrl: "https://paisainminutes.com/redirect.php?partner=rupay91&lead_id={LEAD_ID}&phone={PHONE}"
   }
 ];
 

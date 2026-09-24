@@ -75,8 +75,16 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
     }
   };
 
-  const eligibleLenders = PARTNER_NBFCS.filter(n => (salary || 0) >= n.minSalary);
-  const ineligibleLenders = PARTNER_NBFCS.filter(n => (salary || 0) < n.minSalary);
+  const eligibleLenders = PARTNER_NBFCS.filter(n => (salary || 0) >= n.minSalary).sort((a, b) => {
+    if (a.id === 'rupay91') return -1;
+    if (b.id === 'rupay91') return 1;
+    return 0;
+  });
+  const ineligibleLenders = PARTNER_NBFCS.filter(n => (salary || 0) < n.minSalary).sort((a, b) => {
+    if (a.id === 'rupay91') return -1;
+    if (b.id === 'rupay91') return 1;
+    return 0;
+  });
 
   const salaryPresets = [
     { label: '₹25,000', val: 25000 },
@@ -365,7 +373,7 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
               Salary ₹{salary.toLocaleString()} Par Koi Eligible Offer Nahi Hai
             </h4>
             <p className="text-xs text-slate-500">
-              Minimum salary criteria ₹25,000/month (Ticket 2 Loan) se shuru hoti hai.
+              Minimum salary criteria ₹25,000/month (Rupay91, Ticket 2 Loan) se shuru hoti hai.
             </p>
             <button
               onClick={() => setSalary(25000)}
