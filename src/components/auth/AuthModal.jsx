@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { api, warmBackend } from '../../services/api';
-import { Shield, Phone, ArrowRight, CheckCircle2, Lock, X, User, Mail, FileText, Sparkles, Loader2, RefreshCw, AlertCircle, Zap } from 'lucide-react';
+import { Shield, Phone, ArrowRight, CheckCircle2, Lock, X, User, Mail, FileText, Sparkles, Loader2, RefreshCw, AlertCircle, Zap, Smartphone, ArrowLeft } from 'lucide-react';
 
 export const AuthModal = () => {
   const { isAuthOpen, setIsAuthOpen, loginUser, referredBy } = useApp();
 
-  const [step, setStep] = useState('phone'); // 'phone' | 'otp' | 'signup'
+  const [step, setStep] = useState('welcome'); // 'welcome' | 'phone' | 'otp' | 'signup'
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
   
@@ -77,6 +77,24 @@ export const AuthModal = () => {
     }
   };
 
+  const checkPendingRedirect = (cleanPhone) => {
+    try {
+      const pendingRaw = localStorage.getItem('paisainminute_pending_redirect');
+      if (!pendingRaw) return;
+      const pending = JSON.parse(pendingRaw);
+      localStorage.removeItem('paisainminute_pending_redirect');
+      if (pending && pending.urlTemplate) {
+        let leadId = pending.leadId || localStorage.getItem('paisainminute_lead_id') || ('PIM' + Date.now().toString().slice(-6));
+        let targetUrl = pending.urlTemplate
+          .replace('{LEAD_ID}', encodeURIComponent(leadId))
+          .replace('{PHONE}', encodeURIComponent(cleanPhone));
+        window.open(targetUrl, '_blank');
+      }
+    } catch (e) {
+      console.error('Error handling pending redirect', e);
+    }
+  };
+
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
     const cleanPhone = phone.replace(/\D/g, '').slice(-10);
@@ -115,6 +133,7 @@ export const AuthModal = () => {
           });
           setIsAuthOpen(false);
           setStep('phone');
+          checkPendingRedirect(cleanPhone);
         } else {
           // Check local database fallback
           const usersDb = JSON.parse(localStorage.getItem('paisainminute_users_db') || '{}');
@@ -122,6 +141,7 @@ export const AuthModal = () => {
             loginUser(cleanPhone);
             setIsAuthOpen(false);
             setStep('phone');
+            checkPendingRedirect(cleanPhone);
           } else {
             // New user needs to complete profile registration
             setStep('signup');
@@ -200,6 +220,7 @@ export const AuthModal = () => {
     setIsLoading(false);
     setIsAuthOpen(false);
     setStep('phone');
+    checkPendingRedirect(cleanPhone);
   };
 
   return (
@@ -218,51 +239,98 @@ export const AuthModal = () => {
           <X className="w-5 h-5" />
         </button>
 
-        {/* Modal Brand Header */}
-        <div className="flex items-center space-x-2.5">
-          <img src="/logo.png" alt="Paisa in Minutes" className="h-12 sm:h-14 w-auto object-contain" />
-          <div>
-            <p className="text-[11px] text-[#4A8DFF] font-bold">Live SMS OTP Verification Portal</p>
-            <span className="text-[9.5px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 inline-flex items-center mt-0.5">
-              ✓ Secure Instant SMS Connected
-            </span>
-          </div>
-        </div>
+        {/* STEP 0: WELCOME SCREEN (Mobile Login Only) */}
+        {step === 'welcome' ? (
+          <div className="space-y-5 text-center py-2">
+            <div className="flex flex-col items-center space-y-2 pt-2">
+              <div className="w-16 h-16 rounded-2xl bg-white shadow-md p-2 border border-slate-100 flex items-center justify-center">
+                <img src="/logo.png" alt="Paisa in Minutes" className="w-full h-full object-contain" />
+              </div>
+              <h2 className="text-xl font-black text-[#223981] tracking-tight">
+                Paisa in Minutes
+              </h2>
+              <span className="text-[11px] font-bold text-amber-800 bg-amber-50 border border-amber-200/80 px-3.5 py-0.5 rounded-full shadow-2xs">
+                Your trusted loan partner
+              </span>
+            </div>
 
-        {/* Referral Invitation Welcome Banner */}
-        {referredBy && (
-          <div className="bg-gradient-to-r from-amber-50 to-amber-100 p-3 rounded-2xl border border-amber-300 space-y-1">
-            <p className="text-xs font-black text-amber-900 flex items-center">
-              🎁 Invited by {referredBy.name}!
+            <div className="space-y-3 pt-3">
+              <button
+                type="button"
+                onClick={() => setStep('phone')}
+                className="w-full py-3.5 px-4 bg-[#F59E0B] hover:bg-[#D97706] text-white font-black text-sm rounded-2xl shadow-md transition flex items-center justify-center space-x-2 active:scale-[0.99] cursor-pointer"
+              >
+                <Smartphone className="w-4 h-4" />
+                <span>Continue with Mobile</span>
+              </button>
+            </div>
+
+            <p className="text-[10.5px] text-[#717983] leading-relaxed pt-2">
+              By continuing, you agree to our{' '}
+              <a href="https://paisainminutes.com/terms-and-conditions" target="_blank" rel="noopener noreferrer" className="text-[#2563EB] font-bold underline">
+                Terms of Service
+              </a>{' '}
+              and{' '}
+              <a href="https://paisainminutes.com/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-[#2563EB] font-bold underline">
+                Privacy Policy
+              </a>
+              .
             </p>
-            <p className="text-[10.5px] text-amber-800 font-medium">
-              Enter your mobile number below to claim your ₹15 Lakhs Instant Credit Line & 0% processing fee offer.
-            </p>
           </div>
-        )}
+        ) : (
+          <>
+            {/* Modal Brand Header with Back Button */}
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <button 
+                type="button"
+                onClick={() => setStep('welcome')}
+                className="flex items-center text-xs font-bold text-[#223981] hover:text-[#4A8DFF] transition"
+              >
+                <ArrowLeft className="w-4 h-4 mr-1" />
+                <span>Back</span>
+              </button>
+              <div className="flex items-center space-x-2">
+                <img src="/logo.png" alt="Paisa in Minutes" className="h-8 w-auto object-contain" />
+                <span className="text-xs font-black text-[#223981]">Paisa in Minutes</span>
+              </div>
+            </div>
 
-        {/* Global Error Banner */}
-        {errorMsg && (
-          <div className="bg-red-50 border border-red-200 p-2.5 rounded-2xl text-xs text-red-700 flex items-start space-x-2 animate-in fade-in duration-150">
-            <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
-            <p className="font-semibold leading-tight">{errorMsg}</p>
-          </div>
-        )}
-
-        {/* Global Info Banner */}
-        {infoMsg && (
-          <div className={`border p-2.5 rounded-2xl text-xs flex items-start space-x-2 animate-in fade-in duration-150 ${
-            isSendingOtp
-              ? 'bg-blue-50 border-blue-200 text-[#223981]'
-              : 'bg-emerald-50 border-emerald-200 text-emerald-800'
-          }`}>
-            {isSendingOtp ? (
-              <Loader2 className="w-4 h-4 text-[#4A8DFF] shrink-0 mt-0.5 animate-spin" />
-            ) : (
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+            {/* Referral Invitation Welcome Banner */}
+            {referredBy && (
+              <div className="bg-gradient-to-r from-amber-50 to-amber-100 p-3 rounded-2xl border border-amber-300 space-y-1">
+                <p className="text-xs font-black text-amber-900 flex items-center">
+                  🎁 Invited by {referredBy.name}!
+                </p>
+                <p className="text-[10.5px] text-amber-800 font-medium">
+                  Enter your mobile number below to claim your ₹15 Lakhs Instant Credit Line & 0% processing fee offer.
+                </p>
+              </div>
             )}
-            <p className="font-semibold leading-tight">{infoMsg}</p>
-          </div>
+
+            {/* Global Error Banner */}
+            {errorMsg && (
+              <div className="bg-red-50 border border-red-200 p-2.5 rounded-2xl text-xs text-red-700 flex items-start space-x-2 animate-in fade-in duration-150">
+                <AlertCircle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
+                <p className="font-semibold leading-tight">{errorMsg}</p>
+              </div>
+            )}
+
+            {/* Global Info Banner */}
+            {infoMsg && (
+              <div className={`border p-2.5 rounded-2xl text-xs flex items-start space-x-2 animate-in fade-in duration-150 ${
+                isSendingOtp
+                  ? 'bg-blue-50 border-blue-200 text-[#223981]'
+                  : 'bg-emerald-50 border-emerald-200 text-emerald-800'
+              }`}>
+                {isSendingOtp ? (
+                  <Loader2 className="w-4 h-4 text-[#4A8DFF] shrink-0 mt-0.5 animate-spin" />
+                ) : (
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                )}
+                <p className="font-semibold leading-tight">{infoMsg}</p>
+              </div>
+            )}
+          </>
         )}
 
         {/* STEP 1: PHONE NUMBER INPUT */}

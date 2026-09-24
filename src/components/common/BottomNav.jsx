@@ -1,26 +1,25 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
 import { BILINGUAL_TEXT } from '../../data/mockData';
-import { Home, CreditCard, Users, Activity, User, Sparkles } from 'lucide-react';
+import { Home, CreditCard, Activity, Calculator, User } from 'lucide-react';
 
 export const BottomNav = () => {
-  const { activeTab, setActiveTab, language, activeLoan, affiliate } = useApp();
+  const { activeTab, setActiveTab, language, activeLoan } = useApp();
   const t = BILINGUAL_TEXT[language] || BILINGUAL_TEXT.en;
 
   const navItems = [
     { id: 'home', label: t.homeTab, icon: Home },
     { id: 'loans', label: t.loansTab, icon: CreditCard },
     { 
-      id: 'affiliate', 
-      label: t.affiliateTab, 
-      icon: Users,
-      badge: affiliate.isApproved ? 'Partner' : 'Earn'
-    },
-    { 
       id: 'track', 
       label: t.trackTab, 
       icon: Activity,
       dot: activeLoan.hasActiveLoan
+    },
+    { 
+      id: 'calculator', 
+      label: t.calculatorTab || (language === 'hi' ? 'ईएमआई' : 'Calculator'), 
+      icon: Calculator 
     },
     { id: 'profile', label: t.profileTab, icon: User }
   ];

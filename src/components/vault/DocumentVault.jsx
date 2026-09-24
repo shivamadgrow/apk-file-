@@ -27,7 +27,7 @@ export const DocumentVault = () => {
     },
     {
       id: "doc-3",
-      name: `Loan Sanction Letter — ${activeLoan.selectedNbfc?.name || 'Aditya Birla Capital'}`,
+      name: `Loan Sanction Letter — ${activeLoan.selectedNbfc?.name || 'Rupay91'}`,
       type: "Sanction Letter",
       date: "25 Jul 2026",
       status: "Active Approved",

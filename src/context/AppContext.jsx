@@ -14,6 +14,19 @@ export const AppProvider = ({ children }) => {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isSupportOpen, setIsSupportOpen] = useState(false);
 
+  // Terms & Permissions Acceptance State
+  const [hasAcceptedTerms, setHasAcceptedTerms] = useState(() => {
+    return localStorage.getItem('paisainminute_terms_accepted') === 'true';
+  });
+
+  const acceptTerms = () => {
+    localStorage.setItem('paisainminute_terms_accepted', 'true');
+    setHasAcceptedTerms(true);
+    if (!localStorage.getItem('paisainminute_current_phone')) {
+      setIsAuthOpen(true);
+    }
+  };
+
   // Initialize LocalStorage Database
   const [usersDb, setUsersDb] = useState(() => {
     const savedDb = localStorage.getItem('paisainminute_users_db');
@@ -68,14 +81,18 @@ export const AppProvider = ({ children }) => {
           phone: refPhone || '',
           code: refCode || ''
         });
-        // Always show Login / Signup OTP Modal when opening via Referral Link
-        setIsAuthOpen(true);
+        // Show Login / Signup OTP Modal when opening via Referral Link if terms already accepted
+        if (hasAcceptedTerms) {
+          setIsAuthOpen(true);
+        }
       } else if (!localStorage.getItem('paisainminute_current_phone')) {
-        // Prompt Login / Signup for unauthenticated users on fresh load
-        setIsAuthOpen(true);
+        // Prompt Login / Signup only if terms already accepted
+        if (hasAcceptedTerms) {
+          setIsAuthOpen(true);
+        }
       }
     } catch (e) {}
-  }, []);
+  }, [hasAcceptedTerms]);
 
   // Sync user state when currentPhone or usersDb changes
   useEffect(() => {
@@ -189,7 +206,7 @@ export const AppProvider = ({ children }) => {
       monthlyEmi: loanData.monthlyEmi || 11480,
       appliedDate: 'Just now',
       status: 'Approved — Disbursal Initiated',
-      nbfc: loanData.selectedNbfc?.name || 'Aditya Birla Capital'
+      nbfc: loanData.selectedNbfc?.name || 'Rupay91'
     };
 
     const updatedHistory = [newHistoryItem, ...(existingUser.loanHistory || [])];
@@ -219,28 +236,19 @@ export const AppProvider = ({ children }) => {
     setIsAuthOpen(true);
   };
 
-  // Affiliate State
+  // Affiliate / Partner State
   const [affiliate, setAffiliate] = useState({
-    isApproved: true,
+    isApproved: false,
     accountType: "individual",
-    partnerId: "PM-AFF-88219",
-    referralCode: "ROHAN8821",
-    referralUrl: "https://paisainminutes.com/ref/ROHAN8821",
-    totalEarned: 32300,
-    pendingPayout: 14500,
-    paidOut: 17800,
-    leads: MOCK_LEADS,
-    company: {
-      companyName: "Varma Capital Services Pvt Ltd",
-      gstin: "27AAACV1234F1Z5",
-      companyPan: "AAACV1234F",
-      regCertificate: "REG-MH-2024-9912.pdf",
-      subAgents: 4
-    },
-    payoutHistory: [
-      { id: "PO-101", date: "20 Jul 2026", amount: "₹10,000", mode: "UPI (rohan@okaxis)", status: "Completed" },
-      { id: "PO-102", date: "12 Jul 2026", amount: "₹7,800", mode: "IMPS Bank Transfer", status: "Completed" }
-    ]
+    partnerId: "",
+    referralCode: "",
+    referralUrl: "",
+    totalEarned: 0,
+    pendingPayout: 0,
+    paidOut: 0,
+    leads: [],
+    company: null,
+    payoutHistory: []
   });
 
   // Notifications State
@@ -248,18 +256,18 @@ export const AppProvider = ({ children }) => {
     {
       id: "n1",
       title: "🎉 Pre-Approved Loan Offer!",
-      message: "You have a ₹5,00,000 instant credit line pre-approved with Tata Capital at 10.99%.",
+      message: "You have a ₹5,00,000 instant credit line pre-approved with Rupay91 at 0.95%/mo.",
       time: "10m ago",
       unread: true,
       type: "offer"
     },
     {
       id: "n2",
-      title: "💸 Affiliate Commission Credited!",
-      message: "Commission of ₹10,000 for Vikram Singh's disbursed Personal Loan is credited to your wallet.",
+      title: "⚡ Instant Bank Account Disbursal",
+      message: "Check your pre-approved personal loan offers and track disbursal in real-time.",
       time: "2h ago",
       unread: true,
-      type: "payout"
+      type: "offer"
     }
   ]);
 
@@ -315,7 +323,10 @@ export const AppProvider = ({ children }) => {
       setAffiliate,
       addLead,
       notifications,
-      markNotificationRead
+      markNotificationRead,
+      hasAcceptedTerms,
+      setHasAcceptedTerms,
+      acceptTerms
     }}>
       {children}
     </AppContext.Provider>

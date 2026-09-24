@@ -39,7 +39,7 @@ export const LoanApplicationWizard = ({ preSelectedProduct = 'personal', onClose
   const [tenureMonths, setTenureMonths] = useState(36);
   const [purpose, setPurpose] = useState(defaultPurpose);
   const [employmentType, setEmploymentType] = useState('salaried');
-  const [monthlyIncome, setMonthlyIncome] = useState(75000);
+  const [monthlyIncome, setMonthlyIncome] = useState(35000);
   const [companyName, setCompanyName] = useState('');
 
   // KYC States
@@ -97,12 +97,12 @@ export const LoanApplicationWizard = ({ preSelectedProduct = 'personal', onClose
       stepLabels: [
         { id: 1, title: "Journey Started", time: "Just now", done: true },
         { id: 2, title: "Application & KYC Verified", time: "Just now", done: true },
-        { id: 3, title: `Offer Selected (${chosenOffer?.nbfc.name || 'Aditya Birla Capital'})`, time: "Just now", done: true },
+        { id: 3, title: `Offer Selected (${chosenOffer?.nbfc.name || 'Rupay91'})`, time: "Just now", done: true },
         { id: 4, title: "e-Sign Agreement Signed", time: "Just now", done: true },
         { id: 5, title: "Disbursal in Progress", time: "Estimated < 5 mins", done: true }
       ],
       selectedNbfc: {
-        name: chosenOffer?.nbfc.name || "Aditya Birla Capital",
+        name: chosenOffer?.nbfc.name || "Rupay91",
         rate: `${chosenOffer?.nbfc.interestRate || 10.99}%`,
         fee: `₹${chosenOffer?.fee.toLocaleString() || '5,250'}`,
         disbursalTime: "8 Minutes"
@@ -384,12 +384,13 @@ export const LoanApplicationWizard = ({ preSelectedProduct = 'personal', onClose
         <div>
           <div className="mb-3">
             <h2 className="text-lg font-extrabold text-[#223981]">Compare & Select Best NBFC Offer</h2>
-            <p className="text-xs text-[#717983]">Side-by-side comparison of 4 RBI-registered partner offers.</p>
+            <p className="text-xs text-[#717983]">Side-by-side comparison of 9 partner offers matching your monthly income.</p>
           </div>
 
           <MultiLenderComparison 
             loanAmount={loanAmount}
             tenureMonths={tenureMonths}
+            userSalary={monthlyIncome}
             onSelectOffer={handleOfferSelect}
           />
         </div>
@@ -402,7 +403,7 @@ export const LoanApplicationWizard = ({ preSelectedProduct = 'personal', onClose
             <Sparkles className="w-8 h-8 text-emerald-600 mx-auto mb-1 animate-bounce" />
             <h2 className="text-base font-extrabold text-emerald-900">Pre-Approved Sanction Ready!</h2>
             <p className="text-xs text-emerald-700 mt-0.5">
-              Lender: <strong className="font-bold">{chosenOffer?.nbfc.name || 'Aditya Birla Capital'}</strong>
+              Lender: <strong className="font-bold">{chosenOffer?.nbfc.name || 'Rupay91'}</strong>
             </p>
           </div>
 

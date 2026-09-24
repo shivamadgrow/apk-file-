@@ -8,22 +8,23 @@ import { ProductGrid } from './components/home/ProductGrid';
 import { LoanJourneyTracker } from './components/home/LoanJourneyTracker';
 import { TrustCarousel } from './components/home/TrustCarousel';
 import { LoanApplicationWizard } from './components/loan/LoanApplicationWizard';
+import { MultiLenderComparison } from './components/loan/MultiLenderComparison';
 import { CreditScoreDetail } from './components/credit/CreditScoreDetail';
 import { EmiCalculator } from './components/calculator/EmiCalculator';
 import { DocumentVault } from './components/vault/DocumentVault';
-import { AffiliateDashboard } from './components/affiliate/AffiliateDashboard';
-import { AffiliateOnboarding } from './components/affiliate/AffiliateOnboarding';
 import { SupportModal } from './components/support/SupportModal';
 import { ProfileSettings } from './components/profile/ProfileSettings';
 import { ReferAndEarn } from './components/referral/ReferAndEarn';
 import { AuthModal } from './components/auth/AuthModal';
+import { TermsConsentModal } from './components/common/TermsConsentModal';
 import { warmBackend } from './services/api';
 import { X, Activity } from 'lucide-react';
 
 const MainAppContent = () => {
-  const { activeTab, setActiveTab, affiliate, activeLoan } = useApp();
+  const { activeTab, setActiveTab, activeLoan } = useApp();
   const [selectedProductForLoan, setSelectedProductForLoan] = useState(null);
   const [showWizardModal, setShowWizardModal] = useState(false);
+  const [loanViewMode, setLoanViewMode] = useState('lenders'); // 'lenders' | 'wizard'
 
   // Pre-warm Render backend immediately on app launch and keep it alive
   useEffect(() => {
@@ -34,19 +35,17 @@ const MainAppContent = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // FIX 6: Automatically close wizard modal on activeTab change (e.g. clicking Affiliate tab on BottomNav)
+  // Automatically close wizard modal or redirect deprecated tab
   useEffect(() => {
     setShowWizardModal(false);
+    if (activeTab === 'affiliate') {
+      setActiveTab('home');
+    }
   }, [activeTab]);
 
   const handleProductSelect = (productId) => {
-    if (productId === 'affiliate') {
-      setShowWizardModal(false);
-      setActiveTab('affiliate');
-    } else {
-      setSelectedProductForLoan(productId);
-      setShowWizardModal(true);
-    }
+    setSelectedProductForLoan(productId);
+    setShowWizardModal(true);
   };
 
   const handleApplyNowHero = () => {
@@ -86,20 +85,48 @@ const MainAppContent = () => {
 
       case 'loans':
         return (
-          <div className="space-y-4 max-w-lg mx-auto">
-            <div className="bg-gradient-to-r from-[#223981] via-[#1E3A8A] to-[#4A8DFF] text-white p-4.5 px-5 rounded-2xl text-left shadow-md border border-[#6FA8FF]/30 space-y-1">
-              <h2 className="text-base sm:text-lg font-black tracking-wide leading-tight">Instant Personal & Business Loans</h2>
-              <p className="text-xs text-[#E4EEFF] font-medium leading-normal">Compare partner lending rates starting @ 9.99% p.a.</p>
+          <div className="space-y-3 max-w-2xl mx-auto px-1 sm:px-2">
+            {/* View Switcher: 9 Lending Partners vs Step-by-Step Wizard */}
+            <div className="flex bg-slate-100 p-1.5 rounded-2xl border border-slate-200/80 shadow-2xs">
+              <button
+                type="button"
+                onClick={() => setLoanViewMode('lenders')}
+                className={`flex-1 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-black transition cursor-pointer flex items-center justify-center space-x-1.5 ${
+                  loanViewMode === 'lenders'
+                    ? 'bg-white text-[#1E3A8A] shadow-xs'
+                    : 'text-slate-500 hover:text-[#1E3A8A]'
+                }`}
+              >
+                <span>🏢 9 Lending Partners</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setLoanViewMode('wizard')}
+                className={`flex-1 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-black transition cursor-pointer flex items-center justify-center space-x-1.5 ${
+                  loanViewMode === 'wizard'
+                    ? 'bg-white text-[#1E3A8A] shadow-xs'
+                    : 'text-slate-500 hover:text-[#1E3A8A]'
+                }`}
+              >
+                <span>🪄 Step-by-Step Apply</span>
+              </button>
             </div>
-            <ProductGrid onProductSelect={handleProductSelect} />
-            <LoanApplicationWizard preSelectedProduct="personal" />
-          </div>
-        );
 
-      case 'affiliate':
-        return (
-          <div className="max-w-lg mx-auto w-full max-w-full overflow-x-hidden">
-            {affiliate.isApproved ? <AffiliateDashboard /> : <AffiliateOnboarding />}
+            {loanViewMode === 'lenders' ? (
+              <MultiLenderComparison 
+                loanAmount={350000} 
+                tenureMonths={36} 
+                onSelectOffer={(lender) => {
+                  setSelectedProductForLoan('personal');
+                  setShowWizardModal(true);
+                }} 
+              />
+            ) : (
+              <div className="space-y-4 pt-2">
+                <ProductGrid onProductSelect={handleProductSelect} />
+                <LoanApplicationWizard preSelectedProduct="personal" />
+              </div>
+            )}
           </div>
         );
 
@@ -244,6 +271,9 @@ const MainAppContent = () => {
 
       {/* Sticky Native Bottom Navigation Bar */}
       <BottomNav />
+
+      {/* Permissions, Terms & Conditions Consent Onboarding Modal */}
+      <TermsConsentModal />
 
       {/* Auth Login & Signup Modal */}
       <AuthModal />

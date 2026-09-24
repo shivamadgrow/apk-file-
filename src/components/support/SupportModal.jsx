@@ -77,7 +77,6 @@ export const SupportModal = () => {
     else if (actionType === 'credit') setActiveTab('credit');
     else if (actionType === 'referral') setActiveTab('referral');
     else if (actionType === 'vault') setActiveTab('vault');
-    else if (actionType === 'affiliate') setActiveTab('affiliate');
     else if (actionType === 'track') setActiveTab('track');
     else if (actionType === 'callback') {
       setIsSupportOpen(true);
@@ -127,7 +126,7 @@ export const SupportModal = () => {
     // 4. ELIGIBILITY & LOW SALARY INTENT ("salary", "12k", "15k", "20k", "eligibility", "patrata", "kam kamai")
     if (text.includes('salary') || text.includes('eligible') || text.includes('patrata') || text.includes('15k') || text.includes('20k') || text.includes('12k') || text.includes('minimum')) {
       return {
-        text: `💡 **Loan Eligibility Criteria:**\n• Minimum Income: ₹12,000 / month (Salaried & Self-Employed)\n• Age Limit: 21 to 58 Years\n• Required Documents: 100% Digital (PAN Card + Aadhaar OTP)\n\n👉 Partner lenders KreditBee, Rupay91, & MoneyView low salary par bhi instant loan approve karte hain!`,
+        text: `💡 **Loan Eligibility Criteria:**\n• Minimum Income: ₹25,000 / month (Salaried)\n• Age Limit: 21 to 58 Years\n• Required Documents: 100% Digital (PAN Card + Aadhaar OTP)\n\n👉 Hamare 9 Verified Partner Lenders (Ticket 2 Loan, Jhatpat Loans, Shubh Cash, Udhaar Now, Insta Rupees, Borrowera, Easy Fincare, Loan Within, Rupay91) aapki salary ke hisaab se instant loan provide karte hain!`,
         suggestions: [
           { label: '🚀 Apply for Loan', actionType: 'loans' },
           { label: '📊 Calculate EMI', actionType: 'calculator' }
@@ -179,13 +178,13 @@ export const SupportModal = () => {
       };
     }
 
-    // 9. AFFILIATE & REFERRAL INTENT ("refer", "earn", "commission", "payout", "kamaye", "wallet")
-    if (text.includes('refer') || text.includes('earn') || text.includes('commission') || text.includes('payout') || text.includes('wallet') || text.includes('kamai')) {
+    // 9. REFERRAL INTENT ("refer", "earn", "dost", "points", "wallet")
+    if (text.includes('refer') || text.includes('earn') || text.includes('dost') || text.includes('invite') || text.includes('wallet') || text.includes('point')) {
       return {
-        text: `🎁 **Refer & Affiliate Earnings:**\n• Earn up to 3.0% payout commission per disbursed loan!\n• Get 300 Paisa Points (₹300 Cash) per referral link share.\n• Withdraw earnings 24x7 directly to your UPI ID (GPay/PhonePe)!`,
+        text: `🎁 **Refer & Earn Rewards:**\n• Invite friends & family using your personalized referral link!\n• Earn 300 Paisa Points (₹300 Cash) per successful loan disbursal.\n• Withdraw earnings anytime directly to your UPI ID (GPay/PhonePe)!`,
         suggestions: [
           { label: '🎁 Open Refer & Earn', actionType: 'referral' },
-          { label: '💼 Partner Dashboard', actionType: 'affiliate' }
+          { label: '🚀 Apply Instant Loan', actionType: 'loans' }
         ]
       };
     }
@@ -480,7 +479,7 @@ export const SupportModal = () => {
             <div className="p-3.5 bg-white rounded-2xl border border-slate-200 shadow-2xs">
               <h4 className="font-extrabold text-[#223981]">Q: Is Paisa in Minutes an RBI-registered NBFC?</h4>
               <p className="text-[#717983] font-medium mt-1 leading-relaxed">
-                A: We are an official loan aggregator partner with 100% RBI-registered NBFCs and banks (Rupay91, MoneyView, KreditBee, CASHe, Bajaj), ensuring full regulatory compliance and zero hidden fees.
+                A: We are an official loan aggregator partner with 100% verified lending companies (Ticket 2 Loan, Jhatpat Loans, Shubh Cash, Udhaar Now, Insta Rupees, Borrowera, Easy Fincare, Loan Within, Rupay91), ensuring full regulatory compliance and zero hidden fees.
               </p>
             </div>
             <div className="p-3.5 bg-white rounded-2xl border border-slate-200 shadow-2xs">
@@ -490,9 +489,9 @@ export const SupportModal = () => {
               </p>
             </div>
             <div className="p-3.5 bg-white rounded-2xl border border-slate-200 shadow-2xs">
-              <h4 className="font-extrabold text-[#223981]">Q: When are affiliate payouts credited?</h4>
+              <h4 className="font-extrabold text-[#223981]">Q: How do Refer & Earn rewards work?</h4>
               <p className="text-[#717983] font-medium mt-1 leading-relaxed">
-                A: Affiliate commissions are credited as soon as your referred customer's loan is disbursed. You can withdraw to any UPI ID instantly.
+                A: When your invited friend completes e-KYC and their loan is disbursed, you earn 300 Paisa Points (₹300) directly withdrawable to your UPI ID.
               </p>
             </div>
           </div>

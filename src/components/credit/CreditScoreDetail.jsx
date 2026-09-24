@@ -102,7 +102,7 @@ export const CreditScoreDetail = ({ onApplyClick }) => {
             SCORE BASED MATCH
           </span>
           <h4 className="text-sm font-extrabold mt-1">Pre-Approved ₹5,00,000 Personal Loan</h4>
-          <p className="text-[11px] font-medium text-paisa-navy/90">Instant disbursal with Aditya Birla & Tata Capital</p>
+          <p className="text-[11px] font-medium text-paisa-navy/90">Instant disbursal with Rupay91 & Shubh Cash</p>
         </div>
         <button
           onClick={onApplyClick}

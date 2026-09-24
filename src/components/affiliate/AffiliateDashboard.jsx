@@ -43,8 +43,19 @@ export const AffiliateDashboard = () => {
     setTimeout(() => setCopiedLink(false), 2000);
   };
 
+  const resolvePartnerUrl = (nbfc) => {
+    let url = nbfc.outboundUrl || '';
+    const leadId = affiliate.partnerId || 'PIM-AFF' + Date.now().toString().slice(-4);
+    const rawPhone = user?.phone || localStorage.getItem('paisainminute_current_phone') || '9876543210';
+    const cleanPhone = rawPhone.replace(/\D/g, '').slice(-10) || '9876543210';
+    return url
+      .replace('{LEAD_ID}', encodeURIComponent(leadId))
+      .replace('{PHONE}', encodeURIComponent(cleanPhone));
+  };
+
   const handleCopyPartnerDirectLink = (nbfc) => {
-    navigator.clipboard.writeText(nbfc.outboundUrl);
+    const url = resolvePartnerUrl(nbfc);
+    navigator.clipboard.writeText(url);
     setCopiedPartnerId(nbfc.id);
     setTimeout(() => setCopiedPartnerId(null), 2000);
   };
@@ -63,7 +74,7 @@ export const AffiliateDashboard = () => {
 
   const handleDirectPartnerOpen = (nbfc) => {
     if (nbfc.outboundUrl) {
-      window.open(nbfc.outboundUrl, '_blank');
+      window.open(resolvePartnerUrl(nbfc), '_blank');
     }
   };
 
@@ -372,8 +383,12 @@ export const AffiliateDashboard = () => {
                 <div>
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex items-center space-x-2.5">
-                      <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center font-black text-xs text-[#223981] border border-slate-200">
-                        {nbfc.name.slice(0, 4)}
+                      <div className="w-16 h-9 rounded-xl bg-white p-1 flex items-center justify-center border border-slate-200 shadow-2xs overflow-hidden flex-shrink-0">
+                        {nbfc.logo && nbfc.logo.startsWith('/') ? (
+                          <img src={nbfc.logo} alt={nbfc.name} className="w-full h-full object-contain bg-white" />
+                        ) : (
+                          <span className="font-black text-xs text-[#223981]">{nbfc.name.slice(0, 4)}</span>
+                        )}
                       </div>
                       <div>
                         <h3 className="text-xs font-extrabold text-[#223981]">{nbfc.name}</h3>

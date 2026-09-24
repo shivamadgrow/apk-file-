@@ -102,14 +102,6 @@ export const MobileFrameToggler = () => {
             <Play className="w-3 h-3 mr-1" />
             Active Borrower
           </button>
-          <button
-            onClick={() => loadDemoPreset('affiliate')}
-            className="px-2 py-0.5 text-[11px] rounded bg-amber-500 hover:bg-amber-400 text-paisa-navy font-bold transition flex items-center"
-            title="Load Approved Affiliate Dashboard & Payouts"
-          >
-            <ShieldCheck className="w-3 h-3 mr-1" />
-            Approved Affiliate
-          </button>
         </div>
       </div>
 

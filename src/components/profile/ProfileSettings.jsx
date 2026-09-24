@@ -36,7 +36,7 @@ export const ProfileSettings = () => {
     }
     return [
       { id: "f1", name: "Rohan Varma", phone: "+91 98765 43210", rating: 5, text: "Got ₹3.5 Lakhs credited to HDFC bank account in under 8 mins! Excellent service.", date: "Today" },
-      { id: "f2", name: "Vikram Singh", phone: "+91 98111 22334", rating: 5, text: "Direct master DSA affiliate links and UTM tracking make payout calculation super simple.", date: "Yesterday" },
+      { id: "f2", name: "Vikram Singh", phone: "+91 98111 22334", rating: 5, text: "Instant approval and direct disbursal without visiting any bank branch.", date: "Yesterday" },
       { id: "f3", name: "Priya Sharma", phone: "+91 94123 99120", rating: 5, text: "100% paperless e-KYC and instant eligibility check.", date: "2 days ago" }
     ];
   });
@@ -175,7 +175,7 @@ export const ProfileSettings = () => {
                 </div>
 
                 <div className="flex justify-between items-center text-[9.5px] text-slate-400 pt-1 border-t border-slate-100">
-                  <span>Lender: {item.nbfc || 'Aditya Birla / Rupay91'}</span>
+                  <span>Lender: {item.nbfc || 'Rupay91'}</span>
                   <span>Applied: {item.appliedDate}</span>
                 </div>
               </div>
@@ -484,7 +484,7 @@ export const ProfileSettings = () => {
                 <span className="w-6 h-6 rounded-full bg-[#4A8DFF] text-white font-black flex items-center justify-center text-xs flex-shrink-0">1</span>
                 <div>
                   <p className="font-extrabold text-[#223981]">Select Preferred Partner Lender</p>
-                  <p className="text-[11px] text-[#717983] mt-0.5">Browse partner companies (Rupay91, MoneyView, KreditBee, CASHe, mPokket, Bajaj Finserv) and click 'Apply Now'.</p>
+                  <p className="text-[11px] text-[#717983] mt-0.5">Browse 9 partner companies (Ticket 2 Loan, Jhatpat Loans, Shubh Cash, Udhaar Now, Insta Rupees, Borrowera, Easy Fincare, Loan Within, Rupay91) and click 'Apply Now'.</p>
                 </div>
               </div>
 
@@ -535,7 +535,7 @@ export const ProfileSettings = () => {
               </p>
               <div className="bg-[#E4EEFF]/80 p-3 rounded-2xl border border-[#6FA8FF]/30 text-[#223981] space-y-1">
                 <p className="font-extrabold">Why Choose Paisa in Minutes?</p>
-                <p className="text-[11px] text-[#717983]">✓ Fast Under 8-Minute Bank Account Disbursal<br/>✓ Zero Physical Visit or Paperwork<br/>✓ Transparent Interest Rates Starting @ 9.99% p.a.<br/>✓ Instant Master Corporate Affiliate Revenue Share</p>
+                <p className="text-[11px] text-[#717983]">✓ Fast Under 8-Minute Bank Account Disbursal<br/>✓ Zero Physical Visit or Paperwork<br/>✓ Transparent Interest Rates Starting @ 9.99% p.a.<br/>✓ 100% RBI-Registered Regulated NBFC Partners</p>
               </div>
             </div>
 
@@ -570,6 +570,26 @@ export const ProfileSettings = () => {
               <p>
                 We do not sell, rent, or share your private data to unverified third parties. Data is used exclusively for loan eligibility matching with official RBI-registered NBFC partners.
               </p>
+              <div className="pt-2 flex flex-col space-y-1.5 font-bold text-xs">
+                <a 
+                  href="https://paisainminutes.com/privacy-policy" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-[#2563EB] hover:underline flex items-center justify-between p-2 rounded-xl bg-blue-50/60 border border-blue-100"
+                >
+                  <span>Read Official Privacy Policy</span>
+                  <span>→</span>
+                </a>
+                <a 
+                  href="https://paisainminutes.com/terms-and-conditions" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-[#2563EB] hover:underline flex items-center justify-between p-2 rounded-xl bg-blue-50/60 border border-blue-100"
+                >
+                  <span>Read Terms & Conditions</span>
+                  <span>→</span>
+                </a>
+              </div>
             </div>
 
             <button
@@ -693,7 +713,7 @@ export const ProfileSettings = () => {
             {feedbackTab === 'write' && (
               !feedbackSent ? (
                 <form onSubmit={handleFeedbackSubmit} className="space-y-3 text-xs pt-1">
-                  <p className="text-[#717983]">Tell us how we can improve your loan application or affiliate experience!</p>
+                  <p className="text-[#717983]">Tell us how we can improve your loan application experience!</p>
                   
                   {/* Rating Selector */}
                   <div className="flex items-center space-x-1 justify-center py-1">
@@ -760,9 +780,9 @@ export const ProfileSettings = () => {
       {showRbiModal && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl p-5 max-w-md w-full space-y-3 shadow-2xl text-left border border-slate-200">
-            <h3 className="text-sm font-extrabold text-[#223981]">RBI Registered Lending Partners Disclosure</h3>
+            <h3 className="text-sm font-extrabold text-[#223981]">Registered Lending Partners Disclosure</h3>
             <p className="text-xs text-[#717983] leading-relaxed">
-              Paisa in Minutes acts exclusively as a technology loan aggregator matching borrowers with official RBI-registered non-banking financial companies (NBFCs) including Rupay91, MoneyView, KreditBee, CASHe, mPokket, and Bajaj Finserv.
+              Paisa in Minutes acts exclusively as a technology loan aggregator matching borrowers with verified lending partner companies including Ticket 2 Loan, Jhatpat Loans, Shubh Cash, Udhaar Now, Insta Rupees, Borrowera, Easy Fincare, Loan Within, and Rupay91.
             </p>
             <div className="bg-slate-50 p-3 rounded-2xl text-[11px] text-[#223981] font-semibold">
               ✓ Annualized Interest Rates: 9.99% - 24.0% p.a.<br/>
