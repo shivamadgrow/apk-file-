@@ -191,26 +191,42 @@ export const AuthModal = () => {
     setIsLoading(true);
     setErrorMsg('');
 
+    // Query and associate CIBIL credit score using Name and Phone
+    let bureauScore = null;
+    let bureauCategory = null;
+    try {
+      const cibilRes = await api.checkCibil(trimmedName, cleanPhone);
+      if (cibilRes && cibilRes.ok) {
+        bureauScore = cibilRes.creditScore;
+        bureauCategory = cibilRes.scoreCategory;
+      }
+    } catch (e) {
+      console.warn('CIBIL fetch during signup note:', e);
+    }
+
     const newUserData = {
       name: trimmedName,
       phone: `+91 ${cleanPhone}`,
       email: trimmedEmail,
       pan: cleanPan,
       city: trimmedCity,
-      creditScore: null,
-      scoreCategory: null,
-      lastChecked: null,
+      creditScore: bureauScore,
+      cibilScore: bureauScore,
+      scoreCategory: bureauCategory,
+      lastChecked: bureauScore ? 'Today' : null,
       kycVerified: true,
       bankDetails: null,
       loanHistory: []
     };
 
     try {
-      // Sync profile to cloud database on server
+      // Sync profile & CIBIL score to cloud database on server
       await api.updateProfile({
         name: newUserData.name,
         email: newUserData.email,
-        pan: newUserData.pan
+        pan: newUserData.pan,
+        creditScore: newUserData.creditScore,
+        cibilScore: newUserData.cibilScore
       });
     } catch (err) {
       console.warn('Profile sync warning:', err);

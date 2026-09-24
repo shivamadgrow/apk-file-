@@ -275,6 +275,38 @@ export const AppProvider = ({ children }) => {
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, unread: false } : n));
   };
 
+  // Save and update user's CIBIL Credit Score in persistent data
+  const saveCibilScore = ({ name, phone, creditScore, scoreCategory, reportDate }) => {
+    const cleanPhone = (phone || currentPhone || '').replace(/\D/g, '').slice(-10);
+    const existingUser = (cleanPhone && usersDb[cleanPhone]) ? usersDb[cleanPhone] : user;
+
+    const updatedUser = {
+      ...existingUser,
+      name: name || existingUser.name || (cleanPhone ? `User ${cleanPhone.slice(-4)}` : "Applicant"),
+      phone: cleanPhone ? `+91 ${cleanPhone}` : existingUser.phone,
+      creditScore: Number(creditScore),
+      cibilScore: Number(creditScore),
+      scoreCategory: scoreCategory || (Number(creditScore) >= 750 ? 'Excellent' : 'Good'),
+      lastChecked: reportDate || 'Today',
+      cibilCheckedAt: new Date().toISOString()
+    };
+
+    const updatedDb = {
+      ...usersDb,
+      ...(cleanPhone ? { [cleanPhone]: updatedUser } : {})
+    };
+
+    setUsersDb(updatedDb);
+    localStorage.setItem('paisainminute_users_db', JSON.stringify(updatedDb));
+    
+    if (!currentPhone && cleanPhone) {
+      setCurrentPhone(cleanPhone);
+      localStorage.setItem('paisainminute_current_phone', cleanPhone);
+    }
+    setUser(updatedUser);
+    return updatedUser;
+  };
+
   // Add new lead in Lead Management tab
   const addLead = (newLeadData) => {
     const newLead = {
@@ -283,6 +315,8 @@ export const AppProvider = ({ children }) => {
       phone: newLeadData.phone || "+91 98000 00000",
       type: newLeadData.type || "Personal Loan",
       amount: newLeadData.amount ? `₹${Number(newLeadData.amount).toLocaleString()}` : "₹3,00,000",
+      cibil: newLeadData.cibil || user.creditScore || user.cibilScore || null,
+      creditScore: newLeadData.creditScore || user.creditScore || user.cibilScore || null,
       status: "In Review",
       commission: `₹${Math.round((Number(newLeadData.amount) || 300000) * 0.025).toLocaleString()}`,
       date: "Today",
@@ -317,6 +351,7 @@ export const AppProvider = ({ children }) => {
       loginUser,
       logoutUser,
       saveNewLoanApplication,
+      saveCibilScore,
       activeLoan,
       setActiveLoan,
       affiliate,
