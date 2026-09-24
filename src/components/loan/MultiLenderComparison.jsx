@@ -241,13 +241,13 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
             {eligibleLenders.map((nbfc) => (
               <div
                 key={nbfc.id}
-                className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 border border-emerald-200 shadow-xs hover:shadow-md hover:border-emerald-400 transition-all duration-200 relative group text-left"
+                className="bg-white rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 border border-emerald-200/90 shadow-xs hover:shadow-md hover:border-emerald-400 transition-all duration-200 relative group text-left"
               >
                 {/* TOP ROW: Logo, Brand Info, and Status Badge */}
-                <div className="flex items-center justify-between gap-3 pb-3 border-b border-slate-100">
-                  <div className="flex items-center space-x-3 min-w-0">
+                <div className="flex items-start justify-between gap-2.5 pb-3 border-b border-slate-100">
+                  <div className="flex items-center space-x-3 min-w-0 flex-1">
                     {/* Clean White Logo Container */}
-                    <div className="w-20 h-11 bg-white rounded-xl p-1 border border-slate-200 shadow-2xs flex items-center justify-center overflow-hidden flex-shrink-0">
+                    <div className="w-16 sm:w-20 h-10 sm:h-11 bg-white rounded-xl p-1 border border-slate-200/90 shadow-2xs flex items-center justify-center overflow-hidden flex-shrink-0">
                       {nbfc.logo && nbfc.logo.startsWith('/') ? (
                         <img 
                           src={nbfc.logo} 
@@ -267,24 +267,26 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
                       </span>
                     </div>
 
-                    {/* Company Name & Tag */}
-                    <div className="min-w-0">
-                      <div className="flex items-center space-x-2">
-                        <h4 className="text-sm sm:text-base font-extrabold text-[#1E293B] group-hover:text-[#2563EB] transition-colors truncate">
+                    {/* Company Name, Tag & Rating */}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <h4 className="text-sm sm:text-base font-black text-[#1E293B] group-hover:text-[#2563EB] transition-colors whitespace-nowrap leading-tight">
                           {nbfc.name}
                         </h4>
-                        <span className="text-[10px] font-bold text-[#2563EB] bg-[#EFF6FF] px-2 py-0.5 rounded-full border border-blue-200 hidden sm:inline-block">
-                          {nbfc.tag}
-                        </span>
+                        {nbfc.tag && (
+                          <span className="text-[9.5px] font-bold text-[#2563EB] bg-[#EFF6FF] px-2 py-0.5 rounded-md border border-blue-200/80 whitespace-nowrap">
+                            {nbfc.tag}
+                          </span>
+                        )}
                       </div>
 
-                      <div className="flex items-center space-x-2 text-xs text-slate-500 mt-0.5">
-                        <div className="flex items-center text-amber-500 font-extrabold">
+                      <div className="flex items-center space-x-1.5 text-xs text-slate-500 mt-1 flex-wrap">
+                        <div className="flex items-center text-amber-500 font-extrabold text-[11px] sm:text-xs">
                           <Star className="w-3.5 h-3.5 fill-amber-500 mr-1" />
                           <span>{nbfc.rating}</span>
                         </div>
-                        <span>•</span>
-                        <span className="text-slate-400 font-medium text-[11px] truncate">
+                        <span className="text-slate-300">•</span>
+                        <span className="text-slate-500 font-medium text-[10.5px] sm:text-[11px] whitespace-nowrap">
                           {nbfc.approvalChance}
                         </span>
                       </div>
@@ -292,8 +294,8 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
                   </div>
 
                   {/* Status Badge */}
-                  <div className="flex-shrink-0 text-right">
-                    <span className="inline-flex items-center text-[10.5px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1 rounded-full shadow-2xs whitespace-nowrap">
+                  <div className="flex-shrink-0 self-start text-right">
+                    <span className="inline-flex items-center text-[10.5px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200/90 px-2.5 py-1 rounded-full shadow-2xs whitespace-nowrap">
                       <CheckCircle2 className="w-3.5 h-3.5 mr-1 text-emerald-600 flex-shrink-0" />
                       Eligible
                     </span>
@@ -301,40 +303,40 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
                 </div>
 
                 {/* MIDDLE ROW: Clean 3-Column Metrics Strip */}
-                <div className="grid grid-cols-3 gap-2 sm:gap-4 my-3 p-3 rounded-2xl bg-gradient-to-r from-emerald-50/50 via-white to-emerald-50/50 border border-emerald-100 text-center">
+                <div className="grid grid-cols-3 gap-1 sm:gap-2 my-3 p-2.5 sm:p-3 rounded-2xl bg-gradient-to-r from-emerald-50/40 via-white to-emerald-50/40 border border-emerald-100 text-center items-center">
                   <div>
-                    <span className="text-[9.5px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                    <span className="text-[9px] sm:text-[9.5px] font-bold text-slate-400 uppercase tracking-wider block whitespace-nowrap">
                       MAX LOAN
                     </span>
-                    <span className="text-xs sm:text-base font-black text-[#2563EB] mt-0.5 block truncate">
+                    <span className="text-[11.5px] sm:text-sm font-black text-[#2563EB] mt-0.5 block whitespace-nowrap">
                       {nbfc.maxLoanDisplay}
                     </span>
                   </div>
-                  <div className="border-x border-slate-200/80 px-1">
-                    <span className="text-[9.5px] sm:text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
+                  <div className="border-x border-slate-200/80 px-1 sm:px-2">
+                    <span className="text-[9px] sm:text-[9.5px] font-bold text-slate-400 uppercase tracking-wider block whitespace-nowrap">
                       INTEREST RATE
                     </span>
-                    <span className="text-xs sm:text-base font-black text-emerald-600 mt-0.5 block truncate">
+                    <span className="text-[11.5px] sm:text-sm font-black text-emerald-600 mt-0.5 block whitespace-nowrap">
                       {nbfc.interestRateDisplay}
                     </span>
                   </div>
                   <div>
-                    <span className="text-[9.5px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                    <span className="text-[9px] sm:text-[9.5px] font-bold text-slate-400 uppercase tracking-wider block whitespace-nowrap">
                       MIN SALARY
                     </span>
-                    <span className="text-xs sm:text-base font-black text-emerald-700 mt-0.5 block truncate">
+                    <span className="text-[11.5px] sm:text-sm font-black text-slate-800 mt-0.5 block whitespace-nowrap">
                       {nbfc.minSalaryDisplay}
                     </span>
                   </div>
                 </div>
 
                 {/* BOTTOM ROW: Feature Tags & Direct Apply Button */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-1">
-                  <div className="flex flex-wrap items-center gap-1.5 text-xs text-slate-600">
+                <div className="flex items-center justify-between gap-2.5 pt-1">
+                  <div className="flex flex-col sm:flex-row flex-wrap gap-1.5 text-xs text-slate-600 min-w-0 flex-1">
                     {nbfc.features.slice(0, 2).map((feat, idx) => (
                       <span 
                         key={idx} 
-                        className="inline-flex items-center px-2 py-0.5 rounded-lg bg-emerald-50 text-[10.5px] font-semibold text-emerald-900 border border-emerald-100 truncate"
+                        className="inline-flex items-center px-2 py-0.5 rounded-lg bg-emerald-50/80 text-[10px] sm:text-[10.5px] font-semibold text-emerald-900 border border-emerald-100 whitespace-nowrap self-start"
                       >
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 flex-shrink-0"></span>
                         {feat}
@@ -346,10 +348,10 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
                     <button
                       type="button"
                       onClick={() => handleApplyClick(nbfc)}
-                      className="w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-[#2563EB] to-[#1D4ED8] hover:from-[#1D4ED8] hover:to-[#1E40AF] text-white font-extrabold text-xs sm:text-sm rounded-xl shadow-md shadow-blue-500/20 flex items-center justify-center space-x-1.5 transition active:scale-98 cursor-pointer whitespace-nowrap"
+                      className="px-4 sm:px-5 py-2.5 bg-gradient-to-r from-[#2563EB] to-[#1D4ED8] hover:from-[#1D4ED8] hover:to-[#1E40AF] text-white font-black text-xs sm:text-sm rounded-xl shadow-md shadow-blue-500/20 flex items-center justify-center space-x-1.5 transition active:scale-98 cursor-pointer whitespace-nowrap"
                     >
                       <span>Apply Now</span>
-                      <ArrowRight className="w-4 h-4" />
+                      <ArrowRight className="w-4 h-4 ml-0.5" />
                     </button>
                   </div>
                 </div>
@@ -401,12 +403,12 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
             {ineligibleLenders.map((nbfc) => (
               <div
                 key={nbfc.id}
-                className="bg-slate-50/70 rounded-2xl sm:rounded-3xl p-4 sm:p-5 border border-slate-200 opacity-60 text-left pointer-events-none select-none relative overflow-hidden"
+                className="bg-slate-50/70 rounded-2xl sm:rounded-3xl p-3.5 sm:p-5 border border-slate-200 opacity-60 text-left pointer-events-none select-none relative overflow-hidden"
               >
                 {/* TOP ROW: Logo, Brand Info, and Locked Badge */}
-                <div className="flex items-center justify-between gap-3 pb-3 border-b border-slate-200/60">
-                  <div className="flex items-center space-x-3 min-w-0">
-                    <div className="w-20 h-11 bg-white rounded-xl p-1 border border-slate-200 flex items-center justify-center overflow-hidden flex-shrink-0 grayscale">
+                <div className="flex items-start justify-between gap-2.5 pb-3 border-b border-slate-200/60">
+                  <div className="flex items-center space-x-3 min-w-0 flex-1">
+                    <div className="w-16 sm:w-20 h-10 sm:h-11 bg-white rounded-xl p-1 border border-slate-200 flex items-center justify-center overflow-hidden flex-shrink-0 grayscale">
                       {nbfc.logo && nbfc.logo.startsWith('/') ? (
                         <img 
                           src={nbfc.logo} 
@@ -416,21 +418,19 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
                       ) : null}
                     </div>
 
-                    <div className="min-w-0">
-                      <div className="flex items-center space-x-2">
-                        <h4 className="text-sm sm:text-base font-extrabold text-slate-600 truncate">
-                          {nbfc.name}
-                        </h4>
-                      </div>
-                      <p className="text-[11px] text-amber-700 font-bold mt-0.5">
+                    <div className="min-w-0 flex-1">
+                      <h4 className="text-sm sm:text-base font-black text-slate-700 tracking-tight leading-tight whitespace-nowrap">
+                        {nbfc.name}
+                      </h4>
+                      <p className="text-[10.5px] sm:text-[11px] text-amber-700 font-bold mt-0.5 whitespace-nowrap">
                         Requires Min Salary: {nbfc.minSalaryDisplay}
                       </p>
                     </div>
                   </div>
 
                   {/* Locked Pill Badge */}
-                  <div className="flex-shrink-0 text-right">
-                    <span className="inline-flex items-center text-[10px] font-extrabold bg-amber-50 text-amber-800 border border-amber-200 px-2.5 py-1 rounded-full">
+                  <div className="flex-shrink-0 self-start text-right">
+                    <span className="inline-flex items-center text-[10px] font-extrabold bg-amber-50 text-amber-800 border border-amber-200 px-2.5 py-1 rounded-full whitespace-nowrap">
                       <Lock className="w-3 h-3 mr-1 text-amber-600" />
                       Min {nbfc.minSalaryDisplay}
                     </span>
@@ -438,42 +438,42 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
                 </div>
 
                 {/* MIDDLE ROW: Metrics Strip */}
-                <div className="grid grid-cols-3 gap-2 sm:gap-4 my-3 p-3 rounded-2xl bg-slate-100/80 border border-slate-200/60 text-center">
+                <div className="grid grid-cols-3 gap-1 sm:gap-2 my-3 p-2.5 sm:p-3 rounded-2xl bg-slate-100/80 border border-slate-200/60 text-center items-center">
                   <div>
-                    <span className="text-[9.5px] font-bold text-slate-400 uppercase tracking-wider block">
+                    <span className="text-[9px] sm:text-[9.5px] font-bold text-slate-400 uppercase tracking-wider block whitespace-nowrap">
                       MAX LOAN
                     </span>
-                    <span className="text-xs sm:text-sm font-bold text-slate-600 mt-0.5 block truncate">
+                    <span className="text-[11.5px] sm:text-sm font-bold text-slate-600 mt-0.5 block whitespace-nowrap">
                       {nbfc.maxLoanDisplay}
                     </span>
                   </div>
-                  <div className="border-x border-slate-200 px-1">
-                    <span className="text-[9.5px] font-bold text-slate-500 uppercase tracking-wider block">
+                  <div className="border-x border-slate-200 px-1 sm:px-2">
+                    <span className="text-[9px] sm:text-[9.5px] font-bold text-slate-400 uppercase tracking-wider block whitespace-nowrap">
                       INTEREST RATE
                     </span>
-                    <span className="text-xs sm:text-sm font-bold text-emerald-600 mt-0.5 block truncate">
+                    <span className="text-[11.5px] sm:text-sm font-bold text-emerald-600 mt-0.5 block whitespace-nowrap">
                       {nbfc.interestRateDisplay}
                     </span>
                   </div>
                   <div>
-                    <span className="text-[9.5px] font-bold text-slate-400 uppercase tracking-wider block">
+                    <span className="text-[9px] sm:text-[9.5px] font-bold text-slate-400 uppercase tracking-wider block whitespace-nowrap">
                       MIN SALARY
                     </span>
-                    <span className="text-xs sm:text-sm font-black text-amber-800 mt-0.5 block truncate">
+                    <span className="text-[11.5px] sm:text-sm font-black text-amber-800 mt-0.5 block whitespace-nowrap">
                       {nbfc.minSalaryDisplay}
                     </span>
                   </div>
                 </div>
 
                 {/* BOTTOM ROW: Disabled CTA */}
-                <div className="flex items-center justify-between pt-1">
+                <div className="flex items-center justify-between gap-2.5 pt-1">
                   <span className="text-[11px] text-slate-400 font-medium">
                     Salary criteria unfulfilled
                   </span>
                   <button
                     type="button"
                     disabled
-                    className="px-4 py-2 bg-slate-200 text-slate-500 font-extrabold text-xs rounded-xl cursor-not-allowed flex items-center space-x-1"
+                    className="px-3.5 py-2 bg-slate-200 text-slate-500 font-bold text-xs rounded-xl cursor-not-allowed flex items-center space-x-1 whitespace-nowrap"
                   >
                     <Lock className="w-3 h-3 mr-1 text-slate-500" />
                     <span>Ineligible (Min {nbfc.minSalaryDisplay})</span>
