@@ -118,42 +118,60 @@ export const EmiCalculator = ({ onApplyWithAmount }) => {
       </div>
 
       {/* EMI Result Summary Card */}
-      <div className="bg-gradient-to-br from-[#1E3A8A] via-[#223981] to-[#2563EB] text-white p-4.5 rounded-3xl shadow-lg space-y-3.5">
-        <div className="flex items-center justify-between border-b border-white/15 pb-2.5">
-          <span className="text-xs font-bold text-blue-100 uppercase tracking-wider">Monthly EMI Repayment</span>
-          <span className="text-2xl font-black text-amber-300">
-            ₹{emi.toLocaleString('en-IN')}<span className="text-xs text-white/80 font-semibold">/mo</span>
-          </span>
+      <div className="bg-gradient-to-br from-[#1E3A8A] via-[#223981] to-[#2563EB] text-white p-5 sm:p-6 rounded-3xl shadow-lg space-y-4">
+        {/* Top Header Row */}
+        <div className="flex items-center justify-between border-b border-white/15 pb-3">
+          <div>
+            <span className="text-[11px] font-bold text-blue-200 uppercase tracking-wider block">
+              Monthly EMI Repayment
+            </span>
+            <span className="text-[10px] text-blue-300">
+              Total Payable: ₹{totalPayable.toLocaleString('en-IN')}
+            </span>
+          </div>
+          <div className="text-right">
+            <span className="text-2xl sm:text-3xl font-black text-amber-300">
+              ₹{emi.toLocaleString('en-IN')}
+            </span>
+            <span className="text-xs text-white/80 font-bold ml-0.5">/mo</span>
+          </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-2 text-xs text-left">
-          <div>
-            <p className="text-[10px] text-blue-200 font-medium">Principal</p>
-            <p className="font-extrabold text-white text-xs sm:text-sm">₹{amount.toLocaleString('en-IN')}</p>
+        {/* 3 Metric Columns with proper Left, Center, Right alignment */}
+        <div className="grid grid-cols-3 gap-1.5 bg-white/10 p-3 rounded-2xl border border-white/10 items-center">
+          <div className="text-left pl-1">
+            <p className="text-[10px] font-medium text-blue-200">Principal</p>
+            <p className="font-extrabold text-white text-xs sm:text-sm mt-0.5">
+              ₹{amount.toLocaleString('en-IN')}
+            </p>
           </div>
-          <div>
-            <p className="text-[10px] text-blue-200 font-medium">Daily Rate</p>
-            <p className="font-extrabold text-emerald-300 text-xs sm:text-sm">upto 1.0%/day</p>
+          <div className="text-center border-x border-white/15 px-1">
+            <p className="text-[10px] font-medium text-blue-200">Daily Rate</p>
+            <p className="font-extrabold text-emerald-300 text-xs sm:text-sm mt-0.5">
+              upto 1.0%/day
+            </p>
           </div>
-          <div>
-            <p className="text-[10px] text-blue-200 font-medium">Total Interest</p>
-            <p className="font-extrabold text-amber-300 text-xs sm:text-sm">₹{totalInterest.toLocaleString('en-IN')}</p>
+          <div className="text-right pr-1">
+            <p className="text-[10px] font-medium text-blue-200">Total Interest</p>
+            <p className="font-extrabold text-amber-300 text-xs sm:text-sm mt-0.5">
+              ₹{totalInterest.toLocaleString('en-IN')}
+            </p>
           </div>
         </div>
 
         {/* Visual Bar Breakdown */}
-        <div>
+        <div className="space-y-1.5">
           <div className="h-3 w-full bg-white/20 rounded-full overflow-hidden flex shadow-inner">
             <div style={{ width: `${principalPercent}%` }} className="bg-[#6FA8FF] h-full transition-all duration-300" />
             <div style={{ width: `${interestPercent}%` }} className="bg-amber-400 h-full transition-all duration-300" />
           </div>
-          <div className="flex justify-between text-[10px] text-blue-100 font-semibold mt-1.5">
+          <div className="flex justify-between text-[10.5px] text-blue-100 font-semibold px-0.5">
             <span className="flex items-center">
-              <span className="w-2 h-2 rounded-full bg-[#6FA8FF] mr-1.5" />
+              <span className="w-2 h-2 rounded-full bg-[#6FA8FF] mr-1.5 flex-shrink-0" />
               Principal ({principalPercent}%)
             </span>
             <span className="flex items-center">
-              <span className="w-2 h-2 rounded-full bg-amber-400 mr-1.5" />
+              <span className="w-2 h-2 rounded-full bg-amber-400 mr-1.5 flex-shrink-0" />
               Interest ({interestPercent}%)
             </span>
           </div>
@@ -161,7 +179,7 @@ export const EmiCalculator = ({ onApplyWithAmount }) => {
 
         <button
           onClick={() => onApplyWithAmount && onApplyWithAmount(amount, tenure)}
-          className="w-full py-3 bg-white hover:bg-slate-50 text-[#1E3A8A] text-xs font-black rounded-2xl shadow-md transition-all active:scale-[0.99] flex items-center justify-center space-x-1.5 cursor-pointer"
+          className="w-full py-3.5 bg-white hover:bg-slate-50 text-[#1E3A8A] text-xs sm:text-sm font-black rounded-2xl shadow-md transition-all active:scale-[0.99] flex items-center justify-center space-x-1.5 cursor-pointer mt-1"
         >
           <span>Apply for ₹{amount.toLocaleString('en-IN')} Now</span>
           <ArrowRight className="w-4 h-4 ml-0.5" />

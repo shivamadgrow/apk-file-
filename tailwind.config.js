@@ -23,6 +23,9 @@ export default {
         'paisa-card': '0 8px 30px rgba(34, 57, 129, 0.08)',
         'paisa-hover': '0 14px 40px rgba(74, 141, 255, 0.18)',
         'paisa-glow': '0 0 20px rgba(111, 168, 255, 0.4)',
+      },
+      spacing: {
+        '4.5': '1.125rem',
       }
     },
   },
