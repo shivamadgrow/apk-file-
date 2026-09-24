@@ -30,6 +30,15 @@
   border-radius: 9999px;
 }
 
+/* Hide scrollbars for clean carousels */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 /* High-End Fintech UI Tokens */
 .paisa-hero-card {
   background: linear-gradient(135deg, #1E293B 0%, #223981 50%, #1E3A8A 100%);
