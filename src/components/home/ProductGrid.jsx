@@ -1,7 +1,7 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
 import { BILINGUAL_TEXT } from '../../data/mockData';
-import { UserCheck, CreditCard, Coins, Briefcase, Users, Sparkles, ChevronRight, Zap } from 'lucide-react';
+import { UserCheck, CreditCard, Coins, Briefcase, ChevronRight } from 'lucide-react';
 
 export const ProductGrid = ({ onProductSelect }) => {
   const { language, setActiveTab } = useApp();
@@ -43,15 +43,6 @@ export const ProductGrid = ({ onProductSelect }) => {
       icon: CreditCard,
       color: 'bg-emerald-50 text-emerald-600 border-emerald-200/80',
       badge: 'Rewards'
-    },
-    {
-      id: 'referral',
-      name: 'Refer & Earn Rewards',
-      limit: 'Invite Friends & Family',
-      rate: 'Earn Paisa Points & Cash Bonus',
-      icon: Users,
-      isAffiliateHighlight: true,
-      badge: 'REFERRAL 🎁'
     }
   ];
 
@@ -59,7 +50,7 @@ export const ProductGrid = ({ onProductSelect }) => {
     <div className="my-4 text-left">
       <div className="flex items-center justify-between mb-2.5">
         <h2 className="text-sm font-extrabold text-[#223981] tracking-tight">
-          Instant Loan Suite & Referral Program
+          Instant Loan Suite
         </h2>
         <button 
           onClick={() => setActiveTab('loans')}
@@ -72,44 +63,6 @@ export const ProductGrid = ({ onProductSelect }) => {
       <div className="grid grid-cols-2 gap-2.5">
         {products.map((prod) => {
           const Icon = prod.icon;
-
-          if (prod.isAffiliateHighlight) {
-            return (
-              <div
-                key={prod.id}
-                onClick={() => setActiveTab('referral')}
-                className="col-span-2 paisa-affiliate-card p-4 rounded-2xl text-white cursor-pointer hover:scale-[1.01] transition-all duration-300 relative overflow-hidden group"
-              >
-                <div className="absolute top-0 right-0 w-32 h-32 bg-amber-400/10 rounded-full blur-2xl pointer-events-none" />
-
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center space-x-2.5">
-                    <div className="w-10 h-10 rounded-xl bg-amber-400 text-[#0F172A] flex items-center justify-center font-black shadow-md group-hover:rotate-6 transition-transform">
-                      <Icon className="w-6 h-6" />
-                    </div>
-                    <div>
-                      <h3 className="text-xs font-black text-white group-hover:text-amber-300 transition-colors flex items-center">
-                        {prod.name}
-                        <Sparkles className="w-3 h-3 text-amber-400 ml-1" />
-                      </h3>
-                      <p className="text-[10px] text-amber-300 font-bold mt-0.5">{prod.rate}</p>
-                    </div>
-                  </div>
-
-                  <span className="bg-amber-400 text-[#0F172A] text-[9.5px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow">
-                    {prod.badge}
-                  </span>
-                </div>
-
-                <div className="flex items-center justify-between pt-2 border-t border-white/10 text-[11px]">
-                  <span className="text-slate-300 font-medium">{prod.limit}</span>
-                  <span className="font-extrabold text-amber-300 flex items-center group-hover:translate-x-1 transition-transform">
-                    Refer Now →
-                  </span>
-                </div>
-              </div>
-            );
-          }
 
           return (
             <div
