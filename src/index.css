@@ -39,6 +39,92 @@
   scrollbar-width: none;
 }
 
+/* Custom Range Slider Styling - No ugly focus borders, modern filled track */
+input[type="range"] {
+  outline: none !important;
+  border: none !important;
+}
+input[type="range"]:focus,
+input[type="range"]:focus-visible,
+input[type="range"]:active {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+input[type="range"]::-moz-focus-outer {
+  border: 0;
+}
+
+.paisa-slider {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 8px;
+  border-radius: 9999px;
+  outline: none !important;
+  border: none !important;
+  cursor: pointer;
+  margin: 8px 0 4px 0;
+}
+
+.paisa-slider:focus,
+.paisa-slider:focus-visible,
+.paisa-slider:active {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.paisa-slider::-webkit-slider-runnable-track {
+  background: transparent;
+  height: 8px;
+  border-radius: 9999px;
+  border: none !important;
+  outline: none !important;
+}
+
+.paisa-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #2563EB;
+  border: 3.5px solid #FFFFFF;
+  box-shadow: 0 2px 7px rgba(37, 99, 235, 0.45);
+  cursor: pointer;
+  margin-top: -7px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.paisa-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.55);
+}
+
+.paisa-slider::-webkit-slider-thumb:active {
+  transform: scale(1.22);
+}
+
+.paisa-slider::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #2563EB;
+  border: 3.5px solid #FFFFFF;
+  box-shadow: 0 2px 7px rgba(37, 99, 235, 0.45);
+  cursor: pointer;
+}
+
+.paisa-slider::-moz-range-track {
+  background: transparent;
+  height: 8px;
+  border-radius: 9999px;
+  border: none !important;
+  outline: none !important;
+}
+
 /* High-End Fintech UI Tokens */
 .paisa-hero-card {
   background: linear-gradient(135deg, #1E293B 0%, #223981 50%, #1E3A8A 100%);
