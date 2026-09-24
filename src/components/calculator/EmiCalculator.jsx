@@ -34,28 +34,67 @@ export const EmiCalculator = ({ onApplyWithAmount }) => {
         </div>
       </div>
 
-      {/* Slider 1: Loan Amount (Starts from ₹0) */}
+      {/* Slider 1: Loan Amount (Manual Input + Slider + Quick Chips) */}
       <div className="bg-slate-50/80 p-4 rounded-2xl border border-slate-200/90 shadow-2xs">
-        <div className="flex justify-between items-center mb-1.5">
-          <span className="text-xs font-black text-[#223981]">Loan Amount</span>
-          <span className="text-lg font-black text-[#2563EB]">₹{amount.toLocaleString('en-IN')}</span>
+        <div className="flex justify-between items-center mb-2 gap-2">
+          <div>
+            <span className="text-xs font-black text-[#223981] block">Loan Amount</span>
+            <span className="text-[10px] text-slate-400 font-medium">Type manually or use slider</span>
+          </div>
+
+          {/* Manual Type Input Box */}
+          <div className="flex items-center bg-white px-2.5 py-1 rounded-xl border border-blue-200 shadow-2xs focus-within:border-[#2563EB] focus-within:ring-2 focus-within:ring-blue-100 transition-all">
+            <span className="text-base font-black text-[#2563EB] mr-0.5">₹</span>
+            <input
+              type="text"
+              inputMode="numeric"
+              value={amount === 0 ? '' : amount.toLocaleString('en-IN')}
+              onFocus={(e) => e.target.select()}
+              onChange={(e) => {
+                const raw = e.target.value.replace(/\D/g, '');
+                setAmount(raw === '' ? 0 : Math.min(5000000, Number(raw)));
+              }}
+              placeholder="0"
+              className="w-28 sm:w-32 text-right text-base sm:text-lg font-black text-[#2563EB] bg-transparent outline-none focus:outline-none"
+            />
+          </div>
         </div>
+
         <input 
           type="range"
           min="0"
           max="2000000"
           step="5000"
-          value={amount}
+          value={Math.min(2000000, amount)}
           onChange={(e) => setAmount(Number(e.target.value))}
           style={{
             background: `linear-gradient(to right, #2563EB 0%, #2563EB ${amountPct}%, #E2E8F0 ${amountPct}%, #E2E8F0 100%)`
           }}
           className="paisa-slider"
         />
+
         <div className="flex justify-between text-[10px] text-slate-500 font-semibold mt-1">
           <span>₹0</span>
           <span>₹10 Lakhs</span>
           <span>₹20 Lakhs</span>
+        </div>
+
+        {/* Quick Amount Preset Chips */}
+        <div className="flex items-center space-x-1.5 overflow-x-auto no-scrollbar pt-2.5 border-t border-slate-200/60 mt-2">
+          {[25000, 50000, 100000, 300000, 500000, 1000000].map((preset) => (
+            <button
+              key={preset}
+              type="button"
+              onClick={() => setAmount(preset)}
+              className={`px-2.5 py-1 rounded-lg text-[10.5px] font-bold transition-all whitespace-nowrap cursor-pointer ${
+                amount === preset
+                  ? 'bg-[#2563EB] text-white shadow-2xs'
+                  : 'bg-white text-slate-600 border border-slate-200 hover:border-[#2563EB]/60 hover:text-[#2563EB]'
+              }`}
+            >
+              ₹{preset >= 100000 ? `${preset / 100000} Lakh` : `${preset / 1000}k`}
+            </button>
+          ))}
         </div>
       </div>
 
