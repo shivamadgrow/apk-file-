@@ -8,15 +8,17 @@ export const EmiCalculator = ({ onApplyWithAmount }) => {
 
   // EMI Math Formula: P * r * (1+r)^n / ((1+r)^n - 1)
   const monthlyRate = rate / 12 / 100;
-  const emi = Math.round((amount * monthlyRate * Math.pow(1 + monthlyRate, tenure)) / (Math.pow(1 + monthlyRate, tenure) - 1));
+  const emi = amount > 0 
+    ? Math.round((amount * monthlyRate * Math.pow(1 + monthlyRate, tenure)) / (Math.pow(1 + monthlyRate, tenure) - 1))
+    : 0;
   const totalPayable = emi * tenure;
-  const totalInterest = totalPayable - amount;
+  const totalInterest = Math.max(0, totalPayable - amount);
 
-  const principalPercent = Math.round((amount / totalPayable) * 100);
-  const interestPercent = 100 - principalPercent;
+  const principalPercent = totalPayable > 0 ? Math.round((amount / totalPayable) * 100) : 0;
+  const interestPercent = totalPayable > 0 ? 100 - principalPercent : 0;
 
   // Track percentage calculations for two-tone filled slider tracks
-  const amountPct = Math.min(100, Math.max(0, ((amount - 50000) / (2000000 - 50000)) * 100));
+  const amountPct = Math.min(100, Math.max(0, (amount / 2000000) * 100));
   const ratePct = Math.min(100, Math.max(0, ((rate - 9.5) / (24.0 - 9.5)) * 100));
   const tenurePct = Math.min(100, Math.max(0, ((tenure - 6) / (72 - 6)) * 100));
 
@@ -32,7 +34,7 @@ export const EmiCalculator = ({ onApplyWithAmount }) => {
         </div>
       </div>
 
-      {/* Slider 1: Loan Amount */}
+      {/* Slider 1: Loan Amount (Starts from ₹0) */}
       <div className="bg-slate-50/80 p-4 rounded-2xl border border-slate-200/90 shadow-2xs">
         <div className="flex justify-between items-center mb-1.5">
           <span className="text-xs font-black text-[#223981]">Loan Amount</span>
@@ -40,9 +42,9 @@ export const EmiCalculator = ({ onApplyWithAmount }) => {
         </div>
         <input 
           type="range"
-          min="50000"
+          min="0"
           max="2000000"
-          step="25000"
+          step="5000"
           value={amount}
           onChange={(e) => setAmount(Number(e.target.value))}
           style={{
@@ -51,7 +53,7 @@ export const EmiCalculator = ({ onApplyWithAmount }) => {
           className="paisa-slider"
         />
         <div className="flex justify-between text-[10px] text-slate-500 font-semibold mt-1">
-          <span>₹50,000</span>
+          <span>₹0</span>
           <span>₹10 Lakhs</span>
           <span>₹20 Lakhs</span>
         </div>
@@ -179,10 +181,17 @@ export const EmiCalculator = ({ onApplyWithAmount }) => {
 
         <button
           onClick={() => onApplyWithAmount && onApplyWithAmount(amount, tenure)}
-          className="w-full py-3.5 bg-white hover:bg-slate-50 text-[#1E3A8A] text-xs sm:text-sm font-black rounded-2xl shadow-md transition-all active:scale-[0.99] flex items-center justify-center space-x-1.5 cursor-pointer mt-1"
+          disabled={amount <= 0}
+          className={`w-full py-3.5 ${
+            amount > 0
+              ? 'bg-white hover:bg-slate-50 text-[#1E3A8A] cursor-pointer active:scale-[0.99]'
+              : 'bg-white/60 text-[#1E3A8A]/50 cursor-not-allowed'
+          } text-xs sm:text-sm font-black rounded-2xl shadow-md transition-all flex items-center justify-center space-x-1.5 mt-1`}
         >
-          <span>Apply for ₹{amount.toLocaleString('en-IN')} Now</span>
-          <ArrowRight className="w-4 h-4 ml-0.5" />
+          <span>
+            {amount > 0 ? `Apply for ₹${amount.toLocaleString('en-IN')} Now` : 'Select Loan Amount to Apply'}
+          </span>
+          {amount > 0 && <ArrowRight className="w-4 h-4 ml-0.5" />}
         </button>
       </div>
     </div>
