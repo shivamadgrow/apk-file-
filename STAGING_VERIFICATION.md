@@ -17,6 +17,71 @@ No staging or production verification has been performed in this session, by des
 no real OTP has been sent, no real lead created, no real bureau call triggered. The
 checklist below is what to run, in order, before trusting the live integration.
 
+## Setting up a safe staging environment (2026-10-09 addition)
+
+**Confirmed from source: no staging environment exists today.** `api.paisainminutes.tech`
+is production; the only other configured environment is the local `.env.test` used by
+automated unit tests (a disposable database on `127.0.0.1`, deliberately refused to run
+anywhere else — see `scripts/test-db-setup.js`'s safety guard). Building real staging
+infrastructure is a deploy/ops decision outside this engagement's scope — this section
+documents exactly what it needs, based on what the code actually supports today.
+
+**1. Separate backend + database.** Deploy another copy of `paisa/server` pointed at its
+own `DATABASE_URL` (a separate MongoDB, ideally also a replica set — Prisma's Mongo
+connector needs one for transactions, same as the local test setup). Never point a
+staging deployment at the production `DATABASE_URL`.
+
+**2. Avoid real SMS without inventing a sandbox.** The code already has a built-in test
+double for this: when `NODE_ENV=test`, `src/routes/auth.js`'s `sendProvider()` swaps in a
+mock that always "succeeds" with no real SMS, and the OTP response includes
+`debug: { code }` so a script can read the code without a real phone. **Caveat:** that
+same flag also disables the persisted rate limiters by default (`skipInTest` in
+`src/middleware/rateLimit.js`, overridable with `TEST_RATE_LIMIT=1`) — so a staging run
+under `NODE_ENV=test` verifies logic correctly but is not a faithful rehearsal of
+production rate-limiting unless `TEST_RATE_LIMIT=1` is also set. There is no dedicated
+`NODE_ENV=staging` mode in the code today; introducing one (to get the OTP mock without
+disabling rate limits) would be a small, safe backend change if this matters to you —
+not made here, since it wasn't asked for and is a judgment call about test fidelity.
+If a real sandbox/test credential exists with the actual SMS provider (Pinnacle), that
+is the more faithful option and needs no code change — just different env values.
+
+**3. Avoid real credit-bureau inquiries.** There is no test/sandbox mode for the CIBIL
+integration (`src/lib/providers/cibil.js`) — it always attempts a real call if
+`Cibil_Auth_Key`/`CIBIL_API_URL` are set. **Recommendation: leave those two variables
+unset in staging.** The provider's own error-mapping already treats a missing/
+unconfigured key as `providerStatus 404` → "not configured," which the intake code
+whitelists as a non-error ("Pending Bureau Whitelist") rather than a loud failure — so
+this safely exercises every *error-handling* path (which is what Task 2 actually asks
+to verify) without ever reaching the real bureau. Getting a genuine bureau-sandbox
+credential (if SmartAuth/CIBIL offers one) is a business conversation, not something
+this session can arrange.
+
+**4. Avoid real partner webhooks.** `AffiliatePartner.apiEnabled`/`apiEndpoint` control
+whether a click triggers a server-to-server push to a partner (`src/routes/
+partnerPublic.js`'s `handleClick`). **For a staging database, simply don't set these
+fields on any seeded partner row** (they default to `apiEnabled: false`), or seed
+staging with partner rows that have a harmless `redirectUrl` (e.g., pointing at a
+request-inspection URL like webhook.site) instead of copying the real partner URLs from
+`config/partners.php`. Never run `scripts/seed-config.js --apply` against a staging DB
+using the real website's files unless you first edit the resulting rows to disable
+`apiEnabled` and point `redirectUrl` somewhere harmless — otherwise a "staging" click
+could really reach a partner.
+
+**5. Android device/emulator.** None was available in this sandbox (no `emulator`
+binary, no connected device). A real test needs either a physical Android device
+(API 22–36, matching `minSdkVersion`/`targetSdkVersion`) or an emulator image — install
+one via `sdkmanager "system-images;android-36;google_apis_playstore;x86_64"` plus
+`avdmanager create avd` (both tools are already present in this environment's SDK, just
+no image was fetched, since no test in this round needed to run the actual app).
+Point the Android build at the staging backend via `VITE_API_URL` (see `src/services/
+api.js` — it already reads this env var with the production URL as fallback).
+
+**6. Test accounts.** A staging run needs: at least one fresh phone number with no prior
+`User` row in the staging DB (to test new-user signup), one phone number with an
+existing profile (to test returning-user login), and — if testing account deletion's
+`reactivatedAt` protection meaningfully — the ability to manipulate `createdAt`
+timestamps directly in the staging DB (same technique the backend's own tests use).
+
 ## Before you start
 
 - Use a test phone number you control, not a real customer's number.

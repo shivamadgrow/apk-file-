@@ -9,40 +9,44 @@ export const ProductGrid = ({ onProductSelect }) => {
 
   const products = [
     {
+      // The only category currently backed by real partner data (the 9 NBFC-registered
+      // lending partners). Business/Gold/Credit Card below route through the same
+      // partner comparison — there is no distinct partner data for them yet, so their
+      // limit/rate must not assert a specific unverified number.
       id: 'personal',
       name: t.personalLoan,
-      limit: 'Up to ₹15 Lakhs',
-      rate: 'upto 1.0% / day',
+      limit: 'Up to ₹10 Lakhs',
+      rate: 'Set by partner',
       icon: UserCheck,
       color: 'bg-blue-50 text-[#4A8DFF] border-blue-200/80',
-      badge: 'Popular'
+      badge: ''
     },
     {
       id: 'business',
       name: t.businessLoan,
-      limit: 'Up to ₹50 Lakhs',
-      rate: 'Zero Collateral',
+      limit: 'Compare Partner Offers',
+      rate: 'Set by partner',
       icon: Briefcase,
       color: 'bg-indigo-50 text-indigo-600 border-indigo-200/80',
-      badge: 'Fast Track'
+      badge: ''
     },
     {
       id: 'gold',
       name: t.goldLoan,
-      limit: 'Up to ₹25 Lakhs',
-      rate: 'upto 1.0% / day',
+      limit: 'Compare Partner Offers',
+      rate: 'Set by partner',
       icon: Coins,
       color: 'bg-amber-50 text-amber-600 border-amber-200/80',
-      badge: 'Lowest Rate'
+      badge: ''
     },
     {
       id: 'credit_card',
       name: t.creditCard,
-      limit: 'Instant Approval',
-      rate: 'Lifetime Free',
+      limit: 'Compare Partner Offers',
+      rate: 'Set by partner',
       icon: CreditCard,
       color: 'bg-emerald-50 text-emerald-600 border-emerald-200/80',
-      badge: 'Rewards'
+      badge: ''
     }
   ];
 
@@ -50,7 +54,7 @@ export const ProductGrid = ({ onProductSelect }) => {
     <div className="my-4 text-left">
       <div className="flex items-center justify-between mb-2.5">
         <h2 className="text-sm font-extrabold text-[#223981] tracking-tight">
-          Instant Loan Suite
+          Loan Products
         </h2>
         <button 
           onClick={() => setActiveTab('loans')}

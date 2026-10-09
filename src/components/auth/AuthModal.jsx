@@ -89,10 +89,20 @@ export const AuthModal = () => {
       const pending = JSON.parse(pendingRaw);
       if (!pending || !pending.slug) return;
 
+      // The consent checkbox was already shown and checked in MultiLenderComparison
+      // before the login prompt opened — it must not be silently skipped just because
+      // login happened in between. If it's missing, don't submit.
+      if (!pending.leadConsent) {
+        console.warn('Pending partner redirect had no recorded consent; not submitting.');
+        return;
+      }
+
       const res = await api.submitLoanApplication({
         monthlySalary: pending.salary,
         loanAmount: pending.loanAmount,
-        tenureMonths: pending.tenureMonths
+        tenureMonths: pending.tenureMonths,
+        leadConsent: true,
+        leadConsentVersion: pending.leadConsentVersion
       });
       const code = res.ok ? (res.application?.leadCode || res.application?.displayId) : null;
       if (!code) {
@@ -322,7 +332,7 @@ export const AuthModal = () => {
                   🎁 Invited by {referredBy.name}!
                 </p>
                 <p className="text-[10.5px] text-amber-800 font-medium">
-                  Enter your mobile number below to claim your ₹15 Lakhs Instant Credit Line & 0% processing fee offer.
+                  Enter your mobile number below to explore personal loan offers from our lending partners.
                 </p>
               </div>
             )}
@@ -507,7 +517,7 @@ export const AuthModal = () => {
                 <span>Mobile Verified Successfully! 🎉</span>
               </p>
               <p className="text-[10.5px] text-[#475569] mt-0.5">
-                All fields marked with <span className="text-red-500 font-black">*</span> are <strong className="text-[#223981]">strictly mandatory</strong> as per RBI lending compliance.
+                All fields marked with <span className="text-red-500 font-black">*</span> are <strong className="text-[#223981]">required</strong> to create your profile.
               </p>
             </div>
 

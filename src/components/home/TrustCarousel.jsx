@@ -24,11 +24,11 @@ export const TrustCarousel = () => {
           <div className="flex items-center space-x-1.5">
             <Building2 className="w-4 h-4 text-[#2563EB]" />
             <h3 className="text-xs sm:text-sm font-black text-[#223981]">
-              9 Verified Lending Partners
+              9 Lending Partners
             </h3>
           </div>
           <p className="text-[10.5px] text-[#717983] mt-0.5">
-            Instant approval based on your monthly salary criteria
+            See which partners match your monthly salary
           </p>
         </div>
 

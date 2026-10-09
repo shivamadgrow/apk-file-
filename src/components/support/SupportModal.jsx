@@ -26,7 +26,7 @@ export const SupportModal = () => {
     { 
       id: 1, 
       sender: 'bot', 
-      text: `Hello ${displayName}! 👋 I am PaisaBot AI Assistant 🤖. Ask me anything about Instant Personal Loans, EMI Calculation, Low Salary Approval (₹12k+), 8-Minute Disbursal, or CIBIL Improvement!`,
+      text: `Hello ${displayName}! 👋 I am PaisaBot Assistant 🤖. Ask me about personal loan offers, EMI calculation, salary eligibility, or CIBIL score tips!`,
       suggestions: [
         { label: '🚀 Apply for Loan', actionType: 'loans' },
         { label: '📊 Calculate EMI', actionType: 'calculator' },
@@ -94,7 +94,7 @@ export const SupportModal = () => {
     // 1. GREETINGS INTENT ("hi", "hello", "hey", "namaste", "good morning")
     if (/^(hi|hello|hey|heylo|namaste|hlo|gm|ge|greetings)$/i.test(text) || text.startsWith('hi ') || text.startsWith('hello ')) {
       return {
-        text: `Hello ${displayName}! 👋 Main PaisaBot AI Assistant hoon. Aap mujhse Instant Personal Loan, EMI calculation, Low Salary (₹12,000+), 8-Minute Disbursal, ya CIBIL score ke baare me kuch bhi pooch sakte hain!`,
+        text: `Hello ${displayName}! 👋 Main PaisaBot Assistant hoon. Aap mujhse Personal Loan offers, EMI calculation, salary eligibility, ya CIBIL score ke baare me kuch bhi pooch sakte hain!`,
         suggestions: [
           { label: '🚀 Apply Instant Loan', actionType: 'loans' },
           { label: '💰 Check Interest Rates', actionType: 'calculator' },
@@ -129,7 +129,7 @@ export const SupportModal = () => {
     // 4. ELIGIBILITY & LOW SALARY INTENT ("salary", "12k", "15k", "20k", "eligibility", "patrata", "kam kamai")
     if (text.includes('salary') || text.includes('eligible') || text.includes('patrata') || text.includes('15k') || text.includes('20k') || text.includes('12k') || text.includes('minimum')) {
       return {
-        text: `💡 **Loan Eligibility Criteria:**\n• Minimum Income: ₹25,000 / month (Salaried)\n• Age Limit: 21 to 58 Years\n• Required Documents: 100% Digital (PAN Card + Aadhaar OTP)\n\n👉 Hamare 9 Verified Partner Lenders (Ticket 2 Loan, Jhatpat Loans, Shubh Cash, Udhaar Now, Insta Rupees, Borrowera, Easy Fincare, Loan Within, Rupay91) aapki salary ke hisaab se instant loan provide karte hain!`,
+        text: `💡 **Loan Eligibility:**\n• Our 9 NBFC-registered lending partners each set their own minimum salary and eligibility criteria (Ticket 2 Loan, Jhatpat Loans, Shubh Cash, Udhaar Now, Insta Rupees, Borrowera, Easy Fincare, Loan Within, Rupay91).\n• Enter your salary in the Loans tab to see which partners you're eligible for.\n• Final eligibility, KYC, and approval are decided by the partner you choose.`,
         suggestions: [
           { label: '🚀 Apply for Loan', actionType: 'loans' },
           { label: '📊 Calculate EMI', actionType: 'calculator' }
@@ -140,10 +140,10 @@ export const SupportModal = () => {
     // 5. REQUIRED DOCUMENTS INTENT ("document", "kagaj", "pan", "aadhaar", "proof", "kyc")
     if (text.includes('document') || text.includes('kagaj') || text.includes('pan') || text.includes('aadhaar') || text.includes('kyc') || text.includes('proof')) {
       return {
-        text: `📄 **100% Paperless Digital e-KYC Requirements:**\n1. PAN Card Number\n2. Aadhaar Card linked Mobile Number (for instant OTP verification)\n3. 3-Month Bank Statement / NetBanking Login\n\nZero physical documentation required! Disbursal takes under 8 minutes!`,
+        text: `📄 **Documents & KYC:**\nWe collect your name, email, and PAN (optional) to submit your enquiry. Your PAN and Aadhaar KYC are completed directly with the lending partner you choose, on their own site — Paisa in Minutes does not collect or verify Aadhaar details.`,
         suggestions: [
           { label: '🔒 Document Vault', actionType: 'vault' },
-          { label: '🚀 Start Loan e-KYC', actionType: 'loans' }
+          { label: '🚀 Start Loan Enquiry', actionType: 'loans' }
         ]
       };
     }
@@ -151,7 +151,7 @@ export const SupportModal = () => {
     // 6. DISBURSAL SPEED / TIME INTENT ("time", "speed", "kab aayega", "fast", "disbursal", "minutes")
     if (text.includes('time') || text.includes('speed') || text.includes('kab') || text.includes('fast') || text.includes('disbursal') || text.includes('minute')) {
       return {
-        text: `⚡ **Paisa Milega, Minutes Mein!**\nWithin **6 to 8 minutes** of completing digital e-KYC and e-Signing your loan agreement, money is directly transferred into your bank account via instant IMPS!`,
+        text: `⚡ **Disbursal Speed:**\nOnce you complete KYC and sign your loan agreement with your chosen partner, they decide and process the disbursal — Paisa in Minutes doesn't control or guarantee the timing. Check with your partner for their typical turnaround.`,
         suggestions: [
           { label: '📑 Track Application', actionType: 'track' },
           { label: '🚀 Apply Now', actionType: 'loans' }
@@ -162,10 +162,10 @@ export const SupportModal = () => {
     // 7. INTEREST RATES & CHARGES INTENT ("rate", "interest", "byaj", "charge", "fee")
     if (text.includes('rate') || text.includes('interest') || text.includes('byaj') || text.includes('charge') || text.includes('fee')) {
       return {
-        text: `💰 **Interest Rates & Charges:**\n• Interest Rate: upto 1.0% / day\n• Loan Tenure: 6 to 60 Months\n• Processing Fee: 0% to 2% (as per partner NBFC offers)\n• 100% Transparent - Zero hidden charges!`,
+        text: `💰 **Interest Rates & Charges:**\nInterest rate, processing fee, and total repayment amount are set by each lending partner individually — we don't set or guarantee these. Open a partner's offer to see their exact terms before you apply.`,
         suggestions: [
           { label: '📊 Calculate My EMI', actionType: 'calculator' },
-          { label: '🚀 Compare 6 NBFCs', actionType: 'loans' }
+          { label: '🚀 Compare Partner Offers', actionType: 'loans' }
         ]
       };
     }
@@ -223,7 +223,7 @@ export const SupportModal = () => {
 
     // NATURAL FALLBACK WITH EXPLICIT ADVICE & SUGGESTIONS
     return {
-      text: `Main samajh gaya ${displayName}! Loan ya EMI ke baare me aap kuch bhi pooch sakte hain:\n1. 🚀 Instant Loan Eligibility & Low Salary (₹12k+)\n2. 📊 EMI Calculation & Tenure\n3. ⚡ 8-Minute Paperless Disbursal\n4. 🎯 Free CIBIL Check & Tips`,
+      text: `Main samajh gaya ${displayName}! Loan ya EMI ke baare me aap kuch bhi pooch sakte hain:\n1. 🚀 Loan Eligibility & Salary Criteria\n2. 📊 EMI Calculation & Tenure\n3. ⚡ Disbursal Timeline (set by your partner)\n4. 🎯 Free CIBIL Check & Tips`,
       suggestions: [
         { label: '🚀 Apply Instant Loan', actionType: 'loans' },
         { label: '📊 EMI Calculator', actionType: 'calculator' },
@@ -507,13 +507,18 @@ export const SupportModal = () => {
             <div className="p-3.5 bg-white rounded-2xl border border-slate-200 shadow-2xs">
               <h4 className="font-extrabold text-[#223981]">Q: Is Paisa in Minutes an RBI-registered NBFC?</h4>
               <p className="text-[#717983] font-medium mt-1 leading-relaxed">
-                A: We are an official loan aggregator partner with 100% verified lending companies (Ticket 2 Loan, Jhatpat Loans, Shubh Cash, Udhaar Now, Insta Rupees, Borrowera, Easy Fincare, Loan Within, Rupay91), ensuring full regulatory compliance and zero hidden fees.
+                A: No. Paisa in Minutes is a loan aggregator/facilitator, not a lender — we don't lend money ourselves.
+                We connect you with NBFC-registered lending partners (Ticket 2 Loan, Jhatpat Loans, Shubh Cash, Udhaar Now,
+                Insta Rupees, Borrowera, Easy Fincare, Loan Within, Rupay91), and each partner handles its own application,
+                KYC, and loan terms once you're redirected to them.
               </p>
             </div>
             <div className="p-3.5 bg-white rounded-2xl border border-slate-200 shadow-2xs">
               <h4 className="font-extrabold text-[#223981]">Q: How fast is loan disbursal?</h4>
               <p className="text-[#717983] font-medium mt-1 leading-relaxed">
-                A: Once your e-KYC and loan agreement are e-Signed, loan funds are disbursed directly into your bank account in 6 to 10 minutes.
+                A: Disbursal timing is decided entirely by the lending partner you choose, after you complete their own
+                application and KYC on their site — Paisa in Minutes doesn't process or control disbursal and can't
+                guarantee a specific time.
               </p>
             </div>
             <div className="p-3.5 bg-white rounded-2xl border border-slate-200 shadow-2xs">

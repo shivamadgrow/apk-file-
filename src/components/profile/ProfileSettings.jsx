@@ -259,7 +259,7 @@ export const ProfileSettings = () => {
           <div className="bg-white p-4 rounded-2xl border border-slate-200 text-center space-y-1.5">
             <p className="text-xs font-bold text-[#223981]">No Loan Applications Found</p>
             <p className="text-[11px] text-[#717983]">
-              {isAuthenticated ? 'Apply for an instant loan to view your application timeline here.' : 'Log in with your mobile number to sync your applications.'}
+              {isAuthenticated ? 'Submit a loan enquiry to view your application timeline here.' : 'Log in with your mobile number to sync your applications.'}
             </p>
             <button 
               onClick={() => isAuthenticated ? setActiveTab('loans') : setIsAuthOpen(true)}
@@ -310,12 +310,9 @@ export const ProfileSettings = () => {
               Linked
             </span>
           ) : (
-            <button 
-              onClick={() => setIsAuthOpen(true)}
-              className="text-[10.5px] font-extrabold text-[#2563EB] bg-[#E4EEFF] px-2.5 py-1 rounded-xl hover:bg-[#2563EB] hover:text-white transition"
-            >
-              + Link Bank Account
-            </button>
+            <span className="text-[10.5px] font-extrabold text-slate-400 bg-slate-100 px-2.5 py-1 rounded-xl">
+              Coming Soon
+            </span>
           )}
         </div>
         {isAuthenticated && user.bankDetails ? (
@@ -325,7 +322,8 @@ export const ProfileSettings = () => {
           </div>
         ) : (
           <p className="text-xs text-[#717983] font-medium">
-            No bank account linked. Link your account for instant 8-minute loan disbursal.
+            Bank account linking isn't available in the app yet. Your chosen lending partner will collect bank
+            details directly, on their own site, as part of their application process.
           </p>
         )}
       </div>
@@ -616,7 +614,7 @@ export const ProfileSettings = () => {
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <h3 className="text-sm font-extrabold text-[#223981] flex items-center">
                 <ListOrdered className="w-4 h-4 mr-2 text-[#4A8DFF]" />
-                How to Apply for Instant Loan
+                How to Apply
               </h3>
               <button onClick={() => setShowHowToApplyModal(false)} className="p-1 hover:bg-slate-100 rounded-lg">
                 <X className="w-4 h-4 text-[#717983]" />
@@ -635,16 +633,16 @@ export const ProfileSettings = () => {
               <div className="flex items-start space-x-3 bg-slate-50 p-3 rounded-2xl">
                 <span className="w-6 h-6 rounded-full bg-[#4A8DFF] text-white font-black flex items-center justify-center text-xs flex-shrink-0">2</span>
                 <div>
-                  <p className="font-extrabold text-[#223981]">Complete 100% Paperless e-KYC</p>
-                  <p className="text-[11px] text-[#717983] mt-0.5">Enter your PAN number & Aadhaar OTP for instant pre-approved loan eligibility verification.</p>
+                  <p className="font-extrabold text-[#223981]">Submit Your Enquiry</p>
+                  <p className="text-[11px] text-[#717983] mt-0.5">Share your income and loan details with Paisa in Minutes, with your consent, so we can match you with partners.</p>
                 </div>
               </div>
 
               <div className="flex items-start space-x-3 bg-slate-50 p-3 rounded-2xl">
                 <span className="w-6 h-6 rounded-full bg-[#4A8DFF] text-white font-black flex items-center justify-center text-xs flex-shrink-0">3</span>
                 <div>
-                  <p className="font-extrabold text-[#223981]">e-Sign Loan Agreement & Get Disbursal</p>
-                  <p className="text-[11px] text-[#717983] mt-0.5">e-Sign the digital loan agreement. Funds are transferred directly to your bank account in 6 to 10 minutes!</p>
+                  <p className="font-extrabold text-[#223981]">Complete KYC & Get Terms From the Partner</p>
+                  <p className="text-[11px] text-[#717983] mt-0.5">You'll be redirected to your chosen partner's site to complete their KYC and receive their final loan terms and disbursal timeline.</p>
                 </div>
               </div>
             </div>
@@ -675,11 +673,12 @@ export const ProfileSettings = () => {
 
             <div className="text-xs text-[#717983] leading-relaxed space-y-2">
               <p>
-                <strong className="text-[#223981]">Paisa in Minutes</strong> is India's leading technology loan aggregator platform bridging borrowers with top 100% RBI-registered non-banking financial companies (NBFCs) and banks.
+                <strong className="text-[#223981]">Paisa in Minutes</strong> is a technology loan aggregator/facilitator — we don't lend money ourselves.
+                We connect borrowers with NBFC-registered lending partners for their loan needs.
               </p>
               <div className="bg-[#E4EEFF]/80 p-3 rounded-2xl border border-[#6FA8FF]/30 text-[#223981] space-y-1">
                 <p className="font-extrabold">Why Choose Paisa in Minutes?</p>
-                <p className="text-[11px] text-[#717983]">✓ Fast Under 8-Minute Bank Account Disbursal<br/>✓ Zero Physical Visit or Paperwork<br/>✓ Transparent Interest Rates Starting @ upto 1.0% / day<br/>✓ 100% RBI-Registered Regulated NBFC Partners</p>
+                <p className="text-[11px] text-[#717983]">✓ Compare Multiple NBFC-Registered Lending Partners<br/>✓ Zero Physical Visit to Apply Through This App<br/>✓ See Each Partner's Own Interest Rates Before You Apply<br/>✓ Your Partner's Own KYC &amp; Approval — Not Decided By Us</p>
               </div>
             </div>
 
@@ -709,10 +708,13 @@ export const ProfileSettings = () => {
 
             <div className="text-xs text-[#717983] leading-relaxed space-y-2">
               <p>
-                Your privacy and security are our highest priority. All personal information, PAN data, Aadhaar e-KYC credentials, and bank account details are encrypted using bank-grade 256-bit SSL/AES security protocol.
+                Your personal information and bank account details are sent to our servers over an encrypted (HTTPS) connection.
+                This app does not collect Aadhaar numbers or Aadhaar OTPs — identity verification happens with the lending partner
+                you choose, on their own site.
               </p>
               <p>
-                We do not sell, rent, or share your private data to unverified third parties. Data is used exclusively for loan eligibility matching with official RBI-registered NBFC partners.
+                We do not sell or rent your personal data. Data you submit is used to process your loan enquiry and share it with
+                the NBFC-registered lending partner you select.
               </p>
               <div className="pt-2 flex flex-col space-y-1.5 font-bold text-xs">
                 <a 
@@ -757,7 +759,6 @@ export const ProfileSettings = () => {
                 </div>
                 <div>
                   <h3 className="text-sm font-extrabold text-[#223981]">Data Privacy & Security Consent</h3>
-                  <p className="text-[10px] text-[#717983]">RBI Digital Lending Architecture 2026</p>
                 </div>
               </div>
               <button onClick={() => setShowSecurityConsentModal(false)} className="p-1 hover:bg-slate-100 rounded-lg">
@@ -769,20 +770,22 @@ export const ProfileSettings = () => {
               <div className="bg-[#E4EEFF]/70 p-3 rounded-2xl border border-[#6FA8FF]/30 space-y-1.5">
                 <div className="flex items-center space-x-2 text-[#223981] font-extrabold text-xs">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                  <span>256-Bit SSL/AES Bank Grade Encryption</span>
+                  <span>Encrypted in Transit</span>
                 </div>
                 <p className="text-[10.5px] text-[#475569]">
-                  All PAN, Aadhaar OTP credentials, and mobile numbers are tokenized and protected under ISO/IEC 27001 data governance standards.
+                  Your information is sent to our servers over an encrypted (HTTPS) connection. This app does not collect
+                  Aadhaar numbers, Aadhaar OTPs, or any document scans.
                 </p>
               </div>
 
               <div className="bg-slate-50 p-3 rounded-2xl border border-slate-200/80 space-y-1.5">
                 <div className="flex items-center space-x-2 text-[#223981] font-extrabold text-xs">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                  <span>Explicit Borrower Consent Policy</span>
+                  <span>Explicit Borrower Consent</span>
                 </div>
                 <p className="text-[10.5px] text-[#475569]">
-                  Under RBI guidelines, user data is shared solely with the specific RBI-registered lender you choose to apply with. We never sell or distribute your private data.
+                  Your information is shared only with the specific NBFC-registered lending partner you choose to apply with,
+                  and only after you give consent on the loan enquiry screen. We never sell or distribute your private data.
                 </p>
               </div>
             </div>
@@ -929,14 +932,16 @@ export const ProfileSettings = () => {
       {showRbiModal && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl p-5 max-w-md w-full space-y-3 shadow-2xl text-left border border-slate-200">
-            <h3 className="text-sm font-extrabold text-[#223981]">Registered Lending Partners Disclosure</h3>
+            <h3 className="text-sm font-extrabold text-[#223981]">Lending Partners Disclosure</h3>
             <p className="text-xs text-[#717983] leading-relaxed">
-              Paisa in Minutes acts exclusively as a technology loan aggregator matching borrowers with verified lending partner companies including Ticket 2 Loan, Jhatpat Loans, Shubh Cash, Udhaar Now, Insta Rupees, Borrowera, Easy Fincare, Loan Within, and Rupay91.
+              Paisa in Minutes is a loan aggregator/facilitator — not a lender. We connect you with NBFC-registered
+              lending partners, including Ticket 2 Loan, Jhatpat Loans, Shubh Cash, Udhaar Now, Insta Rupees, Borrowera,
+              Easy Fincare, Loan Within, and Rupay91. Each partner sets and discloses its own interest rate, fees, and
+              loan terms — review them on the partner's own site before you proceed.
             </p>
             <div className="bg-slate-50 p-3 rounded-2xl text-[11px] text-[#223981] font-semibold">
-              ✓ Interest Rates: upto 1.0% / day (Annualized 9.99% - 24.0% p.a.)<br/>
-              ✓ Loan Tenures: 6 Months to 72 Months<br/>
-              ✓ Zero hidden fees or upfront processing charges
+              ✓ Loan Tenures across our partners range from 6 to 60 Months (varies by partner and offer)<br/>
+              ✓ Interest rates, processing fees, and total repayment amount are set by each partner — see their offer for exact figures
             </div>
             <button
               onClick={() => setShowRbiModal(false)}

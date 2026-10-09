@@ -175,7 +175,7 @@ const MainAppContent = () => {
                   </div>
                   <h3 className="text-base font-extrabold text-[#223981]">No Active Loan Application</h3>
                   <p className="text-xs text-[#717983] max-w-xs mx-auto">
-                    Apply for an instant personal loan to track your 8-minute bank account disbursal status live.
+                    Submit a loan enquiry to start tracking its status here.
                   </p>
                   <button
                     onClick={handleApplyNowHero}
@@ -188,7 +188,7 @@ const MainAppContent = () => {
                 {/* Supporting 3-Step Visual: How Disbursal Tracking Works (Fix 7) */}
                 <div className="bg-slate-50 p-4 rounded-3xl border border-slate-200/80 space-y-3">
                   <h4 className="text-xs font-extrabold text-[#223981] uppercase tracking-wider">
-                    How Disbursal Tracking Works
+                    How It Works
                   </h4>
                   <div className="grid grid-cols-1 gap-2.5 text-xs">
                     <div className="bg-white p-3 rounded-2xl border border-slate-200/60 flex items-start space-x-3">
@@ -196,7 +196,7 @@ const MainAppContent = () => {
                         1
                       </div>
                       <div>
-                        <p className="font-extrabold text-[#223981]">Select Lender & Apply</p>
+                        <p className="font-extrabold text-[#223981]">Select a Partner & Apply</p>
                         <p className="text-[11px] text-[#717983] mt-0.5">Choose your preferred offer from our lending partners.</p>
                       </div>
                     </div>
@@ -206,8 +206,8 @@ const MainAppContent = () => {
                         2
                       </div>
                       <div>
-                        <p className="font-extrabold text-[#223981]">Complete Paperless e-KYC</p>
-                        <p className="text-[11px] text-[#717983] mt-0.5">Verify Aadhaar / PAN and link your bank account for disbursal.</p>
+                        <p className="font-extrabold text-[#223981]">Complete KYC With the Partner</p>
+                        <p className="text-[11px] text-[#717983] mt-0.5">You'll be redirected to their site to verify your identity and bank details.</p>
                       </div>
                     </div>
 
@@ -216,8 +216,8 @@ const MainAppContent = () => {
                         3
                       </div>
                       <div>
-                        <p className="font-extrabold text-[#223981]">Track Real-Time Disbursal</p>
-                        <p className="text-[11px] text-[#717983] mt-0.5">Watch step-by-step progress as funds are credited in under 8 minutes.</p>
+                        <p className="font-extrabold text-[#223981]">Track Your Application Here</p>
+                        <p className="text-[11px] text-[#717983] mt-0.5">Approval and disbursal timing are decided entirely by the partner you chose.</p>
                       </div>
                     </div>
                   </div>
@@ -291,7 +291,7 @@ const MainAppContent = () => {
               🛡️ Regulatory Compliance Disclaimer
             </p>
             <p className="text-[10.5px] text-[#475569] leading-relaxed font-medium">
-              Paisa in Minutes is a loan aggregator/marketplace. We do not directly lend money. Loans are sanctioned and disbursed solely by our RBI-registered NBFC/Bank lending partners.
+              Paisa in Minutes is a loan aggregator/marketplace. We do not directly lend money. Loans are sanctioned and disbursed solely by our NBFC-registered lending partners.
             </p>
           </div>
           <p className="text-[9.5px] text-slate-400 font-semibold pt-1">

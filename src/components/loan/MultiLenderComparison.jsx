@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { PARTNER_NBFCS } from '../../data/mockData';
 import { api, hasSession, buildPartnerRedirectUrl } from '../../services/api';
+import { LeadConsentCheckbox, DISCLOSURE_VERSION } from './LeadConsentCheckbox';
 import {
-  ShieldCheck, Lock, Zap, Star, CheckCircle2, ArrowRight,
+  ShieldCheck, Lock, Zap, CheckCircle2, ArrowRight,
   Sparkles, AlertCircle, Sliders, Check, Loader2
 } from 'lucide-react';
 
@@ -17,6 +18,10 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
   const [resolvedLeadCode, setResolvedLeadCode] = useState(leadCode);
   const [submittingSlug, setSubmittingSlug] = useState(null);
   const [applyError, setApplyError] = useState('');
+  // Only relevant when this component itself will create the lead (resolvedLeadCode
+  // not already supplied by a caller like LoanApplicationWizard, which captures its
+  // own consent before ever reaching this screen) — see LeadConsentCheckbox.jsx.
+  const [leadConsent, setLeadConsent] = useState(false);
 
   useEffect(() => {
     if (leadCode) setResolvedLeadCode(leadCode);
@@ -52,16 +57,22 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
   // Ensures a real backend lead exists for this applicant, returning its leadCode.
   // Never fabricates an ID — on failure it returns null and the caller must show
   // an honest error instead of proceeding to a partner redirect.
-  const ensureLead = async () => {
+  const ensureLead = async (consentOverride) => {
     if (resolvedLeadCode) return resolvedLeadCode;
     if (!salary || salary <= 0) {
       setApplyError('Please enter your monthly salary before applying.');
       return null;
     }
+    if (!(consentOverride ?? leadConsent)) {
+      setApplyError('Please accept the consent checkbox before applying.');
+      return null;
+    }
     const res = await api.submitLoanApplication({
       monthlySalary: salary,
       loanAmount,
-      tenureMonths
+      tenureMonths,
+      leadConsent: true,
+      leadConsentVersion: DISCLOSURE_VERSION
     });
     if (!res.ok) {
       setApplyError(res.error || 'Unable to start your application right now. Please try again.');
@@ -79,10 +90,21 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
   const handleApplyClick = async (nbfc) => {
     setApplyError('');
 
+    if (!resolvedLeadCode && !leadConsent) {
+      setApplyError('Please accept the consent checkbox before applying.');
+      return;
+    }
+
     // If the user isn't logged in yet, prompt for mobile OTP login first and remember
-    // which partner they wanted so AuthModal can resume this after verification.
+    // which partner they wanted (and that consent was already given) so AuthModal can
+    // resume this after verification — consent was captured here, before login, not
+    // skipped.
     if (!(await hasSession())) {
-      localStorage.setItem('paisainminute_pending_redirect', JSON.stringify({ slug: nbfc.slug, salary, loanAmount, tenureMonths }));
+      localStorage.setItem('paisainminute_pending_redirect', JSON.stringify({
+        slug: nbfc.slug, salary, loanAmount, tenureMonths,
+        leadConsent: !resolvedLeadCode ? leadConsent : undefined,
+        leadConsentVersion: DISCLOSURE_VERSION
+      }));
       setIsAuthOpen(true);
       return;
     }
@@ -138,7 +160,7 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
           <div>
             <div className="flex items-center space-x-2">
               <span className="text-[10px] font-black uppercase tracking-wider bg-white/20 text-white px-2.5 py-0.5 rounded-full backdrop-blur-xs">
-                Instant Approval
+                Compare Offers
               </span>
               <span className="text-[11px] font-bold text-blue-200">
                 9 Regulated Partners
@@ -260,6 +282,13 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
         </div>
       </div>
 
+      {/* Only shown when this screen will itself create the lead — if a caller (e.g.
+          LoanApplicationWizard) already submitted with consent and passed a leadCode
+          in, that consent was already captured and this would be redundant. */}
+      {!resolvedLeadCode && (
+        <LeadConsentCheckbox checked={leadConsent} onChange={setLeadConsent} />
+      )}
+
       {applyError && (
         <div className="p-3 bg-red-50 text-red-700 text-xs font-semibold rounded-2xl border border-red-200 flex items-center space-x-2">
           <AlertCircle className="w-4 h-4 flex-shrink-0" />
@@ -325,16 +354,6 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
                         )}
                       </div>
 
-                      <div className="flex items-center space-x-1.5 text-xs text-slate-500 mt-1 flex-wrap">
-                        <div className="flex items-center text-amber-500 font-extrabold text-[11px] sm:text-xs">
-                          <Star className="w-3.5 h-3.5 fill-amber-500 mr-1" />
-                          <span>{nbfc.rating}</span>
-                        </div>
-                        <span className="text-slate-300">•</span>
-                        <span className="text-slate-500 font-medium text-[10.5px] sm:text-[11px] whitespace-nowrap">
-                          {nbfc.approvalChance}
-                        </span>
-                      </div>
                     </div>
                   </div>
 
@@ -393,7 +412,7 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
                     <button
                       type="button"
                       onClick={() => handleApplyClick(nbfc)}
-                      disabled={submittingSlug === nbfc.slug}
+                      disabled={submittingSlug === nbfc.slug || (!resolvedLeadCode && !leadConsent)}
                       className="px-4 sm:px-5 py-2.5 bg-gradient-to-r from-[#2563EB] to-[#1D4ED8] hover:from-[#1D4ED8] hover:to-[#1E40AF] text-white font-black text-xs sm:text-sm rounded-xl shadow-md shadow-blue-500/20 flex items-center justify-center space-x-1.5 transition active:scale-98 cursor-pointer whitespace-nowrap disabled:opacity-60"
                     >
                       {submittingSlug === nbfc.slug ? (

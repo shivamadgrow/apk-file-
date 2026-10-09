@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { MultiLenderComparison } from './MultiLenderComparison';
+import { LeadConsentCheckbox, DISCLOSURE_VERSION } from './LeadConsentCheckbox';
 import { api } from '../../services/api';
 import {
   CheckCircle2, ArrowRight, ArrowLeft, Upload, ShieldCheck,
@@ -48,6 +49,11 @@ export const LoanApplicationWizard = ({ preSelectedProduct = 'personal', onClose
   // existing journey. Never mark these as "verified" client-side.
   const [panNumber, setPanNumber] = useState('');
 
+  // Lead-sharing consent — unchecked by default, required before submission. The
+  // backend hard-enforces this for every customer-app submission (see
+  // paisa/server/src/lib/intake.js); this UI gate is the user-facing half of that.
+  const [leadConsent, setLeadConsent] = useState(false);
+
   // Selected Offer State
   const [chosenOffer, setChosenOffer] = useState(null);
   const [agreementSigned, setAgreementSigned] = useState(false);
@@ -88,6 +94,10 @@ export const LoanApplicationWizard = ({ preSelectedProduct = 'personal', onClose
       setSubmitError('Please enter a valid 10-character PAN (e.g. ABCDE1234F), or leave it blank.');
       return;
     }
+    if (!leadConsent) {
+      setSubmitError('Please accept the consent checkbox before submitting your enquiry.');
+      return;
+    }
 
     setIsSubmittingApplication(true);
 
@@ -98,7 +108,9 @@ export const LoanApplicationWizard = ({ preSelectedProduct = 'personal', onClose
       employmentType,
       monthlySalary: monthlyIncome,
       companyName,
-      pan: panNumber || undefined
+      pan: panNumber || undefined,
+      leadConsent: true,
+      leadConsentVersion: DISCLOSURE_VERSION
     });
 
     setIsSubmittingApplication(false);
@@ -247,7 +259,7 @@ export const LoanApplicationWizard = ({ preSelectedProduct = 'personal', onClose
             <div>
               <p className="text-[10px] font-bold text-[#6FA8FF] uppercase">Calculated Monthly EMI</p>
               <p className="text-2xl font-black text-white">₹{calculatedEmi.toLocaleString()}<span className="text-xs font-normal">/month</span></p>
-              <p className="text-[10px] text-emerald-300 font-bold">Interest starting @ upto 1.0% / day</p>
+              <p className="text-[10px] text-emerald-300 font-bold">Indicative only — your actual rate is set by the lending partner you choose</p>
             </div>
             <button
               onClick={handleNextStep}
@@ -360,6 +372,8 @@ export const LoanApplicationWizard = ({ preSelectedProduct = 'personal', onClose
             </p>
           </div>
 
+          <LeadConsentCheckbox checked={leadConsent} onChange={setLeadConsent} />
+
           {submitError && (
             <div className="p-3 bg-red-50 text-red-700 text-xs font-semibold rounded-2xl border border-red-200 flex items-center space-x-2">
               <AlertTriangle className="w-4 h-4 flex-shrink-0" />
@@ -377,7 +391,7 @@ export const LoanApplicationWizard = ({ preSelectedProduct = 'personal', onClose
             </button>
             <button
               onClick={handleProceedToOffers}
-              disabled={isSubmittingApplication}
+              disabled={isSubmittingApplication || !leadConsent}
               className="flex-1 py-2.5 bg-[#4A8DFF] text-white text-xs font-extrabold rounded-xl shadow flex items-center justify-center space-x-1 disabled:opacity-60"
             >
               {isSubmittingApplication ? (
