@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
-import { api, warmBackend } from '../../services/api';
+import { api, warmBackend, buildPartnerRedirectUrl } from '../../services/api';
 import { Shield, Phone, ArrowRight, CheckCircle2, Lock, X, User, Mail, FileText, Sparkles, Loader2, RefreshCw, AlertCircle, Zap, Smartphone, ArrowLeft } from 'lucide-react';
 
 export const AuthModal = () => {
@@ -77,19 +77,29 @@ export const AuthModal = () => {
     }
   };
 
-  const checkPendingRedirect = (cleanPhone) => {
+  // Resumes a partner selection the user made before they were logged in (see
+  // MultiLenderComparison's handleApplyClick). Now that they're authenticated, we
+  // create a real backend lead and redirect through the same confirmed tracked
+  // endpoint the website uses — never a fabricated id or guessed partner URL.
+  const checkPendingRedirect = async () => {
     try {
       const pendingRaw = localStorage.getItem('paisainminute_pending_redirect');
       if (!pendingRaw) return;
-      const pending = JSON.parse(pendingRaw);
       localStorage.removeItem('paisainminute_pending_redirect');
-      if (pending && pending.urlTemplate) {
-        let leadId = pending.leadId || localStorage.getItem('paisainminute_lead_id') || ('PIM' + Date.now().toString().slice(-6));
-        let targetUrl = pending.urlTemplate
-          .replace('{LEAD_ID}', encodeURIComponent(leadId))
-          .replace('{PHONE}', encodeURIComponent(cleanPhone));
-        window.open(targetUrl, '_blank');
+      const pending = JSON.parse(pendingRaw);
+      if (!pending || !pending.slug) return;
+
+      const res = await api.submitLoanApplication({
+        monthlySalary: pending.salary,
+        loanAmount: pending.loanAmount,
+        tenureMonths: pending.tenureMonths
+      });
+      const code = res.ok ? (res.application?.leadCode || res.application?.displayId) : null;
+      if (!code) {
+        console.warn('Could not start application for pending partner redirect:', res.error);
+        return;
       }
+      window.open(buildPartnerRedirectUrl(pending.slug, code), '_blank');
     } catch (e) {
       console.error('Error handling pending redirect', e);
     }
@@ -113,27 +123,29 @@ export const AuthModal = () => {
       const res = await api.verifyOtp(cleanPhone, cleanOtp);
 
       if (res.ok) {
-        // Fetch existing profile from backend database
+        // Fetch existing profile from the backend. api.getProfile() returns the
+        // real GET /api/users/me shape ({name, email, city, pincode, panMasked, ...})
+        // — it never includes creditScore/bankDetails/loanHistory, those are purely
+        // local-device concepts populated by their own real flows (bureau check,
+        // loan submission), so we must not overwrite them with nulls on every login.
         const profile = await api.getProfile();
 
         if (profile && profile.name) {
-          // User already registered on server
+          const usersDb = JSON.parse(localStorage.getItem('paisainminute_users_db') || '{}');
+          const existingLocal = usersDb[cleanPhone] || {};
           loginUser(cleanPhone, {
+            ...existingLocal,
             name: profile.name,
             phone: `+91 ${cleanPhone}`,
             email: profile.email || '',
-            pan: profile.pan || '',
+            panMasked: profile.panMasked || null,
             city: profile.city || '',
-            creditScore: profile.creditScore || null,
-            scoreCategory: profile.scoreCategory || null,
-            lastChecked: profile.lastChecked || null,
-            kycVerified: !!profile.pan,
-            bankDetails: profile.bankDetails || null,
-            loanHistory: profile.loanHistory || []
+            kycVerified: existingLocal.kycVerified || false,
+            loanHistory: existingLocal.loanHistory || []
           });
           setIsAuthOpen(false);
           setStep('phone');
-          checkPendingRedirect(cleanPhone);
+          checkPendingRedirect();
         } else {
           // Check local database fallback
           const usersDb = JSON.parse(localStorage.getItem('paisainminute_users_db') || '{}');
@@ -141,7 +153,7 @@ export const AuthModal = () => {
             loginUser(cleanPhone);
             setIsAuthOpen(false);
             setStep('phone');
-            checkPendingRedirect(cleanPhone);
+            checkPendingRedirect();
           } else {
             // New user needs to complete profile registration
             setStep('signup');
@@ -191,52 +203,44 @@ export const AuthModal = () => {
     setIsLoading(true);
     setErrorMsg('');
 
-    // Query and associate CIBIL credit score using Name and Phone
-    let bureauScore = null;
-    let bureauCategory = null;
-    try {
-      const cibilRes = await api.checkCibil(trimmedName, cleanPhone);
-      if (cibilRes && cibilRes.ok) {
-        bureauScore = cibilRes.creditScore;
-        bureauCategory = cibilRes.scoreCategory;
-      }
-    } catch (e) {
-      console.warn('CIBIL fetch during signup note:', e);
+    // Sync the real profile fields to the backend (PATCH /api/users/me only accepts
+    // name/email/city/state/pincode/pan — nothing else). No credit score is fetched
+    // here: a bureau pull must only ever happen from the dedicated Credit Score screen,
+    // where the user explicitly gives bureau consent. No KYC verification is claimed
+    // here either — nothing has actually been verified yet.
+    const profileRes = await api.updateProfile({
+      name: trimmedName,
+      email: trimmedEmail,
+      pan: cleanPan,
+      city: trimmedCity
+    });
+
+    if (!profileRes.ok) {
+      setErrorMsg(profileRes.error || 'Unable to save your profile right now. Please try again.');
+      setIsLoading(false);
+      return;
     }
 
     const newUserData = {
       name: trimmedName,
       phone: `+91 ${cleanPhone}`,
       email: trimmedEmail,
-      pan: cleanPan,
+      panMasked: profileRes.user?.panMasked || null,
       city: trimmedCity,
-      creditScore: bureauScore,
-      cibilScore: bureauScore,
-      scoreCategory: bureauCategory,
-      lastChecked: bureauScore ? 'Today' : null,
-      kycVerified: true,
+      creditScore: null,
+      scoreCategory: null,
+      lastChecked: null,
+      factors: null,
+      kycVerified: false,
       bankDetails: null,
       loanHistory: []
     };
-
-    try {
-      // Sync profile & CIBIL score to cloud database on server
-      await api.updateProfile({
-        name: newUserData.name,
-        email: newUserData.email,
-        pan: newUserData.pan,
-        creditScore: newUserData.creditScore,
-        cibilScore: newUserData.cibilScore
-      });
-    } catch (err) {
-      console.warn('Profile sync warning:', err);
-    }
 
     loginUser(cleanPhone, newUserData);
     setIsLoading(false);
     setIsAuthOpen(false);
     setStep('phone');
-    checkPendingRedirect(cleanPhone);
+    checkPendingRedirect();
   };
 
   return (

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { api } from '../../services/api';
-import { ShieldCheck, TrendingUp, AlertTriangle, CheckCircle, ArrowRight, Zap, RefreshCw, User, Phone, Sparkles, Loader2, Lock } from 'lucide-react';
+import { ShieldCheck, TrendingUp, AlertTriangle, CheckCircle, ArrowRight, Zap, RefreshCw, User, Phone, Sparkles, Loader2, Lock, Info } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 export const CreditScoreDetail = ({ onApplyClick }) => {
@@ -10,19 +10,17 @@ export const CreditScoreDetail = ({ onApplyClick }) => {
   const [inputName, setInputName] = useState(() => {
     return user?.name && user.name !== 'Guest User' && !user.name.startsWith('User ') ? user.name : '';
   });
-  const [inputPhone, setInputPhone] = useState(() => {
-    const raw = user?.phone || currentPhone || '';
-    return raw.replace(/\D/g, '').slice(-10);
-  });
+  const [consentGiven, setConsentGiven] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [noRecordFound, setNoRecordFound] = useState(false);
   const [showRefreshForm, setShowRefreshForm] = useState(false);
 
   const hasScore = !!(user && user.creditScore);
+  const displayPhone = (user?.phone || currentPhone || '').replace(/\D/g, '').slice(-10);
 
   const handleCheckCibil = async (e) => {
     if (e) e.preventDefault();
-    const cleanPhone = inputPhone.replace(/\D/g, '').slice(-10);
     const trimmedName = inputName.trim();
 
     if (!trimmedName || trimmedName.length < 2) {
@@ -30,44 +28,41 @@ export const CreditScoreDetail = ({ onApplyClick }) => {
       return;
     }
 
-    if (cleanPhone.length !== 10) {
-      setErrorMsg('Please enter a valid 10-digit mobile number.');
+    if (!consentGiven) {
+      setErrorMsg('Please give your consent to fetch your credit bureau report before continuing.');
       return;
     }
 
     setIsLoading(true);
     setErrorMsg('');
+    setNoRecordFound(false);
 
-    try {
-      const res = await api.checkCibil(trimmedName, cleanPhone);
+    // This call never fabricates a score. It either returns a real score from the
+    // confirmed backend's bureau integration, or an honest failure reason.
+    const res = await api.checkCibil(trimmedName, consentGiven);
 
-      if (res && res.ok) {
-        saveCibilScore({
-          name: trimmedName,
-          phone: cleanPhone,
-          creditScore: res.creditScore,
-          scoreCategory: res.scoreCategory,
-          reportDate: res.reportDate || 'Today'
-        });
+    if (res && res.ok) {
+      saveCibilScore({
+        name: trimmedName,
+        phone: displayPhone,
+        creditScore: res.creditScore,
+        scoreCategory: res.scoreCategory,
+        reportDate: res.reportDate || 'Today',
+        factors: res.factors
+      });
 
-        // Trigger celebratory confetti for good bureau verification
-        try {
-          confetti({
-            particleCount: 50,
-            spread: 60,
-            origin: { y: 0.6 }
-          });
-        } catch (e) {}
+      try {
+        confetti({ particleCount: 50, spread: 60, origin: { y: 0.6 } });
+      } catch (e) {}
 
-        setShowRefreshForm(false);
-      } else {
-        setErrorMsg(res?.error || 'Unable to fetch CIBIL score right now. Please try again.');
-      }
-    } catch (err) {
-      setErrorMsg('Network error while connecting to CIBIL Bureau service.');
-    } finally {
-      setIsLoading(false);
+      setShowRefreshForm(false);
+    } else if (res && res.reason === 'no_record_found') {
+      setNoRecordFound(true);
+    } else {
+      setErrorMsg(res?.error || 'Unable to fetch your credit score right now. Please try again later.');
     }
+
+    setIsLoading(false);
   };
 
   // If user does not have a credit score or explicitly clicked refresh form:
@@ -104,6 +99,13 @@ export const CreditScoreDetail = ({ onApplyClick }) => {
             </div>
           )}
 
+          {noRecordFound && (
+            <div className="p-3 bg-blue-50 text-blue-800 text-xs font-semibold rounded-2xl border border-blue-200 flex items-center space-x-2">
+              <Info className="w-4 h-4 flex-shrink-0 text-blue-600" />
+              <span>No credit bureau record was found for your profile yet. This usually means you have little to no credit history.</span>
+            </div>
+          )}
+
           {/* 1. Full Name */}
           <div className="space-y-1">
             <label className="text-xs font-bold text-[#1E293B] flex items-center justify-between">
@@ -122,11 +124,11 @@ export const CreditScoreDetail = ({ onApplyClick }) => {
             </div>
           </div>
 
-          {/* 2. Mobile Phone Number */}
+          {/* 2. Mobile Phone Number (read-only — the bureau check always uses your verified, logged-in number) */}
           <div className="space-y-1">
             <label className="text-xs font-bold text-[#1E293B] flex items-center justify-between">
               <span>Mobile Phone Number</span>
-              <span className="text-[10px] text-slate-400 font-semibold">Linked with Bank</span>
+              <span className="text-[10px] text-slate-400 font-semibold">Verified Number</span>
             </label>
             <div className="relative flex items-center">
               <div className="absolute left-3.5 flex items-center space-x-1 pointer-events-none">
@@ -135,20 +137,31 @@ export const CreditScoreDetail = ({ onApplyClick }) => {
               </div>
               <input
                 type="tel"
-                maxLength={10}
-                value={inputPhone}
-                onChange={(e) => setInputPhone(e.target.value.replace(/\D/g, ''))}
-                placeholder="9876543210"
-                className="w-full pl-20 pr-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-[#1E293B] focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:bg-white transition tracking-wider"
+                value={displayPhone}
+                disabled
+                className="w-full pl-20 pr-3.5 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-500 tracking-wider cursor-not-allowed"
               />
             </div>
           </div>
+
+          {/* Explicit Bureau Consent (required by the backend before any bureau pull) */}
+          <label className="flex items-start space-x-2.5 p-3 bg-slate-50 rounded-2xl border border-slate-200 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={consentGiven}
+              onChange={(e) => setConsentGiven(e.target.checked)}
+              className="mt-0.5 w-4 h-4 accent-[#2563EB] cursor-pointer flex-shrink-0"
+            />
+            <span className="text-[11px] text-slate-700 font-medium leading-relaxed">
+              I consent to Paisa in Minutes fetching my credit information from the credit bureau for the purpose of this check.
+            </span>
+          </label>
 
           {/* Trust Disclaimer */}
           <div className="p-3 bg-amber-50/80 rounded-2xl border border-amber-200/80 text-[11px] text-amber-900 font-medium space-y-1">
             <div className="flex items-center space-x-1.5 font-bold text-amber-950">
               <Lock className="w-3.5 h-3.5 text-amber-700" />
-              <span>100% Safe, RBI-Compliant & Soft Credit Inquiry</span>
+              <span>Soft Credit Inquiry</span>
             </div>
             <p className="text-[10.5px] text-amber-800 leading-relaxed">
               Checking your score via Paisa in Minutes does <strong>NOT</strong> reduce or affect your CIBIL score in any way.
@@ -158,8 +171,8 @@ export const CreditScoreDetail = ({ onApplyClick }) => {
           {/* Submit Button */}
           <button
             type="submit"
-            disabled={isLoading}
-            className="w-full py-3.5 bg-gradient-to-r from-[#2563EB] to-[#1D4ED8] hover:from-[#1D4ED8] hover:to-[#1E40AF] text-white text-xs sm:text-sm font-black rounded-2xl shadow-md shadow-blue-500/25 flex items-center justify-center space-x-2 transition active:scale-98 cursor-pointer disabled:opacity-75"
+            disabled={isLoading || !consentGiven}
+            className="w-full py-3.5 bg-gradient-to-r from-[#2563EB] to-[#1D4ED8] hover:from-[#1D4ED8] hover:to-[#1E40AF] text-white text-xs sm:text-sm font-black rounded-2xl shadow-md shadow-blue-500/25 flex items-center justify-center space-x-2 transition active:scale-98 cursor-pointer disabled:opacity-50"
           >
             {isLoading ? (
               <>
@@ -199,7 +212,7 @@ export const CreditScoreDetail = ({ onApplyClick }) => {
         <div className="flex items-start justify-between relative z-10">
           <div>
             <span className="text-[9.5px] font-black uppercase bg-emerald-500/20 text-emerald-300 px-2.5 py-0.5 rounded-full border border-emerald-400/30">
-              Official Bureau Score
+              Bureau Score
             </span>
             <h2 className="text-xl sm:text-2xl font-black mt-1 tracking-tight">
               CIBIL Credit Score Analysis
@@ -216,9 +229,11 @@ export const CreditScoreDetail = ({ onApplyClick }) => {
             <p className="text-4xl sm:text-5xl font-black text-amber-300 tracking-tight leading-none">
               {user.creditScore}
             </p>
-            <span className="inline-block mt-1.5 text-xs font-extrabold bg-emerald-600 text-white px-3 py-0.5 rounded-full shadow-sm">
-              {user.scoreCategory || 'Excellent'}
-            </span>
+            {user.scoreCategory && (
+              <span className="inline-block mt-1.5 text-xs font-extrabold bg-emerald-600 text-white px-3 py-0.5 rounded-full shadow-sm">
+                {user.scoreCategory}
+              </span>
+            )}
           </div>
         </div>
 
@@ -249,62 +264,43 @@ export const CreditScoreDetail = ({ onApplyClick }) => {
         </div>
       </div>
 
-      {/* Credit Factors Breakdown */}
-      <div className="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200/90 shadow-sm space-y-3">
-        <h3 className="text-xs font-extrabold text-slate-800 uppercase tracking-wider">
-          Credit Score Impact Factors
-        </h3>
-
-        <div className="space-y-2 text-xs">
-          {/* Payment History */}
-          <div className="p-3 bg-slate-50 rounded-2xl flex items-center justify-between border border-slate-100">
-            <div className="flex items-center space-x-2">
-              <CheckCircle className="w-5 h-5 text-emerald-500" />
-              <div>
-                <p className="font-bold text-slate-800">Payment History (High Impact)</p>
-                <p className="text-[10px] text-slate-500">0 Late Payments in 24 Months</p>
+      {/* Credit Factors Breakdown — shown only when the bureau response actually included factor data */}
+      {user.factors && Object.keys(user.factors).length > 0 && (
+        <div className="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200/90 shadow-sm space-y-3">
+          <h3 className="text-xs font-extrabold text-slate-800 uppercase tracking-wider">
+            Credit Score Impact Factors
+          </h3>
+          <div className="space-y-2 text-xs">
+            {user.factors.scoreFactors && (
+              <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100">
+                <p className="font-bold text-slate-800 mb-1">Score Factors</p>
+                <p className="text-[11px] text-slate-600 whitespace-pre-wrap">{JSON.stringify(user.factors.scoreFactors)}</p>
               </div>
-            </div>
-            <span className="font-black text-emerald-600 text-xs">100% Excellent</span>
-          </div>
-
-          {/* Credit Utilization */}
-          <div className="p-3 bg-slate-50 rounded-2xl flex items-center justify-between border border-slate-100">
-            <div className="flex items-center space-x-2">
-              <TrendingUp className="w-5 h-5 text-[#2563EB]" />
-              <div>
-                <p className="font-bold text-slate-800">Credit Limit Utilization</p>
-                <p className="text-[10px] text-slate-500">Optimal ratio below 30%</p>
+            )}
+            {user.factors.accountsSummary && (
+              <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100">
+                <p className="font-bold text-slate-800 mb-1">Accounts Summary</p>
+                <p className="text-[11px] text-slate-600 whitespace-pre-wrap">{JSON.stringify(user.factors.accountsSummary)}</p>
               </div>
-            </div>
-            <span className="font-black text-[#2563EB] text-xs">14% (Optimal)</span>
-          </div>
-
-          {/* Credit Inquiries */}
-          <div className="p-3 bg-slate-50 rounded-2xl flex items-center justify-between border border-slate-100">
-            <div className="flex items-center space-x-2">
-              <ShieldCheck className="w-5 h-5 text-indigo-600" />
-              <div>
-                <p className="font-bold text-slate-800">Hard Bureau Inquiries</p>
-                <p className="text-[10px] text-slate-500">Only 1 inquiry in last 90 days</p>
+            )}
+            {user.factors.inquiryHistory && (
+              <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100">
+                <p className="font-bold text-slate-800 mb-1">Inquiry History</p>
+                <p className="text-[11px] text-slate-600 whitespace-pre-wrap">{JSON.stringify(user.factors.inquiryHistory)}</p>
               </div>
-            </div>
-            <span className="font-black text-emerald-600 text-xs">Low Risk</span>
+            )}
           </div>
         </div>
-      </div>
+      )}
 
-      {/* Pre-approved Loan Banner based on Score */}
+      {/* CTA to explore real lender offers — no specific pre-approved amount is claimed here, since no backend currently returns one */}
       <div className="bg-gradient-to-r from-amber-500 to-amber-600 text-slate-900 p-4 sm:p-5 rounded-3xl shadow-md flex items-center justify-between">
         <div>
-          <span className="text-[9.5px] font-black uppercase bg-white/30 text-slate-950 px-2.5 py-0.5 rounded-full">
-            CIBIL SCORE BASED MATCH
-          </span>
           <h4 className="text-sm sm:text-base font-black mt-1">
-            Pre-Approved ₹10,00,000 Credit Line
+            Explore Loan Offers
           </h4>
           <p className="text-[11px] font-semibold text-slate-900/90">
-            Instant disbursal ready with Rupay91 & verified partner NBFCs
+            See lenders you may be eligible for based on your profile
           </p>
         </div>
         <button
@@ -312,7 +308,7 @@ export const CreditScoreDetail = ({ onApplyClick }) => {
           onClick={onApplyClick}
           className="px-4 py-2.5 bg-slate-950 hover:bg-black text-white text-xs font-black rounded-2xl shadow transition whitespace-nowrap ml-3 cursor-pointer"
         >
-          Claim Now →
+          View Offers →
         </button>
       </div>
     </div>

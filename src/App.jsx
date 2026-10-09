@@ -3,12 +3,12 @@ import { useApp, AppProvider } from './context/AppContext';
 import { Header } from './components/common/Header';
 import { BottomNav } from './components/common/BottomNav';
 import { HeroBanner } from './components/home/HeroBanner';
-import { CreditGauge } from './components/home/CreditGauge';
 import { ProductGrid } from './components/home/ProductGrid';
 import { LoanJourneyTracker } from './components/home/LoanJourneyTracker';
 import { TrustCarousel } from './components/home/TrustCarousel';
 import { LoanApplicationWizard } from './components/loan/LoanApplicationWizard';
 import { MultiLenderComparison } from './components/loan/MultiLenderComparison';
+import { ApplicationHistory } from './components/loan/ApplicationHistory';
 import { CreditScoreDetail } from './components/credit/CreditScoreDetail';
 import { EmiCalculator } from './components/calculator/EmiCalculator';
 import { DocumentVault } from './components/vault/DocumentVault';
@@ -21,7 +21,7 @@ import { warmBackend } from './services/api';
 import { X, Activity } from 'lucide-react';
 
 const MainAppContent = () => {
-  const { activeTab, setActiveTab, activeLoan } = useApp();
+  const { activeTab, setActiveTab, activeLoan, setActiveLoan, saveNewLoanApplication, currentPhone } = useApp();
   const [selectedProductForLoan, setSelectedProductForLoan] = useState(null);
   const [showWizardModal, setShowWizardModal] = useState(false);
   const [loanViewMode, setLoanViewMode] = useState('lenders'); // 'lenders' | 'wizard'
@@ -76,7 +76,6 @@ const MainAppContent = () => {
         return (
           <div className="space-y-3 max-w-lg mx-auto">
             <HeroBanner onApplyClick={handleApplyNowHero} />
-            <CreditGauge />
             <ProductGrid onProductSelect={handleProductSelect} />
             <LoanJourneyTracker />
             <TrustCarousel />
@@ -113,13 +112,34 @@ const MainAppContent = () => {
             </div>
 
             {loanViewMode === 'lenders' ? (
-              <MultiLenderComparison 
-                loanAmount={350000} 
-                tenureMonths={36} 
+              <MultiLenderComparison
+                loanAmount={350000}
+                tenureMonths={36}
                 onSelectOffer={(lender) => {
-                  setSelectedProductForLoan('personal');
-                  setShowWizardModal(true);
-                }} 
+                  // The redirect to the partner's site already happened inside
+                  // MultiLenderComparison's handleApplyClick, using a real backend lead
+                  // (lender.leadCode). Reopening the full application wizard here would
+                  // be a confusing, redundant second step after the user already left
+                  // for the partner's site — instead, record the same honest "redirected"
+                  // entry the wizard would and take them straight to the Track tab.
+                  const honestRecord = {
+                    id: lender.leadCode || null,
+                    type: 'Personal Loan',
+                    amount: 0,
+                    tenureMonths: 0,
+                    monthlyEmi: 0,
+                    purpose: '',
+                    status: 'Submitted (FRESH) — Redirected to Partner',
+                    stepLabels: [
+                      { id: 1, title: 'Application Submitted', time: 'Just now', done: true },
+                      { id: 2, title: `Redirected to ${lender.name || 'Partner Lender'}`, time: 'Just now', done: true }
+                    ],
+                    selectedNbfc: { name: lender.name || 'Partner Lender', rate: lender.interestRateDisplay || '', fee: '', disbursalTime: '' }
+                  };
+                  setActiveLoan(honestRecord);
+                  saveNewLoanApplication(honestRecord);
+                  setActiveTab('track');
+                }}
               />
             ) : (
               <div className="space-y-4 pt-2">
@@ -202,6 +222,17 @@ const MainAppContent = () => {
                     </div>
                   </div>
                 </div>
+              </div>
+            )}
+
+            {/* Real application history from the backend — see ApplicationHistory.jsx.
+                Shown regardless of activeLoan above, since activeLoan only ever reflects
+                the single most recent locally-recorded submission, not the full history. */}
+            {currentPhone ? (
+              <ApplicationHistory key={activeTab} />
+            ) : (
+              <div className="bg-white rounded-3xl p-5 border border-slate-200 text-center text-xs font-semibold text-slate-400">
+                Log in to see your application history.
               </div>
             )}
           </div>

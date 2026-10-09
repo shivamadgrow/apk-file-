@@ -1,15 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { PARTNER_NBFCS } from '../../data/mockData';
+import { api, hasSession, buildPartnerRedirectUrl } from '../../services/api';
 import {
   ShieldCheck, Lock, Zap, Star, CheckCircle2, ArrowRight,
-  Sparkles, AlertCircle, Sliders, Check
+  Sparkles, AlertCircle, Sliders, Check, Loader2
 } from 'lucide-react';
 
-export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, userSalary = 25000, onSelectOffer }) => {
+export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, userSalary = 25000, leadCode = null, onSelectOffer }) => {
   const { user, currentPhone, setIsAuthOpen } = useApp();
   const [salary, setSalary] = useState(userSalary || 25000);
   const [inputValue, setInputValue] = useState(String(userSalary || 25000));
+  // The real backend lead code for this applicant. If the caller (e.g. the wizard,
+  // once it has already submitted a fuller application) passes one in, we reuse it
+  // instead of creating a second, thinner lead.
+  const [resolvedLeadCode, setResolvedLeadCode] = useState(leadCode);
+  const [submittingSlug, setSubmittingSlug] = useState(null);
+  const [applyError, setApplyError] = useState('');
+
+  useEffect(() => {
+    if (leadCode) setResolvedLeadCode(leadCode);
+  }, [leadCode]);
 
   useEffect(() => {
     if (userSalary) {
@@ -38,40 +49,54 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
     setInputValue(String(val));
   };
 
-  const handleApplyClick = (nbfc) => {
-    let targetUrl = nbfc.outboundUrl || '';
-
-    // Get phone number from user or localStorage
-    const rawPhone = user?.phone || currentPhone || localStorage.getItem('paisainminute_current_phone') || '';
-    const cleanPhone = rawPhone.replace(/\D/g, '').slice(-10);
-
-    // Get or create unique lead ID
-    let leadId = user?.leadId || localStorage.getItem('paisainminute_lead_id');
-    if (!leadId) {
-      leadId = 'PIM' + Date.now().toString().slice(-6) + Math.floor(10 + Math.random() * 90);
-      localStorage.setItem('paisainminute_lead_id', leadId);
+  // Ensures a real backend lead exists for this applicant, returning its leadCode.
+  // Never fabricates an ID — on failure it returns null and the caller must show
+  // an honest error instead of proceeding to a partner redirect.
+  const ensureLead = async () => {
+    if (resolvedLeadCode) return resolvedLeadCode;
+    if (!salary || salary <= 0) {
+      setApplyError('Please enter your monthly salary before applying.');
+      return null;
     }
+    const res = await api.submitLoanApplication({
+      monthlySalary: salary,
+      loanAmount,
+      tenureMonths
+    });
+    if (!res.ok) {
+      setApplyError(res.error || 'Unable to start your application right now. Please try again.');
+      return null;
+    }
+    const code = res.application?.leadCode || res.application?.displayId;
+    if (!code) {
+      setApplyError('Unexpected response from the server. Please try again.');
+      return null;
+    }
+    setResolvedLeadCode(code);
+    return code;
+  };
 
-    // If user is not logged in yet, prompt for mobile login to capture phone
-    if (!cleanPhone) {
-      localStorage.setItem('paisainminute_pending_redirect', JSON.stringify({
-        partner: nbfc.id,
-        urlTemplate: targetUrl,
-        leadId
-      }));
+  const handleApplyClick = async (nbfc) => {
+    setApplyError('');
+
+    // If the user isn't logged in yet, prompt for mobile OTP login first and remember
+    // which partner they wanted so AuthModal can resume this after verification.
+    if (!(await hasSession())) {
+      localStorage.setItem('paisainminute_pending_redirect', JSON.stringify({ slug: nbfc.slug, salary, loanAmount, tenureMonths }));
       setIsAuthOpen(true);
       return;
     }
 
-    // Substitute {LEAD_ID} and {PHONE}
-    targetUrl = targetUrl
-      .replace('{LEAD_ID}', encodeURIComponent(leadId))
-      .replace('{PHONE}', encodeURIComponent(cleanPhone));
+    setSubmittingSlug(nbfc.slug);
+    const code = await ensureLead();
+    setSubmittingSlug(null);
+    if (!code) return; // applyError is already set — never redirect without a real lead
 
+    const targetUrl = buildPartnerRedirectUrl(nbfc.slug, code);
     window.open(targetUrl, '_blank');
 
     if (onSelectOffer) {
-      onSelectOffer({ ...nbfc, resolvedUrl: targetUrl, leadId, phone: cleanPhone });
+      onSelectOffer({ ...nbfc, resolvedUrl: targetUrl, leadCode: code });
     }
   };
 
@@ -235,6 +260,13 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
         </div>
       </div>
 
+      {applyError && (
+        <div className="p-3 bg-red-50 text-red-700 text-xs font-semibold rounded-2xl border border-red-200 flex items-center space-x-2">
+          <AlertCircle className="w-4 h-4 flex-shrink-0" />
+          <span>{applyError}</span>
+        </div>
+      )}
+
       {/* 2. SECTION A: ELIGIBLE COMPANIES (TOP - ACTIVE & CLICKABLE) */}
       <div className="space-y-3 pt-1">
         <div className="flex items-center justify-between gap-2 px-1">
@@ -361,10 +393,20 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
                     <button
                       type="button"
                       onClick={() => handleApplyClick(nbfc)}
-                      className="px-4 sm:px-5 py-2.5 bg-gradient-to-r from-[#2563EB] to-[#1D4ED8] hover:from-[#1D4ED8] hover:to-[#1E40AF] text-white font-black text-xs sm:text-sm rounded-xl shadow-md shadow-blue-500/20 flex items-center justify-center space-x-1.5 transition active:scale-98 cursor-pointer whitespace-nowrap"
+                      disabled={submittingSlug === nbfc.slug}
+                      className="px-4 sm:px-5 py-2.5 bg-gradient-to-r from-[#2563EB] to-[#1D4ED8] hover:from-[#1D4ED8] hover:to-[#1E40AF] text-white font-black text-xs sm:text-sm rounded-xl shadow-md shadow-blue-500/20 flex items-center justify-center space-x-1.5 transition active:scale-98 cursor-pointer whitespace-nowrap disabled:opacity-60"
                     >
-                      <span>Apply Now</span>
-                      <ArrowRight className="w-4 h-4 ml-0.5" />
+                      {submittingSlug === nbfc.slug ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <span>Starting...</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>Apply Now</span>
+                          <ArrowRight className="w-4 h-4 ml-0.5" />
+                        </>
+                      )}
                     </button>
                   </div>
                 </div>

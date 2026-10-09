@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
-import { 
-  Bell, MessageSquare, PhoneCall, HelpCircle, X, Send, CheckCircle2, Shield, Bot, User, Sparkles, Languages, ChevronRight, Zap, ArrowRight, Calculator, CreditCard, Share2
+import {
+  Bell, MessageSquare, PhoneCall, HelpCircle, X, Send, CheckCircle2, Shield, Bot, User, Sparkles, Languages, ChevronRight, Zap, ArrowRight, Calculator, CreditCard, Share2, AlertTriangle
 } from 'lucide-react';
+import { api } from '../../services/api';
 
 const INDIAN_LANGUAGES = [
   { id: 'en', name: 'English', flag: '🇬🇧', greeting: 'Hello! I am PaisaBot AI Assistant 🤖. How can I help you with your loan application, EMI, or eligibility today?' },
@@ -36,8 +37,10 @@ export const SupportModal = () => {
 
   const [inputMsg, setInputMsg] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const [callbackPhone, setCallbackPhone] = useState(user.phone || '+91 98765 43210');
+  const [callbackPhone, setCallbackPhone] = useState(user.phone || '');
   const [callbackRequested, setCallbackRequested] = useState(false);
+  const [callbackSubmitting, setCallbackSubmitting] = useState(false);
+  const [callbackError, setCallbackError] = useState('');
 
   const chatEndRef = useRef(null);
 
@@ -169,8 +172,11 @@ export const SupportModal = () => {
 
     // 8. CIBIL SCORE & IMPROVEMENT INTENT ("cibil", "score", "credit", "bad score", "experian")
     if (text.includes('cibil') || text.includes('score') || text.includes('credit') || text.includes('experian')) {
+      const scoreLine = user.creditScore
+        ? `Your last checked CIBIL score was ${user.creditScore}${user.scoreCategory ? ` (${user.scoreCategory})` : ''}.`
+        : `You haven't checked your CIBIL score in the app yet — tap below to check it for free.`;
       return {
-        text: `🎯 **CIBIL Score Analysis (${user.creditScore || 782} ${user.scoreCategory || 'Good'}):**\n• Scores above 750 get instant pre-approved credit lines!\n• Tips to boost score: 1. Always pay bills on time, 2. Keep credit utilization <30%, 3. Avoid frequent loan rejections.`,
+        text: `🎯 **CIBIL Score Tips:**\n${scoreLine}\n• Scores above 750 generally qualify for better offers.\n• Tips to boost score: 1. Always pay bills on time, 2. Keep credit utilization <30%, 3. Avoid frequent loan rejections.`,
         suggestions: [
           { label: '🎯 Check Free CIBIL', actionType: 'credit' },
           { label: '🚀 Apply Low-CIBIL Loan', actionType: 'loans' }
@@ -179,9 +185,12 @@ export const SupportModal = () => {
     }
 
     // 9. REFERRAL INTENT ("refer", "earn", "dost", "points", "wallet")
+    // The referral rewards program has no backend ledger or payout mechanism yet
+    // (see src/components/referral/ReferAndEarn.jsx) — never promise a specific
+    // point/cash amount or payout method here until that's real.
     if (text.includes('refer') || text.includes('earn') || text.includes('dost') || text.includes('invite') || text.includes('wallet') || text.includes('point')) {
       return {
-        text: `🎁 **Refer & Earn Rewards:**\n• Invite friends & family using your personalized referral link!\n• Earn 300 Paisa Points (₹300 Cash) per successful loan disbursal.\n• Withdraw earnings anytime directly to your UPI ID (GPay/PhonePe)!`,
+        text: `🎁 **Refer & Earn:**\n• Invite friends & family using your personalized referral link!\n• The rewards program (points/payouts) is still being finalized — check the Refer & Earn screen for the latest.`,
         suggestions: [
           { label: '🎁 Open Refer & Earn', actionType: 'referral' },
           { label: '🚀 Apply Instant Loan', actionType: 'loans' }
@@ -190,10 +199,13 @@ export const SupportModal = () => {
     }
 
     // 10. QUERY / TRACKING INTENT ("status", "track", "query", "application")
+    // Must only ever show the REAL status/id this device actually recorded (set by
+    // LoanApplicationWizard from a real backend response) — never a fake application
+    // id or an invented "Approved & e-Signed" status.
     if (text.includes('status') || text.includes('track') || text.includes('query') || text.includes('application')) {
       if (activeLoan.hasActiveLoan) {
         return {
-          text: `📑 Application ID: **${activeLoan.id || 'PL-2026-9812'}**\nAmount: ₹${(activeLoan.amount || 350000).toLocaleString()}\nStatus: **Approved & e-Signed** - Bank transfer in progress (< 5 mins)!`,
+          text: `📑 Application ID: **${activeLoan.id || 'Pending'}**\nAmount: ₹${(activeLoan.amount || 0).toLocaleString()}\nStatus: **${activeLoan.status || 'Submitted'}**`,
           suggestions: [
             { label: '📑 View Live Tracker', actionType: 'track' },
             { label: '📞 Request Call-Back', actionType: 'callback' }
@@ -201,7 +213,7 @@ export const SupportModal = () => {
         };
       }
       return {
-        text: `No active loan query found for ${user.phone || 'your number'}. Tap 'Apply Now' below to get instant loan offers up to ₹15 Lakhs!`,
+        text: `No active loan application found for ${user.phone || 'your number'}. Tap 'Apply Now' below to explore loan offers!`,
         suggestions: [
           { label: '🚀 Apply Instant Loan', actionType: 'loans' },
           { label: '📊 Calculate EMI', actionType: 'calculator' }
@@ -244,9 +256,25 @@ export const SupportModal = () => {
     }, 850);
   };
 
-  const handleCallbackSubmit = (e) => {
+  const handleCallbackSubmit = async (e) => {
     e.preventDefault();
-    setCallbackRequested(true);
+    setCallbackError('');
+
+    const cleanPhone = String(callbackPhone || '').replace(/\D/g, '');
+    if (cleanPhone.length !== 10) {
+      setCallbackError('Please enter a valid 10-digit mobile number.');
+      return;
+    }
+
+    setCallbackSubmitting(true);
+    const res = await api.submitCallbackRequest({ name: displayName, phone: cleanPhone });
+    setCallbackSubmitting(false);
+
+    if (res && res.ok) {
+      setCallbackRequested(true);
+    } else {
+      setCallbackError(res?.error || 'Unable to submit your request right now. Please try again.');
+    }
   };
 
   return (
@@ -267,10 +295,10 @@ export const SupportModal = () => {
 
             <div>
               <h3 className="text-sm font-black text-white flex items-center tracking-wide">
-                <span>PaisaBot Advanced AI</span>
-                <Sparkles className="w-3.5 h-3.5 ml-1 text-amber-300 animate-pulse" />
+                <span>PaisaBot Assistant</span>
+                <Sparkles className="w-3.5 h-3.5 ml-1 text-amber-300" />
               </h3>
-              <p className="text-[10.5px] text-white/90 font-semibold">24x7 Intelligent Loan & Financial Assistant</p>
+              <p className="text-[10.5px] text-white/90 font-semibold">Automated Help Assistant</p>
             </div>
           </div>
 
@@ -502,31 +530,40 @@ export const SupportModal = () => {
           <div className="flex-1 p-5 space-y-4 bg-[#F8FAFC] flex flex-col justify-center">
             {!callbackRequested ? (
               <form onSubmit={handleCallbackSubmit} className="space-y-3 text-left bg-white p-4 rounded-3xl border border-slate-200 shadow-sm">
-                <h4 className="text-sm font-extrabold text-[#223981]">Request Immediate Manager Call-Back</h4>
-                <p className="text-xs text-[#717983]">Our customer specialist will call your registered number within 15 minutes.</p>
+                <h4 className="text-sm font-extrabold text-[#223981]">Request a Call-Back</h4>
+                <p className="text-xs text-[#717983]">Our support team will get in touch with you on this number. Response times may vary.</p>
+
+                {callbackError && (
+                  <div className="p-2.5 bg-red-50 text-red-700 text-xs font-semibold rounded-xl border border-red-200 flex items-center space-x-2">
+                    <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+                    <span>{callbackError}</span>
+                  </div>
+                )}
 
                 <div>
                   <label className="block text-xs font-bold text-[#223981] mb-1">Phone Number</label>
-                  <input 
+                  <input
                     type="text"
                     value={callbackPhone}
                     onChange={(e) => setCallbackPhone(e.target.value)}
+                    placeholder="10-digit mobile number"
                     className="w-full p-3 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-[#223981]"
                   />
                 </div>
 
                 <button
                   type="submit"
-                  className="w-full py-3 bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-extrabold rounded-2xl shadow hover:bg-[#223981] transition"
+                  disabled={callbackSubmitting}
+                  className="w-full py-3 bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-extrabold rounded-2xl shadow transition disabled:opacity-60"
                 >
-                  Request Call-Back
+                  {callbackSubmitting ? 'Submitting...' : 'Request Call-Back'}
                 </button>
               </form>
             ) : (
               <div className="bg-emerald-50 p-5 rounded-3xl border border-emerald-200 text-center space-y-2">
                 <CheckCircle2 className="w-10 h-10 text-emerald-600 mx-auto" />
-                <h4 className="text-base font-extrabold text-emerald-900">Call-Back Request Received!</h4>
-                <p className="text-xs text-emerald-700">A dedicated representative will call {callbackPhone} in less than 15 minutes.</p>
+                <h4 className="text-base font-extrabold text-emerald-900">Request Received</h4>
+                <p className="text-xs text-emerald-700">We've logged your request for {callbackPhone}. Our team will reach out to you.</p>
               </div>
             )}
           </div>

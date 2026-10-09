@@ -6,7 +6,7 @@ import {
 import confetti from 'canvas-confetti';
 
 export const ReferAndEarn = ({ onBack }) => {
-  const { user, currentPhone, affiliate, setActiveTab } = useApp();
+  const { user, currentPhone, setActiveTab } = useApp();
   const [copied, setCopied] = useState(false);
   const [openFaqIdx, setOpenFaqIdx] = useState(null);
 
@@ -16,10 +16,14 @@ export const ReferAndEarn = ({ onBack }) => {
   const userFirstName = userName.split(' ')[0].toUpperCase();
   const referralCode = `PIM-${userFirstName}${cleanPhone.slice(-4)}`;
 
-  // Personalized Dynamic Referral Link (with Name + Phone + Terms + UTM Tag)
-  const dynamicReferralUrl = `https://paisainminutes.com/ref?name=${encodeURIComponent(userName)}&phone=${cleanPhone}&code=${referralCode}&utm_source=paisainminutesapp`;
+  // Referral link — only the referral code is passed. Name and phone number must
+  // never be put in a shareable URL (they'd end up in server logs, browser history,
+  // and chat/SMS apps' link previews on whoever receives it).
+  const dynamicReferralUrl = `https://paisainminutes.com/ref?code=${referralCode}&utm_source=paisainminutesapp`;
 
-  const points = user.referralPoints || 300;
+  // There is no backend referral ledger yet, so this must never default to a fake
+  // non-zero points balance.
+  const points = user.referralPoints || 0;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(dynamicReferralUrl);
@@ -35,7 +39,7 @@ export const ReferAndEarn = ({ onBack }) => {
       confetti({ particleCount: 70, spread: 60 });
     } catch (e) {}
 
-    const shareText = `🚀 Hi! ${userName} (+91 ${cleanPhone}) invited you to Paisa in Minutes! Get up to ₹15 Lakhs Personal Loan in 8 minutes with zero paperwork!\n\nApply via my exclusive referral link: ${dynamicReferralUrl}\n\nTerms: 0% Processing Fee waiver on your 1st loan!`;
+    const shareText = `🚀 Hi! ${userName} invited you to Paisa in Minutes to explore personal loan offers.\n\nApply via my referral link: ${dynamicReferralUrl}`;
     
     if (navigator.share) {
       navigator.share({
@@ -52,30 +56,30 @@ export const ReferAndEarn = ({ onBack }) => {
     setOpenFaqIdx(openFaqIdx === index ? null : index);
   };
 
+  // NOTE: the referral rewards program (points, cash value, payout mechanics) is not
+  // yet connected to any backend ledger or payout system. These FAQ answers must not
+  // promise specific point amounts, cash values, or timelines until that exists —
+  // doing so would be inventing a business commitment nothing can fulfill.
   const faqs = [
     {
-      q: "How does the referral process work ?",
-      a: "Share your unique referral link containing your name & mobile number with your friends. Once they complete e-KYC and get a loan disbursed through Paisa in Minutes, you instantly receive 300 Paisa Points (₹300 Cash) in your wallet."
+      q: "How does the referral process work?",
+      a: "Share your unique referral link with your friends. When they apply through it, your referral is recorded against your account."
     },
     {
       q: "Whom can I refer?",
-      a: "You can refer any Indian citizen over 21 years of age with a valid PAN & Aadhaar who requires a Personal Loan, Business Loan, Credit Line, or Credit Card."
+      a: "You can refer anyone who requires a Personal Loan, Business Loan, Credit Line, or Credit Card and meets our partner lenders' eligibility criteria."
     },
     {
-      q: "Is there a way in which I can track the status of my referrals?",
-      a: "Yes! All your referred friends and their real-time application status (Lead Sent, Approved, Disbursed) are tracked under the Referrals section and Affiliate CRM Dashboard."
+      q: "Is there a way I can track the status of my referrals?",
+      a: "Referrals shared from this app are recorded on this device under the Referrals section."
     },
     {
-      q: "Can I get referral points in cash?",
-      a: "Absolutely! Your Paisa Points can be directly withdrawn to your UPI ID (Google Pay, PhonePe, Paytm) or linked bank account at 1 Point = ₹1 Ratio anytime."
+      q: "Can I get referral rewards in cash?",
+      a: "The referral rewards program is still being set up. We'll update this page with full details — including how rewards are calculated and paid out — once it's live."
     },
     {
-      q: "My referral has successfully got a loan disbursed. But I am not able to see my points.",
-      a: "Points are automatically credited within 2 hours of loan disbursal by the NBFC partner. If you face any delay, click '24x7 Helpdesk' or email info@paisainminutes.com."
-    },
-    {
-      q: "How many points I and my referral will get.",
-      a: "You get up to 300 Points (₹300) per successful referral disbursal, and your referred friend receives a 0% processing fee waiver on their first loan!"
+      q: "I referred a friend. How do I know if I'll receive a reward?",
+      a: "We'll contact you directly with reward details once the program is fully live. If you have questions in the meantime, reach out via '24x7 Helpdesk' or email info@paisainminutes.com."
     }
   ];
 
@@ -122,9 +126,9 @@ export const ReferAndEarn = ({ onBack }) => {
           </div>
         </div>
 
-        {/* Subtitle Matching Screenshot */}
+        {/* Subtitle — no specific point amount is promised until the rewards program is live */}
         <p className="text-sm font-extrabold text-[#223981] max-w-xs mx-auto leading-snug">
-          Refer your friend and get upto <span className="text-[#4A8DFF] underline decoration-2">300 points</span>
+          Refer a friend — <span className="text-[#4A8DFF] underline decoration-2">rewards program coming soon</span>
         </p>
 
         {/* Paisa Points Balance Pill Box */}
@@ -219,12 +223,12 @@ export const ReferAndEarn = ({ onBack }) => {
             <div className="space-y-1.5 text-[11px] font-semibold text-[#1E293B]">
               <div className="flex items-start space-x-2 bg-white p-2.5 rounded-xl border border-slate-200/60 shadow-2xs">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" />
-                <span><strong>Term 1:</strong> Your referred friend must apply & complete e-KYC using link containing your mobile number (<strong>{cleanPhone}</strong>).</span>
+                <span><strong>Term 1:</strong> Your referred friend must apply using your referral code (<strong>{referralCode}</strong>).</span>
               </div>
 
               <div className="flex items-start space-x-2 bg-white p-2.5 rounded-xl border border-slate-200/60 shadow-2xs">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" />
-                <span><strong>Term 2:</strong> 300 Paisa Points (₹300 Cash) will be auto-credited to your account upon friend's first loan disbursal.</span>
+                <span><strong>Term 2:</strong> The referral rewards program is being finalized. Reward amounts and payout details will be shared here once it's live.</span>
               </div>
             </div>
           </div>
@@ -242,7 +246,7 @@ export const ReferAndEarn = ({ onBack }) => {
             </div>
             <p className="text-xs font-extrabold text-[#223981]">No referral yet</p>
             <p className="text-[11px] text-[#717983] font-medium leading-relaxed">
-              Share your referral link above with friends and earn 300 Paisa Points on every successful loan disbursal!
+              Share your referral link above with friends to get started.
             </p>
           </div>
         </div>

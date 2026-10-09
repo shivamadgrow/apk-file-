@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
@@ -35,15 +35,14 @@
         </provider>
     </application>
 
-    <!-- Permissions for Paisa in Minutes -->
+    <!-- Permissions for Paisa in Minutes.
+         Only INTERNET and ACCESS_NETWORK_STATE are used by any real functionality in
+         this app. CAMERA, LOCATION, READ_PHONE_STATE, and POST_NOTIFICATIONS were
+         previously declared with no corresponding implemented feature (no Capacitor
+         plugin, no permission-gated code path) — they were removed because an unused
+         declared permission on a lending app invites Play Console policy scrutiny and
+         user distrust. Re-add a permission only when a real, implemented feature needs
+         it. -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    <uses-feature android:name="android.hardware.camera" android:required="false" />
-    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
-    <uses-feature android:name="android.hardware.location.gps" android:required="false" />
 </manifest>

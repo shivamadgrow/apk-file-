@@ -1,8 +1,14 @@
-// Mock data for Paisa in Minutes — Personal Loan Marketplace & Affiliate App
-
+// Lending partner catalogue for Paisa in Minutes — Personal Loan Marketplace.
+// `slug` matches the AffiliatePartner.slug values the website's own partners.php
+// config uses (verified against /home/primordic/projects/adgrow/paisainminutescrm).
+// The actual outbound URL is never hardcoded here — it is always resolved through
+// the backend's tracked redirect endpoint, GET {API_BASE_URL}/public/redirect/:slug,
+// which is the same endpoint the website's loan-offers.php uses. See
+// src/components/loan/MultiLenderComparison.jsx.
 export const PARTNER_NBFCS = [
   {
     id: "ticket2loan",
+    slug: "ticket2loan",
     name: "Ticket 2 Loan",
     logo: "/partners/ticket2loan.png",
     minSalary: 25000,
@@ -18,10 +24,10 @@ export const PARTNER_NBFCS = [
     tag: "Entry-Level Approved",
     rating: 4.8,
     features: ["Min Salary ₹25,000 Required", "100% Online Paperless e-KYC", "Disbursal in Under 10 Mins"],
-    outboundUrl: "https://paisainminutes.com/redirect.php?partner=ticket2loan&lead_id={LEAD_ID}&phone={PHONE}"
   },
   {
     id: "jhatpat",
+    slug: "jhatpatloans",
     name: "Jhatpat Loans",
     logo: "/partners/jhatpat.png",
     minSalary: 30000,
@@ -37,10 +43,10 @@ export const PARTNER_NBFCS = [
     tag: "Instant 5 Mins",
     rating: 4.7,
     features: ["Min Salary ₹30,000 Required", "Instant Pocket Bank Transfer", "Zero Physical Documentation"],
-    outboundUrl: "https://paisainminutes.com/redirect.php?partner=jhatpatloans&lead_id={LEAD_ID}&phone={PHONE}"
   },
   {
     id: "shubh_cash",
+    slug: "shubhcash",
     name: "Shubh Cash",
     logo: "/partners/shubhcash.png",
     minSalary: 35000,
@@ -56,10 +62,10 @@ export const PARTNER_NBFCS = [
     tag: "Most Popular",
     rating: 4.8,
     features: ["Min Salary ₹35,000 Required", "Direct Bank Account Disbursal", "Flexible Repayment Tenures"],
-    outboundUrl: "https://paisainminutes.com/redirect.php?partner=shubhcash&lead_id={LEAD_ID}&phone={PHONE}"
   },
   {
     id: "udhaarnow",
+    slug: "udhaarnow",
     name: "Udhaar Now",
     logo: "/partners/udhaarnow.png",
     minSalary: 35000,
@@ -75,10 +81,10 @@ export const PARTNER_NBFCS = [
     tag: "Emergency Credit",
     rating: 4.7,
     features: ["Min Salary ₹35,000 Required", "Instant Approval for Salaried", "24x7 Direct Bank Credit"],
-    outboundUrl: "https://paisainminutes.com/redirect.php?partner=udhaarnow&lead_id={LEAD_ID}&phone={PHONE}"
   },
   {
     id: "instarupees",
+    slug: "instarupees",
     name: "Insta Rupees",
     logo: "/partners/instarupees.png",
     minSalary: 40000,
@@ -94,10 +100,10 @@ export const PARTNER_NBFCS = [
     tag: "Fast Track",
     rating: 4.9,
     features: ["Min Salary ₹40,000 Required", "Low Processing Fee", "High Approval Ratio"],
-    outboundUrl: "https://paisainminutes.com/redirect.php?partner=instarupees&lead_id={LEAD_ID}&phone={PHONE}"
   },
   {
     id: "borrowera",
+    slug: "borrowera",
     name: "Borrowera",
     logo: "/partners/borrowera.png",
     minSalary: 45000,
@@ -113,10 +119,10 @@ export const PARTNER_NBFCS = [
     tag: "Premium Lender",
     rating: 4.9,
     features: ["Min Salary ₹45,000 Required", "Lowest Interest Rate @ upto 1.0%/day", "Sanction Letter in 8 Mins"],
-    outboundUrl: "https://paisainminutes.com/redirect.php?partner=borrowera&lead_id={LEAD_ID}&phone={PHONE}"
   },
   {
     id: "easyfincare",
+    slug: "easyfincare",
     name: "Easy Fincare",
     logo: "/partners/easyfincare.png",
     minSalary: 45000,
@@ -132,10 +138,10 @@ export const PARTNER_NBFCS = [
     tag: "High Ticket Loan",
     rating: 4.8,
     features: ["Min Salary ₹45,000 Required", "Pre-Approved Sanction", "Zero Foreclosure Charges"],
-    outboundUrl: "https://paisainminutes.com/redirect.php?partner=easyfincare&lead_id={LEAD_ID}&phone={PHONE}"
   },
   {
     id: "loanwithin",
+    slug: "loanwithin",
     name: "Loan Within",
     logo: "/partners/loanwithin.png",
     minSalary: 45000,
@@ -151,10 +157,10 @@ export const PARTNER_NBFCS = [
     tag: "Quick Disbursal",
     rating: 4.8,
     features: ["Min Salary ₹45,000 Required", "Digital Agreement Signing", "Direct Bank IMPS Disbursal"],
-    outboundUrl: "https://paisainminutes.com/redirect.php?partner=loanwithin&lead_id={LEAD_ID}&phone={PHONE}"
   },
   {
     id: "rupay91",
+    slug: "rupay91",
     name: "Rupay91",
     logo: "/partners/rupay91.png",
     minSalary: 50000,
@@ -170,109 +176,6 @@ export const PARTNER_NBFCS = [
     tag: "Top Tier Exclusive",
     rating: 4.9,
     features: ["Min Salary ₹50,000 Required", "Up to ₹10 Lakhs Instant Credit", "VIP Disbursal in 6 Minutes"],
-    outboundUrl: "https://paisainminutes.com/redirect.php?partner=rupay91&lead_id={LEAD_ID}&phone={PHONE}"
-  }
-];
-
-export const TESTIMONIALS = [
-  {
-    id: "t1",
-    name: "Rajesh Kumar",
-    city: "Mumbai, Maharashtra",
-    loanType: "Personal Loan ₹3,50,000",
-    timeTaken: "8 Minutes",
-    rating: 5,
-    quote: "Got ₹3.5 Lakh credited to my HDFC account in under 10 minutes for emergency medical expenses. Paisa in Minutes lived up to its tagline!",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80",
-    verifiedBadge: "RBI NBFC Disbursed"
-  }
-];
-
-export const AFFILIATE_SLABS = [
-  {
-    product: "Personal Loan",
-    commission: "2.5% of Loan Amount",
-    avgEarningsPerLead: "₹7,500 on ₹3L disbursal",
-    icon: "UserCheck"
-  },
-  {
-    product: "Business Loan",
-    commission: "3.2% of Loan Amount",
-    avgEarningsPerLead: "₹16,000 on ₹5L disbursal",
-    icon: "Briefcase"
-  },
-  {
-    product: "Gold Loan",
-    commission: "1.8% of Loan Amount",
-    avgEarningsPerLead: "₹3,600 on ₹2L disbursal",
-    icon: "Coins"
-  },
-  {
-    product: "Credit Card",
-    commission: "₹1,500 Flat per Card Approval",
-    avgEarningsPerLead: "Instant ₹1,500 Payout",
-    icon: "CreditCard"
-  }
-];
-
-export const MOCK_LEADS = [
-  {
-    id: "LD-9021",
-    name: "Vikram Singh",
-    phone: "+91 98765 11223",
-    type: "Personal Loan",
-    amount: "₹4,00,000",
-    status: "Disbursed",
-    commission: "₹10,000",
-    date: "24 Jul 2026",
-    nbfc: "Rupay91 Instant Loan",
-    payoutStatus: "Credited"
-  },
-  {
-    id: "LD-9022",
-    name: "Sunita Verma",
-    phone: "+91 94123 44556",
-    type: "Business Loan",
-    amount: "₹6,50,000",
-    status: "Approved",
-    commission: "₹20,800",
-    date: "25 Jul 2026",
-    nbfc: "Bajaj Finserv",
-    payoutStatus: "Processing"
-  },
-  {
-    id: "LD-9023",
-    name: "Amit Patel",
-    phone: "+91 98234 88990",
-    type: "Personal Loan",
-    amount: "₹2,50,000",
-    status: "In Review",
-    commission: "₹6,250",
-    date: "26 Jul 2026",
-    nbfc: "Ticket 2 Loan",
-    payoutStatus: "Pending Disbursal"
-  },
-  {
-    id: "LD-9024",
-    name: "Pooja Sharma",
-    phone: "+91 97112 33445",
-    type: "Personal Loan",
-    amount: "₹1,50,000",
-    status: "Disbursed",
-    commission: "₹1,500",
-    date: "27 Jul 2026",
-    nbfc: "Jhatpat Loans",
-    payoutStatus: "Credited"
-  }
-];
-
-export const MARKETING_KITS = [
-  {
-    id: "mk-1",
-    title: "WhatsApp Promo Message (High Converting)",
-    type: "Text Template",
-    content: "🚀 Need urgent cash? Get up to ₹15 Lakhs Personal Loan in 8 minutes with zero paperwork! Check instant loan offers from our lending partners: {REFERRAL_LINK} — Paisa Milega, Minutes Mein!",
-    shares: "12,400+ shares"
   }
 ];
 

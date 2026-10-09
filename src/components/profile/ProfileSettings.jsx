@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { BILINGUAL_TEXT } from '../../data/mockData';
-import { 
-  User, Shield, Globe, Landmark, Lock, FileText, LogOut, ChevronRight, HelpCircle, History, 
-  Sparkles, CheckCircle2, Share2, Info, MessageSquare, ListOrdered, X, Send, Languages
+import { api } from '../../services/api';
+import {
+  User, Shield, Globe, Landmark, Lock, FileText, LogOut, ChevronRight, HelpCircle, History,
+  Sparkles, CheckCircle2, Share2, Info, MessageSquare, ListOrdered, X, Send, Languages,
+  Edit3, AlertTriangle, Trash2, Loader2
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 export const ProfileSettings = () => {
-  const { user, language, setLanguage, setIsSupportOpen, setActiveTab, setIsAuthOpen, logoutUser, currentPhone } = useApp();
+  const { user, language, setLanguage, setIsSupportOpen, setActiveTab, setIsAuthOpen, logoutUser, updateLocalProfile, deleteLocalAccount, currentPhone } = useApp();
   const t = BILINGUAL_TEXT[language] || BILINGUAL_TEXT.en;
   const isAuthenticated = !!currentPhone;
 
@@ -23,10 +25,122 @@ export const ProfileSettings = () => {
   const [showLanguageModal, setShowLanguageModal] = useState(false);
   const [selectedLangTemp, setSelectedLangTemp] = useState(language);
 
+  // Edit Profile — fields match exactly what the backend's PATCH /api/users/me accepts
+  // (paisa/server/src/routes/users.js PROFILE_FIELDS). Nothing else is editable here.
+  const [showEditProfileModal, setShowEditProfileModal] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editEmail, setEditEmail] = useState('');
+  const [editCity, setEditCity] = useState('');
+  const [editState, setEditState] = useState('');
+  const [editPincode, setEditPincode] = useState('');
+  const [editPan, setEditPan] = useState('');
+  const [editError, setEditError] = useState('');
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+
+  const openEditProfile = () => {
+    setEditName(user.name && !user.name.startsWith('User ') ? user.name : '');
+    setEditEmail(user.email || '');
+    setEditCity(user.city || '');
+    setEditState(user.state || '');
+    setEditPincode(user.pincode || '');
+    setEditPan('');
+    setEditError('');
+    setShowEditProfileModal(true);
+  };
+
+  const handleSaveProfile = async (e) => {
+    e.preventDefault();
+    setEditError('');
+    if (editEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(editEmail)) {
+      setEditError('Please enter a valid email address.');
+      return;
+    }
+    if (editPan && !/^[A-Z]{5}[0-9]{4}[A-Z]$/i.test(editPan)) {
+      setEditError('Please enter a valid 10-character PAN (e.g. ABCDE1234F), or leave it blank.');
+      return;
+    }
+    if (editPincode && !/^\d{6}$/.test(editPincode)) {
+      setEditError('Pincode must be 6 digits.');
+      return;
+    }
+
+    setIsSavingProfile(true);
+    const payload = { name: editName, email: editEmail, city: editCity, state: editState, pincode: editPincode };
+    if (editPan) payload.pan = editPan.toUpperCase();
+    const res = await api.updateProfile(payload);
+    setIsSavingProfile(false);
+
+    if (!res.ok) {
+      setEditError(res.error || 'Unable to save your profile right now. Please try again.');
+      return;
+    }
+    // Only ever reflects what the server actually confirmed (res.user) — never what
+    // was typed, in case the server trimmed/rejected a field differently.
+    updateLocalProfile({
+      name: res.user.name || '',
+      email: res.user.email || '',
+      city: res.user.city || '',
+      state: res.user.state || '',
+      pincode: res.user.pincode || '',
+      panMasked: res.user.panMasked || null
+    });
+    setShowEditProfileModal(false);
+  };
+
+  // Delete Account — matches the confirmed backend's DELETE /api/users/me, which
+  // requires reauthentication via a fresh OTP code sent to this account's own number.
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteStep, setDeleteStep] = useState('confirm'); // 'confirm' | 'otp' | 'done'
+  const [deleteCode, setDeleteCode] = useState('');
+  const [deleteError, setDeleteError] = useState('');
+  const [isSendingDeleteOtp, setIsSendingDeleteOtp] = useState(false);
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+
+  const openDeleteModal = () => {
+    setDeleteStep('confirm');
+    setDeleteCode('');
+    setDeleteError('');
+    setShowDeleteModal(true);
+  };
+
+  const handleSendDeleteOtp = async () => {
+    setDeleteError('');
+    setIsSendingDeleteOtp(true);
+    const res = await api.sendOtp(currentPhone);
+    setIsSendingDeleteOtp(false);
+    if (!res.ok) {
+      setDeleteError(res.error || 'Unable to send the confirmation code. Please try again.');
+      return;
+    }
+    setDeleteStep('otp');
+  };
+
+  const handleConfirmDelete = async (e) => {
+    e.preventDefault();
+    setDeleteError('');
+    if (deleteCode.trim().length < 4) {
+      setDeleteError('Please enter the code sent to your phone.');
+      return;
+    }
+    setIsDeletingAccount(true);
+    const res = await api.deleteAccount(deleteCode.trim());
+    setIsDeletingAccount(false);
+    if (!res.ok) {
+      setDeleteError(res.error || 'Unable to delete your account right now. Please try again.');
+      return;
+    }
+    setDeleteStep('done');
+    setTimeout(() => {
+      setShowDeleteModal(false);
+      deleteLocalAccount();
+    }, 1800);
+  };
+
   const [feedbackText, setFeedbackText] = useState('');
   const [feedbackSent, setFeedbackSent] = useState(false);
 
-  // Initialize and fetch all persistent customer reviews
+  // Initialize and fetch all persistent customer reviews. No fabricated reviews —
+  // this starts empty and only ever shows reviews actually submitted on this device.
   const [allFeedbacks, setAllFeedbacks] = useState(() => {
     const saved = localStorage.getItem('paisainminute_feedbacks');
     if (saved) {
@@ -34,11 +148,7 @@ export const ProfileSettings = () => {
         return JSON.parse(saved);
       } catch (e) {}
     }
-    return [
-      { id: "f1", name: "Rohan Varma", phone: "+91 98765 43210", rating: 5, text: "Got ₹3.5 Lakhs credited to HDFC bank account in under 8 mins! Excellent service.", date: "Today" },
-      { id: "f2", name: "Vikram Singh", phone: "+91 98111 22334", rating: 5, text: "Instant approval and direct disbursal without visiting any bank branch.", date: "Yesterday" },
-      { id: "f3", name: "Priya Sharma", phone: "+91 94123 99120", rating: 5, text: "100% paperless e-KYC and instant eligibility check.", date: "2 days ago" }
-    ];
+    return [];
   });
 
   const loanHistory = user.loanHistory || [];
@@ -97,13 +207,17 @@ export const ProfileSettings = () => {
           <div>
             <h2 className="text-lg font-extrabold text-[#223981]">{isAuthenticated ? user.name : 'Guest User'}</h2>
             <p className="text-xs font-semibold text-[#717983]">{isAuthenticated ? user.phone : 'Unverified Session'}</p>
-            {isAuthenticated && user.kycVerified ? (
+            {/* Identity/KYC verification happens with the lending partner after redirect
+                (see LoanApplicationWizard) — this app never claims to have verified it
+                itself. This badge only reflects the one thing genuinely true here: the
+                mobile number was OTP-verified. */}
+            {isAuthenticated ? (
               <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 mt-1 inline-block">
-                ✓ e-KYC Verified Borrower (PAN: {user.pan})
+                ✓ Mobile Verified{user.panMasked ? ` • PAN: ${user.panMasked}` : ''}
               </span>
             ) : (
               <span className="text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200 mt-1 inline-block">
-                ⏳ KYC Pending — Mobile Verification Required
+                ⏳ Mobile Verification Required
               </span>
             )}
           </div>
@@ -219,7 +333,21 @@ export const ProfileSettings = () => {
       {/* SECTION 1: UTILITIES & DISCLOSURES */}
       <div className="space-y-1 text-xs">
         <h4 className="text-[11px] font-extrabold text-[#223981] uppercase tracking-wider px-1 mb-1">Financial Utilities & Disclosures</h4>
-        
+
+        {/* 0. Edit Profile */}
+        {isAuthenticated && (
+          <div
+            onClick={openEditProfile}
+            className="p-3.5 bg-white rounded-2xl border border-slate-200 hover:bg-slate-50 cursor-pointer flex items-center justify-between transition group shadow-2xs"
+          >
+            <div className="flex items-center space-x-2.5">
+              <Edit3 className="w-4.5 h-4.5 text-[#2563EB] flex-shrink-0" />
+              <span className="font-extrabold text-[#223981] text-xs sm:text-sm">Edit Profile</span>
+            </div>
+            <ChevronRight className="w-4 h-4 text-[#717983]" />
+          </div>
+        )}
+
         {/* 1. EMI Calculator Utility */}
         <div 
           onClick={() => setActiveTab('calculator')}
@@ -381,6 +509,22 @@ export const ProfileSettings = () => {
           <ChevronRight className="w-4 h-4 text-rose-400" />
         </div>
 
+        {/* Delete Account */}
+        {isAuthenticated && (
+          <div
+            onClick={openDeleteModal}
+            className="p-3.5 hover:bg-rose-50 cursor-pointer flex items-center justify-between transition group"
+          >
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition">
+                <Trash2 className="w-4.5 h-4.5 text-rose-600" />
+              </div>
+              <span className="font-extrabold text-rose-600 text-sm">Delete Account</span>
+            </div>
+            <ChevronRight className="w-4 h-4 text-rose-400" />
+          </div>
+        )}
+
       </div>
 
       {/* Official Brand Footer */}
@@ -392,7 +536,7 @@ export const ProfileSettings = () => {
           <h4 className="text-xs font-extrabold text-[#223981]">Paisa in Minutes</h4>
           <p className="text-[10px] text-[#4A8DFF] font-bold">Paisa Milega, Minutes Mein</p>
           <p className="text-[9px] text-[#717983]">
-            Official Technology Loan Aggregator Platform • RBI-Registered Lending Partners • Version 2.4.0
+            Loan Aggregator Platform • Version 1.0
           </p>
         </div>
       </div>
@@ -747,8 +891,8 @@ export const ProfileSettings = () => {
               ) : (
                 <div className="bg-emerald-50 p-4 rounded-2xl border border-emerald-200 text-center space-y-1 my-2">
                   <CheckCircle2 className="w-8 h-8 text-emerald-600 mx-auto" />
-                  <h4 className="text-xs font-black text-emerald-900">Feedback Saved & Mailed!</h4>
-                  <p className="text-[11px] text-emerald-700">Review logged into CRM & sent to info@paisainminutes.com</p>
+                  <h4 className="text-xs font-black text-emerald-900">Feedback Saved</h4>
+                  <p className="text-[11px] text-emerald-700">Saved on this device, and your mail app was opened to send it to info@paisainminutes.com — please hit send there to complete it.</p>
                 </div>
               )
             )}
@@ -756,6 +900,11 @@ export const ProfileSettings = () => {
             {/* TAB 2: FETCHED REVIEWS LIST */}
             {feedbackTab === 'all' && (
               <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+                {allFeedbacks.length === 0 && (
+                  <p className="text-xs text-[#717983] text-center py-6">
+                    No reviews submitted from this device yet.
+                  </p>
+                )}
                 {allFeedbacks.map((item) => (
                   <div key={item.id} className="bg-slate-50 p-3 rounded-2xl border border-slate-200 space-y-1">
                     <div className="flex items-center justify-between text-xs">
@@ -764,7 +913,7 @@ export const ProfileSettings = () => {
                     </div>
                     <p className="text-xs text-[#1E293B] font-semibold">{item.text}</p>
                     <div className="flex justify-between items-center text-[9.5px] text-[#717983] pt-1">
-                      <span>Mailed to: info@paisainminutes.com</span>
+                      <span>Saved on this device</span>
                       <span>{item.date}</span>
                     </div>
                   </div>
@@ -795,6 +944,140 @@ export const ProfileSettings = () => {
             >
               Close Disclosure
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: EDIT PROFILE */}
+      {showEditProfileModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <form onSubmit={handleSaveProfile} className="bg-white rounded-3xl p-5 max-w-sm w-full space-y-3 shadow-2xl text-left border border-slate-200">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-extrabold text-[#223981]">Edit Profile</h3>
+              <button type="button" onClick={() => setShowEditProfileModal(false)} className="p-1 hover:bg-slate-100 rounded-lg">
+                <X className="w-4 h-4 text-slate-500" />
+              </button>
+            </div>
+
+            {editError && (
+              <div className="p-2.5 bg-red-50 text-red-700 text-xs font-semibold rounded-xl border border-red-200 flex items-center space-x-2">
+                <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+                <span>{editError}</span>
+              </div>
+            )}
+
+            <div className="space-y-2.5">
+              <div>
+                <label className="block text-[11px] font-bold text-[#223981] mb-1">Full Name</label>
+                <input type="text" value={editName} onChange={(e) => setEditName(e.target.value)} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-[#223981]" />
+              </div>
+              <div>
+                <label className="block text-[11px] font-bold text-[#223981] mb-1">Email</label>
+                <input type="email" value={editEmail} onChange={(e) => setEditEmail(e.target.value)} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-[#223981]" />
+              </div>
+              <div className="grid grid-cols-2 gap-2.5">
+                <div>
+                  <label className="block text-[11px] font-bold text-[#223981] mb-1">City</label>
+                  <input type="text" value={editCity} onChange={(e) => setEditCity(e.target.value)} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-[#223981]" />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-[#223981] mb-1">State</label>
+                  <input type="text" value={editState} onChange={(e) => setEditState(e.target.value)} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-[#223981]" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2.5">
+                <div>
+                  <label className="block text-[11px] font-bold text-[#223981] mb-1">Pincode</label>
+                  <input type="text" maxLength={6} value={editPincode} onChange={(e) => setEditPincode(e.target.value.replace(/\D/g, ''))} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-[#223981]" />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold text-[#223981] mb-1">PAN {user.panMasked ? `(${user.panMasked})` : ''}</label>
+                  <input type="text" maxLength={10} placeholder={user.panMasked ? 'Change PAN' : 'ABCDE1234F'} value={editPan} onChange={(e) => setEditPan(e.target.value.toUpperCase())} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-[#223981] tracking-wider" />
+                </div>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={isSavingProfile}
+              className="w-full py-3 bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-extrabold rounded-2xl shadow transition flex items-center justify-center space-x-2 disabled:opacity-60"
+            >
+              {isSavingProfile ? (<><Loader2 className="w-4 h-4 animate-spin" /><span>Saving...</span></>) : (<span>Save Changes</span>)}
+            </button>
+          </form>
+        </div>
+      )}
+
+      {/* MODAL: DELETE ACCOUNT */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-5 max-w-sm w-full space-y-3.5 shadow-2xl text-left border border-slate-200">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-extrabold text-rose-700">Delete Account</h3>
+              {deleteStep !== 'done' && (
+                <button onClick={() => setShowDeleteModal(false)} className="p-1 hover:bg-slate-100 rounded-lg">
+                  <X className="w-4 h-4 text-slate-500" />
+                </button>
+              )}
+            </div>
+
+            {deleteStep === 'confirm' && (
+              <>
+                <div className="p-3 bg-rose-50 rounded-2xl border border-rose-200 text-[11px] text-rose-800 font-medium leading-relaxed">
+                  This will permanently remove your name, email, PAN, city, state, pincode, and saved bank
+                  accounts from our systems, and sign you out of every device. Loan applications already
+                  submitted to lending partners are kept as financial records, as required for compliance,
+                  but are no longer linked to your personal profile information.
+                </div>
+                {deleteError && (
+                  <div className="p-2.5 bg-red-50 text-red-700 text-xs font-semibold rounded-xl border border-red-200 flex items-center space-x-2">
+                    <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+                    <span>{deleteError}</span>
+                  </div>
+                )}
+                <button
+                  onClick={handleSendDeleteOtp}
+                  disabled={isSendingDeleteOtp}
+                  className="w-full py-3 bg-rose-600 hover:bg-rose-700 text-white text-xs font-extrabold rounded-2xl shadow transition flex items-center justify-center space-x-2 disabled:opacity-60"
+                >
+                  {isSendingDeleteOtp ? (<><Loader2 className="w-4 h-4 animate-spin" /><span>Sending code...</span></>) : (<span>Send Confirmation Code to My Phone</span>)}
+                </button>
+              </>
+            )}
+
+            {deleteStep === 'otp' && (
+              <form onSubmit={handleConfirmDelete} className="space-y-3">
+                <p className="text-xs text-[#717983]">Enter the code sent to {user.phone || 'your phone'} to confirm deletion.</p>
+                {deleteError && (
+                  <div className="p-2.5 bg-red-50 text-red-700 text-xs font-semibold rounded-xl border border-red-200 flex items-center space-x-2">
+                    <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+                    <span>{deleteError}</span>
+                  </div>
+                )}
+                <input
+                  type="text"
+                  maxLength={6}
+                  value={deleteCode}
+                  onChange={(e) => setDeleteCode(e.target.value.replace(/\D/g, ''))}
+                  placeholder="6-digit code"
+                  className="w-full p-3 bg-slate-50 border border-slate-300 rounded-xl text-sm font-bold text-center tracking-widest"
+                />
+                <button
+                  type="submit"
+                  disabled={isDeletingAccount}
+                  className="w-full py-3 bg-rose-600 hover:bg-rose-700 text-white text-xs font-extrabold rounded-2xl shadow transition flex items-center justify-center space-x-2 disabled:opacity-60"
+                >
+                  {isDeletingAccount ? (<><Loader2 className="w-4 h-4 animate-spin" /><span>Deleting...</span></>) : (<span>Permanently Delete My Account</span>)}
+                </button>
+              </form>
+            )}
+
+            {deleteStep === 'done' && (
+              <div className="py-4 text-center space-y-2">
+                <CheckCircle2 className="w-10 h-10 text-emerald-600 mx-auto" />
+                <p className="text-sm font-bold text-[#223981]">Your account has been deleted.</p>
+              </div>
+            )}
           </div>
         </div>
       )}

@@ -1,5 +1,18 @@
 apply plugin: 'com.android.application'
 
+// Release signing: credentials are loaded from android/keystore.properties, a local,
+// untracked file (see keystore.properties.example + RELEASE_SIGNING.md). Nothing here
+// is ever hardcoded or committed. If that file is missing, the release signingConfig
+// is simply not registered, and the check at the bottom of this file fails any
+// assembleRelease/bundleRelease task with a clear message instead of silently
+// producing an unsigned (unpublishable) artifact.
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+def keystoreProperties = new Properties()
+def hasKeystoreProperties = keystorePropertiesFile.exists()
+if (hasKeystoreProperties) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
 android {
     namespace "com.paisainminutes.app"
     compileSdk rootProject.ext.compileSdkVersion
@@ -16,11 +29,40 @@ android {
             ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    signingConfigs {
+        if (hasKeystoreProperties) {
+            release {
+                storeFile file(keystoreProperties['storeFile'])
+                storePassword keystoreProperties['storePassword']
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+            }
+        }
+    }
     buildTypes {
         release {
+            if (hasKeystoreProperties) {
+                signingConfig signingConfigs.release
+            }
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+    }
+}
+
+// Fail fast and clearly, rather than silently producing an unsigned (unpublishable)
+// release artifact, if someone runs a release build before keystore.properties exists.
+gradle.taskGraph.whenReady { graph ->
+    def buildingRelease = graph.allTasks.any { task ->
+        def n = task.name
+        (n.startsWith('assemble') || n.startsWith('bundle')) && n.endsWith('Release')
+    }
+    if (buildingRelease && !hasKeystoreProperties) {
+        throw new org.gradle.api.GradleException(
+            "Release signing is not configured: android/keystore.properties is missing.\n" +
+            "Copy android/keystore.properties.example to android/keystore.properties and fill in\n" +
+            "your real upload keystore details. See android/RELEASE_SIGNING.md for the full procedure."
+        )
     }
 }
 

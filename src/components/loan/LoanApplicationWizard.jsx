@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { MultiLenderComparison } from './MultiLenderComparison';
-import { 
-  CheckCircle2, ArrowRight, ArrowLeft, Upload, ShieldCheck, 
-  FileText, Camera, Check, Lock, Landmark, Sparkles 
+import { api } from '../../services/api';
+import {
+  CheckCircle2, ArrowRight, ArrowLeft, Upload, ShieldCheck,
+  FileText, Lock, Landmark, Sparkles, ExternalLink, Loader2, AlertTriangle
 } from 'lucide-react';
-import confetti from 'canvas-confetti';
 
 export const LoanApplicationWizard = ({ preSelectedProduct = 'personal', onClose }) => {
-  const { setActiveLoan, saveNewLoanApplication, setActiveTab } = useApp();
+  const { user, setActiveLoan, saveNewLoanApplication, setActiveTab } = useApp();
 
   const productTitle = preSelectedProduct === 'business' 
     ? 'Business Loan' 
@@ -42,16 +42,21 @@ export const LoanApplicationWizard = ({ preSelectedProduct = 'personal', onClose
   const [monthlyIncome, setMonthlyIncome] = useState(35000);
   const [companyName, setCompanyName] = useState('');
 
-  // KYC States
+  // Identity fields — collected here only to prefill the lending partner's own KYC
+  // step after redirect. No verification is performed in-app: real PAN/Aadhaar
+  // verification happens with the matched lending partner, matching the website's
+  // existing journey. Never mark these as "verified" client-side.
   const [panNumber, setPanNumber] = useState('');
-  const [aadhaarNumber, setAadhaarNumber] = useState('');
-  const [otpSent, setOtpSent] = useState(false);
-  const [aadhaarOtp, setAadhaarOtp] = useState('782194');
-  const [kycDone, setKycDone] = useState(false);
 
   // Selected Offer State
   const [chosenOffer, setChosenOffer] = useState(null);
   const [agreementSigned, setAgreementSigned] = useState(false);
+
+  // Real backend application state — set only from an actual, successful
+  // POST /api/loan-applications/ response. Never fabricated.
+  const [submittedApplication, setSubmittedApplication] = useState(null);
+  const [isSubmittingApplication, setIsSubmittingApplication] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
   // EMI Preview Calculation
   const approxRate = 10.99;
@@ -59,60 +64,96 @@ export const LoanApplicationWizard = ({ preSelectedProduct = 'personal', onClose
   const calculatedEmi = Math.round((loanAmount * r * Math.pow(1 + r, tenureMonths)) / (Math.pow(1 + r, tenureMonths) - 1));
 
   const handleNextStep = () => {
-    if (step === 3 && !kycDone) {
-      setKycDone(true);
-    }
     setStep(prev => prev + 1);
   };
 
-  const handleOfferSelect = (nbfc, emi, fee) => {
-    setChosenOffer({ nbfc, emi, fee });
-    setStep(5); // Move to e-Sign
+  // Submits the real application to the confirmed backend (POST /api/loan-applications/,
+  // the same intake the website's apply-now.php uses). Only advances to the lender
+  // comparison step on an authoritative success response — a failed or ambiguous
+  // request never fakes success, and the user's entered data is preserved so they
+  // can simply press the button again (the backend safely dedupes repeat submissions
+  // for the same phone, so retrying never creates a duplicate application).
+  const handleProceedToOffers = async () => {
+    setSubmitError('');
+
+    if (!loanAmount || loanAmount <= 0) {
+      setSubmitError('Please select a valid loan amount.');
+      return;
+    }
+    if (!monthlyIncome || monthlyIncome <= 0) {
+      setSubmitError('Please enter your monthly income.');
+      return;
+    }
+    if (panNumber && !/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(panNumber)) {
+      setSubmitError('Please enter a valid 10-character PAN (e.g. ABCDE1234F), or leave it blank.');
+      return;
+    }
+
+    setIsSubmittingApplication(true);
+
+    const res = await api.submitLoanApplication({
+      loanAmount,
+      tenureMonths,
+      purpose,
+      employmentType,
+      monthlySalary: monthlyIncome,
+      companyName,
+      pan: panNumber || undefined
+    });
+
+    setIsSubmittingApplication(false);
+
+    if (!res.ok) {
+      setSubmitError(res.error || 'Unable to submit your application right now. Please try again.');
+      return;
+    }
+
+    setSubmittedApplication(res.application);
+    setStep(4);
+  };
+
+  // nbfc.resolvedUrl / leadId are set by MultiLenderComparison right after it has
+  // already opened the partner's site in a new tab — the actual application/KYC/
+  // disbursal from this point on happens on the partner's site, not in this app.
+  const handleOfferSelect = (nbfc) => {
+    setChosenOffer({ nbfc });
+    setStep(5);
   };
 
   const handleFinalSubmit = () => {
     setAgreementSigned(true);
 
-    // Trigger celebration confetti
-    try {
-      confetti({
-        particleCount: 120,
-        spread: 80,
-        origin: { y: 0.6 }
-      });
-    } catch (e) {
-      console.log('Confetti triggered');
-    }
-
+    // Uses the REAL application id/status returned by the backend (submittedApplication,
+    // from handleProceedToOffers) — never a client-fabricated id. "Redirected to X" is
+    // the one fact we genuinely know happened locally (MultiLenderComparison just opened
+    // that partner's site); we do not claim anything about approval or disbursal, since
+    // that is decided entirely on the partner's own site, outside this app's visibility.
     const newLoanObj = {
-      id: `PL-2026-${Math.floor(1000 + Math.random() * 9000)}`,
+      id: submittedApplication?.leadCode || submittedApplication?.displayId || null,
       hasActiveLoan: true,
       type: preSelectedProduct === 'gold' ? 'Gold Loan' : preSelectedProduct === 'business' ? 'Business Loan' : 'Personal Loan',
       amount: loanAmount,
       tenureMonths: tenureMonths,
-      monthlyEmi: chosenOffer ? chosenOffer.emi : calculatedEmi,
+      monthlyEmi: calculatedEmi,
       purpose: purpose,
-      currentStep: 5,
-      status: "Approved — Disbursal Initiated",
+      currentStep: 3,
+      status: `Submitted (${submittedApplication?.status || 'FRESH'}) — Redirected to Partner`,
       stepLabels: [
         { id: 1, title: "Journey Started", time: "Just now", done: true },
-        { id: 2, title: "Application & KYC Verified", time: "Just now", done: true },
-        { id: 3, title: `Offer Selected (${chosenOffer?.nbfc.name || 'Rupay91'})`, time: "Just now", done: true },
-        { id: 4, title: "e-Sign Agreement Signed", time: "Just now", done: true },
-        { id: 5, title: "Disbursal in Progress", time: "Estimated < 5 mins", done: true }
+        { id: 2, title: "Application Submitted", time: "Just now", done: true },
+        { id: 3, title: `Redirected to ${chosenOffer?.nbfc?.name || 'Partner Lender'}`, time: "Just now", done: true }
       ],
       selectedNbfc: {
-        name: chosenOffer?.nbfc.name || "Rupay91",
-        rate: chosenOffer?.nbfc?.interestRateDisplay || "upto 1.0% / day",
-        fee: `₹${chosenOffer?.fee.toLocaleString() || '5,250'}`,
-        disbursalTime: "8 Minutes"
+        name: chosenOffer?.nbfc?.name || "Partner Lender",
+        rate: chosenOffer?.nbfc?.interestRateDisplay || "",
+        fee: "",
+        disbursalTime: ""
       }
     };
 
     setActiveLoan(newLoanObj);
     saveNewLoanApplication(newLoanObj);
 
-    // Close modal if open & switch directly to Tracking tab automatically!
     if (onClose) onClose();
     setActiveTab('track');
   };
@@ -288,92 +329,68 @@ export const LoanApplicationWizard = ({ preSelectedProduct = 'personal', onClose
         </div>
       )}
 
-      {/* STEP 3: Paperless e-KYC */}
+      {/* STEP 3: Identity details for the lending partner (no in-app verification) */}
       {step === 3 && (
         <div className="space-y-4">
           <div>
-            <h2 className="text-lg font-extrabold text-[#223981]">Paperless e-KYC & Uploads</h2>
-            <p className="text-xs text-[#717983]">Instant Aadhaar OTP verification & document liveness check.</p>
+            <h2 className="text-lg font-extrabold text-[#223981]">Identity Details</h2>
+            <p className="text-xs text-[#717983]">
+              Your PAN & Aadhaar are verified directly by the lending partner you choose next — not by Paisa in Minutes.
+            </p>
           </div>
 
-          <div className="bg-slate-50 p-3 rounded-2xl border border-slate-200 flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <FileText className="w-5 h-5 text-[#4A8DFF]" />
-              <div>
-                <p className="text-xs font-bold text-[#223981]">PAN Card: {panNumber}</p>
-                <p className="text-[10px] text-emerald-600 font-semibold">Verified with NSDL Bureau</p>
-              </div>
+          <div className="bg-slate-50 p-3 rounded-2xl border border-slate-200 space-y-2">
+            <label className="block text-xs font-bold text-[#223981]">PAN Number (optional, for prefill)</label>
+            <input
+              type="text"
+              value={panNumber}
+              onChange={(e) => setPanNumber(e.target.value.toUpperCase())}
+              maxLength={10}
+              placeholder="ABCDE1234F"
+              className="w-full p-2.5 bg-white border border-slate-300 rounded-xl text-xs font-semibold text-[#223981] tracking-wider"
+            />
+          </div>
+
+          <div className="bg-[#E4EEFF]/60 p-3.5 rounded-2xl border border-[#6FA8FF]/40 flex items-start space-x-2.5">
+            <ShieldCheck className="w-5 h-5 text-[#2563EB] flex-shrink-0 mt-0.5" />
+            <p className="text-[11px] text-[#223981] font-semibold leading-relaxed">
+              After you pick an offer in the next step, you'll be taken to that lender's own site to complete
+              Aadhaar e-KYC and any document verification they require. Paisa in Minutes does not perform or
+              claim to perform identity verification itself.
+            </p>
+          </div>
+
+          {submitError && (
+            <div className="p-3 bg-red-50 text-red-700 text-xs font-semibold rounded-2xl border border-red-200 flex items-center space-x-2">
+              <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+              <span>{submitError}</span>
             </div>
-            <CheckCircle2 className="w-5 h-5 text-emerald-500" />
-          </div>
-
-          <div className="bg-[#E4EEFF]/50 p-3.5 rounded-2xl border border-[#6FA8FF]/40 space-y-2">
-            <label className="block text-xs font-bold text-[#223981]">Aadhaar Number (e-KYC)</label>
-            <div className="flex space-x-2">
-              <input 
-                type="text"
-                value={aadhaarNumber}
-                onChange={(e) => setAadhaarNumber(e.target.value)}
-                className="flex-1 p-2 bg-white border border-slate-300 rounded-xl text-xs font-semibold text-[#223981]"
-              />
-              <button 
-                onClick={() => setOtpSent(true)}
-                className="px-3 py-2 bg-[#223981] text-white text-xs font-bold rounded-xl"
-              >
-                {otpSent ? 'Resend OTP' : 'Send OTP'}
-              </button>
-            </div>
-
-            {otpSent && (
-              <div className="pt-2">
-                <p className="text-[10px] text-emerald-700 font-semibold mb-1">OTP sent to linked mobile +91 98765 *****</p>
-                <div className="flex space-x-2">
-                  <input 
-                    type="text"
-                    maxLength={6}
-                    value={aadhaarOtp}
-                    onChange={(e) => setAadhaarOtp(e.target.value)}
-                    placeholder="Enter 6-digit OTP"
-                    className="flex-1 p-2 bg-white border border-emerald-300 rounded-xl text-xs font-bold text-center tracking-widest"
-                  />
-                  <button 
-                    onClick={() => setKycDone(true)}
-                    className="px-3 py-2 bg-emerald-600 text-white text-xs font-bold rounded-xl flex items-center"
-                  >
-                    <Check className="w-3.5 h-3.5 mr-1" />
-                    Verify
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className="bg-slate-50 p-3 rounded-2xl border border-slate-200 flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <Camera className="w-5 h-5 text-[#4A8DFF]" />
-              <div>
-                <p className="text-xs font-bold text-[#223981]">Liveness Selfie Check</p>
-                <p className="text-[10px] text-[#717983]">Facial match with Aadhaar photo: 99.4%</p>
-              </div>
-            </div>
-            <span className="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">
-              Matched
-            </span>
-          </div>
+          )}
 
           <div className="flex items-center space-x-3 pt-2">
             <button
               onClick={() => setStep(2)}
-              className="px-4 py-2.5 border border-slate-300 text-[#223981] text-xs font-bold rounded-xl"
+              disabled={isSubmittingApplication}
+              className="px-4 py-2.5 border border-slate-300 text-[#223981] text-xs font-bold rounded-xl disabled:opacity-50"
             >
               <ArrowLeft className="w-4 h-4" />
             </button>
             <button
-              onClick={handleNextStep}
-              className="flex-1 py-2.5 bg-[#4A8DFF] text-white text-xs font-extrabold rounded-xl shadow flex items-center justify-center space-x-1"
+              onClick={handleProceedToOffers}
+              disabled={isSubmittingApplication}
+              className="flex-1 py-2.5 bg-[#4A8DFF] text-white text-xs font-extrabold rounded-xl shadow flex items-center justify-center space-x-1 disabled:opacity-60"
             >
-              <span>View NBFC Comparison Offers</span>
-              <ArrowRight className="w-4 h-4" />
+              {isSubmittingApplication ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Submitting Application...</span>
+                </>
+              ) : (
+                <>
+                  <span>Submit & View NBFC Offers</span>
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
             </button>
           </div>
         </div>
@@ -387,78 +404,56 @@ export const LoanApplicationWizard = ({ preSelectedProduct = 'personal', onClose
             <p className="text-xs text-[#717983]">Side-by-side comparison of 9 partner offers matching your monthly income.</p>
           </div>
 
-          <MultiLenderComparison 
+          <MultiLenderComparison
             loanAmount={loanAmount}
             tenureMonths={tenureMonths}
             userSalary={monthlyIncome}
+            leadCode={submittedApplication?.leadCode || submittedApplication?.displayId}
             onSelectOffer={handleOfferSelect}
           />
         </div>
       )}
 
-      {/* STEP 5: Offer Selection & e-Sign Agreement */}
+      {/* STEP 5: Honest confirmation — by this point MultiLenderComparison has already
+          opened the chosen lender's own site in a new tab. We do not claim any
+          approval, e-sign, or disbursal happened here, because none of that happens
+          in this app. */}
       {step === 5 && (
         <div className="space-y-4">
-          <div className="bg-emerald-50 p-4 rounded-2xl border border-emerald-200 text-center">
-            <Sparkles className="w-8 h-8 text-emerald-600 mx-auto mb-1 animate-bounce" />
-            <h2 className="text-base font-extrabold text-emerald-900">Pre-Approved Sanction Ready!</h2>
-            <p className="text-xs text-emerald-700 mt-0.5">
-              Lender: <strong className="font-bold">{chosenOffer?.nbfc.name || 'Rupay91'}</strong>
+          <div className="bg-blue-50 p-4 rounded-2xl border border-blue-200 text-center">
+            <ExternalLink className="w-8 h-8 text-blue-600 mx-auto mb-1" />
+            <h2 className="text-base font-extrabold text-blue-900">You're Continuing With {chosenOffer?.nbfc?.name || 'the Partner Lender'}</h2>
+            <p className="text-xs text-blue-700 mt-0.5">
+              We opened their site in a new tab so you can complete your application, KYC, and final loan terms directly with them.
             </p>
           </div>
 
           <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2 text-xs">
             <div className="flex justify-between border-b pb-1">
-              <span className="text-[#717983]">Approved Loan Amount:</span>
+              <span className="text-[#717983]">Requested Loan Amount:</span>
               <span className="font-bold text-[#223981]">₹{loanAmount.toLocaleString()}</span>
             </div>
             <div className="flex justify-between border-b pb-1">
-              <span className="text-[#717983]">Monthly EMI:</span>
-              <span className="font-bold text-[#4A8DFF]">₹{(chosenOffer?.emi || calculatedEmi).toLocaleString()}/mo</span>
-            </div>
-            <div className="flex justify-between border-b pb-1">
-              <span className="text-[#717983]">Tenure:</span>
+              <span className="text-[#717983]">Requested Tenure:</span>
               <span className="font-bold text-[#223981]">{tenureMonths} Months</span>
             </div>
-            <div className="flex justify-between border-b pb-1">
-              <span className="text-[#717983]">Interest Rate:</span>
-              <span className="font-bold text-emerald-600">{chosenOffer?.nbfc?.interestRateDisplay || 'upto 1.0% / day'}</span>
-            </div>
-            <div className="flex justify-between border-b pb-1">
-              <span className="text-[#717983]">Processing Fee:</span>
-              <span className="font-bold text-[#1E293B]">₹{(chosenOffer?.fee || 5250).toLocaleString()}</span>
-            </div>
             <div className="flex justify-between pt-1">
-              <span className="text-[#717983]">Credit Bank Account:</span>
-              <span className="font-bold text-emerald-700">HDFC Bank (****1823)</span>
+              <span className="text-[#717983]">Estimated EMI (indicative):</span>
+              <span className="font-bold text-[#4A8DFF]">₹{calculatedEmi.toLocaleString()}/mo</span>
             </div>
           </div>
 
-          {/* e-Sign Consent Checkbox */}
-          <div className="bg-[#E4EEFF]/60 p-3 rounded-2xl border border-[#6FA8FF]/40 flex items-start space-x-2">
-            <input 
-              type="checkbox"
-              id="esignConsent"
-              checked={agreementSigned}
-              onChange={(e) => setAgreementSigned(e.target.checked)}
-              className="mt-0.5 w-4 h-4 accent-[#4A8DFF] cursor-pointer"
-            />
-            <label htmlFor="esignConsent" className="text-[11px] text-[#223981] font-semibold cursor-pointer">
-              I agree to e-Sign the NBFC Sanction Letter & Loan Agreement with Aadhaar OTP authentication.
-            </label>
+          <div className="bg-amber-50/80 p-3 rounded-2xl border border-amber-200/80 text-[11px] text-amber-900 font-medium">
+            Final approval, interest rate, fees, and disbursal are decided solely by {chosenOffer?.nbfc?.name || 'the lender'} —
+            not by Paisa in Minutes. If the new tab didn't open, check your browser's pop-up settings.
           </div>
 
           <button
             onClick={handleFinalSubmit}
-            disabled={!agreementSigned}
-            className={`w-full py-3.5 rounded-2xl text-xs sm:text-sm font-extrabold text-white flex items-center justify-center space-x-2 shadow-lg transition ${
-              agreementSigned 
-                ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/30 cursor-pointer' 
-                : 'bg-slate-300 cursor-not-allowed'
-            }`}
+            className="w-full py-3.5 rounded-2xl text-xs sm:text-sm font-extrabold text-white flex items-center justify-center space-x-2 shadow-lg transition bg-[#223981] hover:bg-[#1a2c66] cursor-pointer"
           >
-            <Lock className="w-4 h-4" />
-            <span>e-Sign & Disburse Loan Now</span>
+            <CheckCircle2 className="w-4 h-4" />
+            <span>Done — Track This Application</span>
           </button>
         </div>
       )}

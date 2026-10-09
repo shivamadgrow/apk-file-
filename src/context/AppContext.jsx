@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { MOCK_LEADS } from '../data/mockData';
+import { api, hasSession } from '../services/api';
 
 const AppContext = createContext();
 
@@ -58,6 +58,7 @@ export const AppProvider = ({ children }) => {
     creditScore: null,
     scoreCategory: null,
     lastChecked: null,
+    factors: null,
     kycVerified: false,
     bankDetails: null,
     loanHistory: []
@@ -103,6 +104,45 @@ export const AppProvider = ({ children }) => {
     }
   }, [currentPhone, usersDb]);
 
+  // Session validation on app start. A cached `currentPhone`/local profile must
+  // never be trusted as proof of authentication by itself — only a real, currently
+  // valid backend session (an access token that the server actually accepts) counts.
+  // If no token exists at all, any stale local "logged in" state is cleared. If a
+  // token exists but the server is simply unreachable right now, we stay logged in
+  // optimistically (typical offline-tolerant mobile behavior) rather than logging
+  // the user out for a network blip.
+  useEffect(() => {
+    (async () => {
+      if (!currentPhone) return;
+      const profile = await api.getProfile();
+      if (profile && profile.phone) {
+        const cleanPhone = profile.phone.replace(/\D/g, '').slice(-10);
+        setUsersDb((prevDb) => {
+          const existing = prevDb[cleanPhone] || {};
+          const merged = {
+            ...existing,
+            name: profile.name,
+            phone: `+91 ${cleanPhone}`,
+            email: profile.email || '',
+            panMasked: profile.panMasked || null,
+            city: profile.city || ''
+          };
+          const updated = { ...prevDb, [cleanPhone]: merged };
+          localStorage.setItem('paisainminute_users_db', JSON.stringify(updated));
+          return updated;
+        });
+        return;
+      }
+      const stillHasSession = await hasSession();
+      if (!stillHasSession) {
+        // Token is genuinely gone/invalid (refresh already failed server-side) —
+        // don't let a stale local profile keep presenting as "logged in".
+        logoutUser();
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Active Loan Application State (Strictly derived from real history)
   const latestLoan = user && user.loanHistory && user.loanHistory.length > 0 ? user.loanHistory[0] : null;
   const [activeLoan, setActiveLoan] = useState({
@@ -119,7 +159,10 @@ export const AppProvider = ({ children }) => {
     selectedNbfc: latestLoan ? latestLoan.selectedNbfc || { name: latestLoan.nbfc || "" } : null
   });
 
-  // Keep activeLoan in sync when user loanHistory changes
+  // Keep activeLoan in sync when user loanHistory changes.
+  // This reads the status/stepLabels exactly as the wizard recorded them — it must
+  // never re-fabricate a generic "Disbursal in Progress" story on top of whatever
+  // honest state was actually saved.
   useEffect(() => {
     const freshLoan = user && user.loanHistory && user.loanHistory.length > 0 ? user.loanHistory[0] : null;
     if (freshLoan) {
@@ -131,21 +174,10 @@ export const AppProvider = ({ children }) => {
         tenureMonths: freshLoan.tenureMonths || 0,
         monthlyEmi: freshLoan.monthlyEmi || 0,
         purpose: freshLoan.purpose || "Personal Requirement",
-        currentStep: 5,
-        status: freshLoan.status || "Approved — Disbursal Initiated",
-        stepLabels: [
-          { id: 1, title: "Journey Started", time: "Just now", done: true },
-          { id: 2, title: "Application Complete", time: "Just now", done: true },
-          { id: 3, title: "Offer Selected", time: "Just now", done: true },
-          { id: 4, title: "e-KYC & Agreement Signed", time: "Just now", done: true },
-          { id: 5, title: "Disbursal in Progress", time: "Estimated < 5 mins", done: true }
-        ],
-        selectedNbfc: {
-          name: freshLoan.nbfc || "Partner Lender",
-          rate: "10.99%",
-          fee: "₹1,500",
-          disbursalTime: "8 Minutes"
-        }
+        currentStep: freshLoan.stepLabels?.length || 0,
+        status: freshLoan.status || "Submitted",
+        stepLabels: freshLoan.stepLabels || [],
+        selectedNbfc: freshLoan.selectedNbfc || { name: freshLoan.nbfc || "Partner Lender" }
       });
     } else {
       setActiveLoan({
@@ -181,6 +213,7 @@ export const AppProvider = ({ children }) => {
         creditScore: null,
         scoreCategory: null,
         lastChecked: null,
+        factors: null,
         kycVerified: false,
         bankDetails: null,
         loanHistory: []
@@ -193,20 +226,25 @@ export const AppProvider = ({ children }) => {
     localStorage.setItem('paisainminute_current_phone', cleanPhone);
   };
 
-  // Add new loan application to current user's persistent history
+  // Add new loan application to current user's persistent history.
+  // This is a LOCAL record of what the user did in this app (picked an amount,
+  // selected a lender, got redirected). It must only ever reflect fields the caller
+  // actually provides — never default to a fabricated "approved/disbursed" status.
   const saveNewLoanApplication = (loanData) => {
     const cleanPhone = currentPhone;
     const existingUser = usersDb[cleanPhone] || user;
 
     const newHistoryItem = {
-      id: loanData.id || `PL-2026-${Math.floor(1000 + Math.random() * 9000)}`,
+      id: loanData.id || `PIM-${Math.floor(1000 + Math.random() * 9000)}`,
       type: loanData.type || 'Personal Loan',
-      amount: loanData.amount || 350000,
-      tenureMonths: loanData.tenureMonths || 36,
-      monthlyEmi: loanData.monthlyEmi || 11480,
+      amount: loanData.amount || 0,
+      tenureMonths: loanData.tenureMonths || 0,
+      monthlyEmi: loanData.monthlyEmi || 0,
       appliedDate: 'Just now',
-      status: 'Approved — Disbursal Initiated',
-      nbfc: loanData.selectedNbfc?.name || 'Rupay91'
+      status: loanData.status || 'Submitted',
+      stepLabels: loanData.stepLabels || [],
+      selectedNbfc: loanData.selectedNbfc || null,
+      nbfc: loanData.selectedNbfc?.name || loanData.nbfc || ''
     };
 
     const updatedHistory = [newHistoryItem, ...(existingUser.loanHistory || [])];
@@ -225,58 +263,66 @@ export const AppProvider = ({ children }) => {
     setUser(updatedUser);
   };
 
-  // Logout Function
+  // Logout Function. The server-side token revocation happens in the background —
+  // the UI clears immediately either way, so a slow/offline network never traps the
+  // user in a logged-in-looking state on their own device.
   const logoutUser = () => {
+    api.logout().catch(() => {});
     setCurrentPhone('');
     localStorage.removeItem('paisainminute_current_phone');
-    localStorage.removeItem('paisainminute_jwt_token');
-    localStorage.removeItem('paisainminute_refresh_token');
     setUser(GUEST_USER);
     setActiveTab('home');
     setIsAuthOpen(true);
   };
 
-  // Affiliate / Partner State
-  const [affiliate, setAffiliate] = useState({
-    isApproved: false,
-    accountType: "individual",
-    partnerId: "",
-    referralCode: "",
-    referralUrl: "",
-    totalEarned: 0,
-    pendingPayout: 0,
-    paidOut: 0,
-    leads: [],
-    company: null,
-    payoutHistory: []
-  });
+  // Merges real, server-confirmed profile fields (from api.updateProfile's response)
+  // into the local cache. Never called optimistically before the server responds —
+  // callers must await the API call and only invoke this on res.ok.
+  const updateLocalProfile = (fields) => {
+    if (!currentPhone) return;
+    setUsersDb((prevDb) => {
+      const existing = prevDb[currentPhone] || {};
+      const updated = { ...existing, ...fields };
+      const updatedDb = { ...prevDb, [currentPhone]: updated };
+      localStorage.setItem('paisainminute_users_db', JSON.stringify(updatedDb));
+      return updatedDb;
+    });
+  };
 
-  // Notifications State
-  const [notifications, setNotifications] = useState([
-    {
-      id: "n1",
-      title: "🎉 Pre-Approved Loan Offer!",
-      message: "You have a ₹5,00,000 instant credit line pre-approved with Rupay91 at 0.95%/mo.",
-      time: "10m ago",
-      unread: true,
-      type: "offer"
-    },
-    {
-      id: "n2",
-      title: "⚡ Instant Bank Account Disbursal",
-      message: "Check your pre-approved personal loan offers and track disbursal in real-time.",
-      time: "2h ago",
-      unread: true,
-      type: "offer"
+  // Called only after the backend has confirmed account deletion (DELETE /api/users/me
+  // returned ok:true) — this clears the local cache to match what the server actually
+  // did, it does not itself delete anything or claim deletion on its own.
+  const deleteLocalAccount = () => {
+    const phone = currentPhone;
+    setCurrentPhone('');
+    localStorage.removeItem('paisainminute_current_phone');
+    if (phone) {
+      setUsersDb((prevDb) => {
+        const { [phone]: _removed, ...rest } = prevDb;
+        localStorage.setItem('paisainminute_users_db', JSON.stringify(rest));
+        return rest;
+      });
     }
-  ]);
+    setUser(GUEST_USER);
+    setActiveTab('home');
+    setIsAuthOpen(true);
+  };
+
+
+  // Notifications State — empty by default. No pre-approved/disbursal claims are shown
+  // unless they come from a real backend response; fabricating them here would be the
+  // same "fake pre-approval" problem flagged in the audit.
+  const [notifications, setNotifications] = useState([]);
 
   const markNotificationRead = (id) => {
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, unread: false } : n));
   };
 
-  // Save and update user's CIBIL Credit Score in persistent data
-  const saveCibilScore = ({ name, phone, creditScore, scoreCategory, reportDate }) => {
+  // Save and update user's CIBIL Credit Score in persistent data.
+  // This is only ever called with a real score returned by the confirmed backend's
+  // bureau integration (src/services/api.js checkCibil) — it must never be called with
+  // a client-fabricated value.
+  const saveCibilScore = ({ name, phone, creditScore, scoreCategory, reportDate, factors }) => {
     const cleanPhone = (phone || currentPhone || '').replace(/\D/g, '').slice(-10);
     const existingUser = (cleanPhone && usersDb[cleanPhone]) ? usersDb[cleanPhone] : user;
 
@@ -286,9 +332,10 @@ export const AppProvider = ({ children }) => {
       phone: cleanPhone ? `+91 ${cleanPhone}` : existingUser.phone,
       creditScore: Number(creditScore),
       cibilScore: Number(creditScore),
-      scoreCategory: scoreCategory || (Number(creditScore) >= 750 ? 'Excellent' : 'Good'),
+      scoreCategory: scoreCategory || null,
       lastChecked: reportDate || 'Today',
-      cibilCheckedAt: new Date().toISOString()
+      cibilCheckedAt: new Date().toISOString(),
+      factors: factors || null
     };
 
     const updatedDb = {
@@ -305,31 +352,6 @@ export const AppProvider = ({ children }) => {
     }
     setUser(updatedUser);
     return updatedUser;
-  };
-
-  // Add new lead in Lead Management tab
-  const addLead = (newLeadData) => {
-    const newLead = {
-      id: `LD-${Math.floor(9030 + Math.random() * 900)}`,
-      name: newLeadData.name || "New Applicant",
-      phone: newLeadData.phone || "+91 98000 00000",
-      type: newLeadData.type || "Personal Loan",
-      amount: newLeadData.amount ? `₹${Number(newLeadData.amount).toLocaleString()}` : "₹3,00,000",
-      cibil: newLeadData.cibil || user.creditScore || user.cibilScore || null,
-      creditScore: newLeadData.creditScore || user.creditScore || user.cibilScore || null,
-      status: "In Review",
-      commission: `₹${Math.round((Number(newLeadData.amount) || 300000) * 0.025).toLocaleString()}`,
-      date: "Today",
-      nbfc: newLeadData.nbfc || "Rupay91 Instant Loan",
-      payoutStatus: "Pending Disbursal"
-    };
-
-    setAffiliate(prev => ({
-      ...prev,
-      leads: [newLead, ...(prev.leads || [])]
-    }));
-
-    return newLead;
   };
 
   return (
@@ -350,13 +372,12 @@ export const AppProvider = ({ children }) => {
       referredBy,
       loginUser,
       logoutUser,
+      updateLocalProfile,
+      deleteLocalAccount,
       saveNewLoanApplication,
       saveCibilScore,
       activeLoan,
       setActiveLoan,
-      affiliate,
-      setAffiliate,
-      addLead,
       notifications,
       markNotificationRead,
       hasAcceptedTerms,
