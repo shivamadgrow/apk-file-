@@ -9,14 +9,14 @@ export const ProductGrid = ({ onProductSelect }) => {
 
   const products = [
     {
-      // The only category currently backed by real partner data (the 9 NBFC-registered
-      // lending partners). Business/Gold/Credit Card below route through the same
-      // partner comparison — there is no distinct partner data for them yet, so their
-      // limit/rate must not assert a specific unverified number.
+      // The only category currently backed by real partner data (the 6 lending
+      // partners in PARTNER_NBFCS). Business/Gold/Credit Card below route through the
+      // same partner comparison — there is no distinct partner data for them yet, so
+      // their limit/rate must not assert a specific unverified number.
       id: 'personal',
       name: t.personalLoan,
-      limit: 'Up to ₹10 Lakhs',
-      rate: 'Set by partner',
+      limit: 'Up to ₹1 Lakh',
+      rate: 'Up to 1.0% / day',
       icon: UserCheck,
       color: 'bg-blue-50 text-[#4A8DFF] border-blue-200/80',
       badge: ''

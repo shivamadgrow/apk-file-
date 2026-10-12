@@ -19,13 +19,13 @@ export const LoanApplicationWizard = ({ preSelectedProduct = 'personal', onClose
     ? 'Instant Credit Card' 
     : 'Personal Loan';
 
-  const defaultAmount = preSelectedProduct === 'business' 
-    ? 500000 
-    : preSelectedProduct === 'gold' 
-    ? 200000 
-    : preSelectedProduct === 'credit_card' 
-    ? 100000 
-    : 350000;
+  // All 6 real lending partners cap at ₹1,00,000 (confirmed against the website's
+  // own config/partners.php, re-checked 2026-10-12). Tenure, APR, and fees now vary
+  // per partner — 30-90 days for the 5 website-based NBFC partners, 3-12 months for
+  // the app-based partner MoneyDot — so they are shown per-offer in Step 4/5 rather
+  // than as a single number here. Every product category here routes to the same 6
+  // partners in Step 4, so none of them can exceed the ₹1,00,000 cap.
+  const defaultAmount = 50000;
 
   const defaultPurpose = preSelectedProduct === 'business' 
     ? 'Business Working Capital / Inventory' 
@@ -37,7 +37,11 @@ export const LoanApplicationWizard = ({ preSelectedProduct = 'personal', onClose
 
   const [step, setStep] = useState(1);
   const [loanAmount, setLoanAmount] = useState(defaultAmount);
-  const [tenureMonths, setTenureMonths] = useState(36);
+  // Not user-selectable here: real tenure is set by whichever partner the user
+  // picks in Step 4 (ranges from 30 days to 12 months — see PARTNER_NBFCS). This is
+  // sent to the backend's `tenureMonths` field as a representative placeholder (3
+  // months) only for the initial lead record, before a partner is chosen.
+  const tenureMonths = 3;
   const [purpose, setPurpose] = useState(defaultPurpose);
   const [employmentType, setEmploymentType] = useState('salaried');
   const [monthlyIncome, setMonthlyIncome] = useState(35000);
@@ -63,11 +67,6 @@ export const LoanApplicationWizard = ({ preSelectedProduct = 'personal', onClose
   const [submittedApplication, setSubmittedApplication] = useState(null);
   const [isSubmittingApplication, setIsSubmittingApplication] = useState(false);
   const [submitError, setSubmitError] = useState('');
-
-  // EMI Preview Calculation
-  const approxRate = 10.99;
-  const r = approxRate / 12 / 100;
-  const calculatedEmi = Math.round((loanAmount * r * Math.pow(1 + r, tenureMonths)) / (Math.pow(1 + r, tenureMonths) - 1));
 
   const handleNextStep = () => {
     setStep(prev => prev + 1);
@@ -146,7 +145,7 @@ export const LoanApplicationWizard = ({ preSelectedProduct = 'personal', onClose
       type: preSelectedProduct === 'gold' ? 'Gold Loan' : preSelectedProduct === 'business' ? 'Business Loan' : 'Personal Loan',
       amount: loanAmount,
       tenureMonths: tenureMonths,
-      monthlyEmi: calculatedEmi,
+      monthlyEmi: 0, // tenure/EMI terms are set by the chosen partner, not a fixed in-app value
       purpose: purpose,
       currentStep: 3,
       status: `Submitted (${submittedApplication?.status || 'FRESH'}) — Redirected to Partner`,
@@ -190,8 +189,8 @@ export const LoanApplicationWizard = ({ preSelectedProduct = 'personal', onClose
       {step === 1 && (
         <div className="space-y-5">
           <div>
-            <h2 className="text-lg font-extrabold text-[#223981]">Select {productTitle} Amount & Tenure</h2>
-            <p className="text-xs text-[#717983]">Tailor your credit requirement with live EMI preview.</p>
+            <h2 className="text-lg font-extrabold text-[#223981]">Select {productTitle} Amount</h2>
+            <p className="text-xs text-[#717983]">Compare up to ₹1,00,000 across our lending partners — exact rate, tenure, and fees are shown per partner in the next step.</p>
           </div>
 
           {/* Amount Slider */}
@@ -200,41 +199,19 @@ export const LoanApplicationWizard = ({ preSelectedProduct = 'personal', onClose
               <span className="text-xs font-bold text-[#717983]">Required Loan Amount</span>
               <span className="text-xl font-black text-[#223981]">₹{loanAmount.toLocaleString()}</span>
             </div>
-            <input 
+            <input
               type="range"
-              min="25000"
-              max="1500000"
-              step="25000"
+              min="10000"
+              max="100000"
+              step="5000"
               value={loanAmount}
               onChange={(e) => setLoanAmount(Number(e.target.value))}
               className="w-full accent-[#4A8DFF] h-2 bg-slate-200 rounded-lg cursor-pointer"
             />
             <div className="flex justify-between text-[10px] text-[#717983] font-semibold mt-1">
-              <span>₹25,000</span>
-              <span>₹7.5 Lakhs</span>
-              <span>₹15 Lakhs</span>
-            </div>
-          </div>
-
-          {/* Tenure Slider */}
-          <div className="bg-[#E4EEFF]/50 p-4 rounded-2xl border border-[#6FA8FF]/30">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-bold text-[#717983]">Repayment Tenure</span>
-              <span className="text-lg font-extrabold text-[#4A8DFF]">{tenureMonths} Months ({tenureMonths / 12} Yrs)</span>
-            </div>
-            <input 
-              type="range"
-              min="6"
-              max="60"
-              step="6"
-              value={tenureMonths}
-              onChange={(e) => setTenureMonths(Number(e.target.value))}
-              className="w-full accent-[#4A8DFF] h-2 bg-slate-200 rounded-lg cursor-pointer"
-            />
-            <div className="flex justify-between text-[10px] text-[#717983] font-semibold mt-1">
-              <span>6 Months</span>
-              <span>36 Months</span>
-              <span>60 Months</span>
+              <span>₹10,000</span>
+              <span>₹50,000</span>
+              <span>₹1,00,000</span>
             </div>
           </div>
 
@@ -254,12 +231,11 @@ export const LoanApplicationWizard = ({ preSelectedProduct = 'personal', onClose
             </select>
           </div>
 
-          {/* Live Calculated EMI Card */}
           <div className="bg-gradient-to-r from-[#223981] to-[#17275A] text-white p-4 rounded-2xl flex items-center justify-between shadow-md">
             <div>
-              <p className="text-[10px] font-bold text-[#6FA8FF] uppercase">Calculated Monthly EMI</p>
-              <p className="text-2xl font-black text-white">₹{calculatedEmi.toLocaleString()}<span className="text-xs font-normal">/month</span></p>
-              <p className="text-[10px] text-emerald-300 font-bold">Indicative only — your actual rate is set by the lending partner you choose</p>
+              <p className="text-[10px] font-bold text-[#6FA8FF] uppercase">Requested Amount</p>
+              <p className="text-2xl font-black text-white">₹{loanAmount.toLocaleString()}</p>
+              <p className="text-[10px] text-emerald-300 font-bold">Rate, tenure & fees vary by partner — see the next step</p>
             </div>
             <button
               onClick={handleNextStep}
@@ -415,7 +391,7 @@ export const LoanApplicationWizard = ({ preSelectedProduct = 'personal', onClose
         <div>
           <div className="mb-3">
             <h2 className="text-lg font-extrabold text-[#223981]">Compare & Select Best NBFC Offer</h2>
-            <p className="text-xs text-[#717983]">Side-by-side comparison of 9 partner offers matching your monthly income.</p>
+            <p className="text-xs text-[#717983]">Side-by-side comparison of 6 partner offers matching your monthly income.</p>
           </div>
 
           <MultiLenderComparison
@@ -438,7 +414,9 @@ export const LoanApplicationWizard = ({ preSelectedProduct = 'personal', onClose
             <ExternalLink className="w-8 h-8 text-blue-600 mx-auto mb-1" />
             <h2 className="text-base font-extrabold text-blue-900">You're Continuing With {chosenOffer?.nbfc?.name || 'the Partner Lender'}</h2>
             <p className="text-xs text-blue-700 mt-0.5">
-              We opened their site in a new tab so you can complete your application, KYC, and final loan terms directly with them.
+              {chosenOffer?.nbfc?.isApp
+                ? 'We opened the Play Store so you can install their app and complete your application, KYC, and final loan terms directly with them.'
+                : 'We opened their site in a new tab so you can complete your application, KYC, and final loan terms directly with them.'}
             </p>
           </div>
 
@@ -448,12 +426,16 @@ export const LoanApplicationWizard = ({ preSelectedProduct = 'personal', onClose
               <span className="font-bold text-[#223981]">₹{loanAmount.toLocaleString()}</span>
             </div>
             <div className="flex justify-between border-b pb-1">
-              <span className="text-[#717983]">Requested Tenure:</span>
-              <span className="font-bold text-[#223981]">{tenureMonths} Months</span>
+              <span className="text-[#717983]">Repayment Period:</span>
+              <span className="font-bold text-[#223981]">{chosenOffer?.nbfc?.tenureDisplay || 'Set by Partner'}</span>
+            </div>
+            <div className="flex justify-between border-b pb-1">
+              <span className="text-[#717983]">APR:</span>
+              <span className="font-bold text-[#223981]">{chosenOffer?.nbfc?.aprDisplay || 'Set by Partner'}</span>
             </div>
             <div className="flex justify-between pt-1">
-              <span className="text-[#717983]">Estimated EMI (indicative):</span>
-              <span className="font-bold text-[#4A8DFF]">₹{calculatedEmi.toLocaleString()}/mo</span>
+              <span className="text-[#717983]">Processing Fee:</span>
+              <span className="font-bold text-[#4A8DFF]">{chosenOffer?.nbfc?.processingFeeDisplay || 'Set by Partner'}</span>
             </div>
           </div>
 

@@ -26,6 +26,23 @@ export const hasSession = async () => !!(await getToken());
 export const buildPartnerRedirectUrl = (slug, leadCode, source = 'android_app') =>
   `${API_BASE_URL}/public/redirect/${encodeURIComponent(slug)}?lead_id=${encodeURIComponent(leadCode)}&source=${encodeURIComponent(source)}`;
 
+// MoneyDot is a Play Store app, not a website — the backend's AffiliatePartner table
+// has no row and no schema support for it (no is_app/app_package distinction), so it
+// cannot go through the generic tracked redirect above: that would append UTM/ref
+// params as plain query params, not wrapped inside Play Store's single required
+// `referrer=` param, silently breaking install attribution. This mirrors the
+// website's own loan-offers.php `is_app` branch, which builds the same kind of link
+// directly rather than calling the backend redirect endpoint.
+export const buildMoneyDotPlayStoreUrl = (appPackage, leadCode, source = 'android_app') => {
+  const referrerParams = new URLSearchParams({
+    utm_source: 'paisainminutes',
+    utm_medium: 'affiliate',
+    utm_campaign: source,
+    lead_id: leadCode
+  }).toString();
+  return `https://play.google.com/store/apps/details?id=${encodeURIComponent(appPackage)}&hl=en_IN&referrer=${encodeURIComponent(referrerParams)}`;
+};
+
 // Helper to retrieve auth headers with JWT Bearer token. Async because the token
 // read is async (secure storage).
 export const getAuthHeaders = async () => {

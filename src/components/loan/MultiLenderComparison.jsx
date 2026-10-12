@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { PARTNER_NBFCS } from '../../data/mockData';
-import { api, hasSession, buildPartnerRedirectUrl } from '../../services/api';
+import { api, hasSession, buildPartnerRedirectUrl, buildMoneyDotPlayStoreUrl } from '../../services/api';
 import { LeadConsentCheckbox, DISCLOSURE_VERSION } from './LeadConsentCheckbox';
 import {
   ShieldCheck, Lock, Zap, CheckCircle2, ArrowRight,
@@ -114,7 +114,14 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
     setSubmittingSlug(null);
     if (!code) return; // applyError is already set — never redirect without a real lead
 
-    const targetUrl = buildPartnerRedirectUrl(nbfc.slug, code);
+    // MoneyDot is a Play Store app, not a website, and the backend has no schema
+    // support or configured row for it yet (see mockData.js header comment) — so it
+    // is linked to directly, with its own wrapped `referrer=` param for Play Store
+    // install attribution, instead of going through the generic backend redirect
+    // endpoint used for the other (website-based) partners.
+    const targetUrl = nbfc.isApp
+      ? buildMoneyDotPlayStoreUrl(nbfc.appPackage, code)
+      : buildPartnerRedirectUrl(nbfc.slug, code);
     window.open(targetUrl, '_blank');
 
     if (onSelectOffer) {
@@ -122,22 +129,25 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
     }
   };
 
+  // MoneyDot has no published minSalary number ("Set by Partner"), so it is treated
+  // as always eligible here rather than locked out by a numeric comparison it has no
+  // real value for.
   const eligibleLenders = PARTNER_NBFCS
-    .filter(n => (salary || 0) >= n.minSalary)
+    .filter(n => n.minSalary == null || (salary || 0) >= n.minSalary)
     .sort((a, b) => {
       // If Rupay91 is eligible (salary >= 50k), Rupay91 must ALWAYS be at the very top (#1)!
       if (a.id === 'rupay91') return -1;
       if (b.id === 'rupay91') return 1;
       // Best matching salary tier (highest minSalary) first
-      if (b.minSalary !== a.minSalary) {
-        return b.minSalary - a.minSalary;
+      if ((b.minSalary || 0) !== (a.minSalary || 0)) {
+        return (b.minSalary || 0) - (a.minSalary || 0);
       }
       return b.maxAmount - a.maxAmount;
     });
 
   const ineligibleLenders = PARTNER_NBFCS
-    .filter(n => (salary || 0) < n.minSalary)
-    .sort((a, b) => a.minSalary - b.minSalary);
+    .filter(n => n.minSalary != null && (salary || 0) < n.minSalary)
+    .sort((a, b) => (a.minSalary || 0) - (b.minSalary || 0));
 
   const salaryPresets = [
     { label: '₹25,000', val: 25000 },
@@ -163,7 +173,7 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
                 Compare Offers
               </span>
               <span className="text-[11px] font-bold text-blue-200">
-                9 Regulated Partners
+                6 Regulated Partners
               </span>
             </div>
             <h2 className="text-lg sm:text-xl font-black mt-1 tracking-tight text-white">
@@ -378,10 +388,10 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
                   </div>
                   <div className="border-x border-slate-200/80 px-1 sm:px-2">
                     <span className="text-[9px] sm:text-[9.5px] font-bold text-slate-400 uppercase tracking-wider block whitespace-nowrap">
-                      INTEREST RATE
+                      {nbfc.interestRateDisplay ? 'INTEREST RATE' : 'APR'}
                     </span>
                     <span className="text-[11.5px] sm:text-sm font-black text-emerald-600 mt-0.5 block whitespace-nowrap">
-                      {nbfc.interestRateDisplay}
+                      {nbfc.interestRateDisplay || nbfc.aprDisplay}
                     </span>
                   </div>
                   <div>
@@ -391,6 +401,22 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
                     <span className="text-[11.5px] sm:text-sm font-black text-slate-800 mt-0.5 block whitespace-nowrap">
                       {nbfc.minSalaryDisplay}
                     </span>
+                  </div>
+                </div>
+
+                {/* DISCLOSURE ROW: real per-partner APR / tenure / processing fee */}
+                <div className="grid grid-cols-3 gap-1 sm:gap-2 mb-3 px-0.5 text-center items-start">
+                  <div>
+                    <span className="text-[8.5px] font-bold text-slate-400 uppercase tracking-wider block">APR</span>
+                    <span className="text-[10px] sm:text-[11px] font-bold text-slate-700 block">{nbfc.aprDisplay}</span>
+                  </div>
+                  <div>
+                    <span className="text-[8.5px] font-bold text-slate-400 uppercase tracking-wider block">Tenure</span>
+                    <span className="text-[10px] sm:text-[11px] font-bold text-slate-700 block">{nbfc.tenureDisplay}</span>
+                  </div>
+                  <div>
+                    <span className="text-[8.5px] font-bold text-slate-400 uppercase tracking-wider block">Processing Fee</span>
+                    <span className="text-[10px] sm:text-[11px] font-bold text-slate-700 block">{nbfc.processingFeeDisplay}</span>
                   </div>
                 </div>
 
@@ -527,10 +553,10 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
                   </div>
                   <div className="border-x border-slate-200 px-1 sm:px-2">
                     <span className="text-[9px] sm:text-[9.5px] font-bold text-slate-400 uppercase tracking-wider block whitespace-nowrap">
-                      INTEREST RATE
+                      {nbfc.interestRateDisplay ? 'INTEREST RATE' : 'APR'}
                     </span>
                     <span className="text-[11.5px] sm:text-sm font-bold text-emerald-600 mt-0.5 block whitespace-nowrap">
-                      {nbfc.interestRateDisplay}
+                      {nbfc.interestRateDisplay || nbfc.aprDisplay}
                     </span>
                   </div>
                   <div>

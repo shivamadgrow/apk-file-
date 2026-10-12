@@ -27,7 +27,7 @@ export const HeroBanner = ({ onApplyClick }) => {
           </span>
         </h1>
         <p className="text-xs text-[#717983] font-medium mt-1.5 leading-relaxed">
-          Compare offers from multiple NBFC-registered lending partners, then apply directly on their site.
+          Compare offers from multiple lending partners, then apply directly with them.
         </p>
       </div>
 
@@ -35,13 +35,13 @@ export const HeroBanner = ({ onApplyClick }) => {
       <div className="grid grid-cols-3 gap-2">
         <div className="bg-white p-3 rounded-2xl border border-[#E4EEFF] text-center shadow-2xs">
           <Clock className="w-5 h-5 text-[#4A8DFF] mx-auto mb-1" />
-          <p className="text-[11px] font-extrabold text-[#223981]">9 Partners</p>
+          <p className="text-[11px] font-extrabold text-[#223981]">6 Partners</p>
           <p className="text-[9.5px] text-[#717983] font-semibold">Compare Offers</p>
         </div>
 
         <div className="bg-white p-3 rounded-2xl border border-[#E4EEFF] text-center shadow-2xs">
           <Zap className="w-5 h-5 text-amber-500 mx-auto mb-1" />
-          <p className="text-[11px] font-extrabold text-[#223981]">Up to ₹10L</p>
+          <p className="text-[11px] font-extrabold text-[#223981]">Up to ₹1L</p>
           <p className="text-[9.5px] text-[#717983] font-semibold">Max Loan Amount</p>
         </div>
 
