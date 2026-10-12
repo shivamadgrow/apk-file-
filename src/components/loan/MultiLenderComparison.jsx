@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../../context/AppContext';
 import { PARTNER_NBFCS } from '../../data/mockData';
 import { api, hasSession, buildPartnerRedirectUrl, buildMoneyDotPlayStoreUrl } from '../../services/api';
@@ -18,6 +18,7 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
   const [resolvedLeadCode, setResolvedLeadCode] = useState(leadCode);
   const [submittingSlug, setSubmittingSlug] = useState(null);
   const [applyError, setApplyError] = useState('');
+  const applyErrorRef = useRef(null);
   // Only relevant when this component itself will create the lead (resolvedLeadCode
   // not already supplied by a caller like LoanApplicationWizard, which captures its
   // own consent before ever reaching this screen) — see LeadConsentCheckbox.jsx.
@@ -33,6 +34,15 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
       setInputValue(String(userSalary));
     }
   }, [userSalary]);
+
+  // If the user tapped Apply Now further down the partner list, the error box (up
+  // near the consent checkbox) can be off-screen — scroll it into view so a missing
+  // consent checkbox is never a silent no-op.
+  useEffect(() => {
+    if (applyError && applyErrorRef.current) {
+      applyErrorRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [applyError]);
 
   const handleInputChange = (e) => {
     const raw = e.target.value.replace(/\D/g, ''); // only allow digits
@@ -297,7 +307,7 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
       )}
 
       {applyError && (
-        <div className="p-3 bg-red-50 text-red-700 text-xs font-semibold rounded-2xl border border-red-200 flex items-center space-x-2">
+        <div ref={applyErrorRef} className="p-3 bg-red-50 text-red-700 text-xs font-semibold rounded-2xl border border-red-200 flex items-center space-x-2">
           <AlertCircle className="w-4 h-4 flex-shrink-0" />
           <span>{applyError}</span>
         </div>
