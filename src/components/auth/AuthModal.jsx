@@ -47,8 +47,12 @@ export const AuthModal = () => {
   const handleSendOtp = async (e) => {
     if (e) e.preventDefault();
     const cleanPhone = phone.replace(/\D/g, '').slice(-10);
-    if (cleanPhone.length !== 10) {
-      setErrorMsg('Please enter a valid 10-digit mobile number.');
+    // Matches the backend's own normalizeIndianMobile() exactly (src/lib/phone.js) —
+    // real Indian mobile numbers always start with 6, 7, 8 or 9. Checking this
+    // client-side catches a mistyped number immediately instead of only after a
+    // round trip to the server.
+    if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
+      setErrorMsg('Please enter a valid 10-digit mobile number (starting with 6, 7, 8 or 9).');
       return;
     }
 
@@ -397,7 +401,7 @@ export const AuthModal = () => {
 
             <button
               type="submit"
-              disabled={isSendingOtp || phone.replace(/\D/g, '').length < 10}
+              disabled={isSendingOtp}
               className="w-full py-3.5 bg-[#4A8DFF] hover:bg-[#223981] disabled:bg-slate-300 text-white text-xs font-extrabold rounded-2xl shadow-md flex items-center justify-center space-x-2 transition"
             >
               {isSendingOtp ? (

@@ -261,8 +261,10 @@ export const SupportModal = () => {
     setCallbackError('');
 
     const cleanPhone = String(callbackPhone || '').replace(/\D/g, '');
-    if (cleanPhone.length !== 10) {
-      setCallbackError('Please enter a valid 10-digit mobile number.');
+    // Matches the backend's normalizeIndianMobile() — real Indian mobile numbers
+    // always start with 6, 7, 8 or 9.
+    if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
+      setCallbackError('Please enter a valid 10-digit mobile number (starting with 6, 7, 8 or 9).');
       return;
     }
 
