@@ -24,7 +24,7 @@ export const TrustCarousel = () => {
           <div className="flex items-center space-x-1.5">
             <Building2 className="w-4 h-4 text-[#2563EB]" />
             <h3 className="text-xs sm:text-sm font-black text-[#223981]">
-              9 Lending Partners
+              6 Lending Partners
             </h3>
           </div>
           <p className="text-[10.5px] text-[#717983] mt-0.5">
@@ -99,7 +99,7 @@ export const TrustCarousel = () => {
                 Up to <span className="font-extrabold text-[#223981]">{partner.maxLoanDisplay}</span>
               </p>
               <p className="text-[10px] font-bold text-emerald-600 mt-0.5">
-                Rate: {partner.interestRateDisplay}
+                {partner.interestRateDisplay ? `Rate: ${partner.interestRateDisplay}` : `APR: ${partner.aprDisplay}`}
               </p>
             </div>
 

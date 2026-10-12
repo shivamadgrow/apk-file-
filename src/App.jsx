@@ -85,7 +85,7 @@ const MainAppContent = () => {
       case 'loans':
         return (
           <div className="space-y-3 max-w-2xl mx-auto px-1 sm:px-2">
-            {/* View Switcher: 9 Lending Partners vs Step-by-Step Wizard */}
+            {/* View Switcher: 6 Lending Partners vs Step-by-Step Wizard */}
             <div className="flex bg-slate-100 p-1.5 rounded-2xl border border-slate-200/80 shadow-2xs">
               <button
                 type="button"
@@ -96,7 +96,7 @@ const MainAppContent = () => {
                     : 'text-slate-500 hover:text-[#1E3A8A]'
                 }`}
               >
-                <span>🏢 9 Lending Partners</span>
+                <span>🏢 6 Lending Partners</span>
               </button>
               <button
                 type="button"

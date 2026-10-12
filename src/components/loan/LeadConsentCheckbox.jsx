@@ -2,7 +2,7 @@ import React from 'react';
 
 // Shared lead-sharing consent control. Used at every point this app actually submits
 // a loan enquiry (LoanApplicationWizard's own submit step, and MultiLenderComparison's
-// standalone "9 Lending Partners" tab) so the same required disclosure is shown
+// standalone "6 Lending Partners" tab) so the same required disclosure is shown
 // everywhere a submission can happen — there is no path that creates a real backend
 // lead from this app without this checkbox being rendered and checked first.
 //
