@@ -129,25 +129,22 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
     }
   };
 
-  // MoneyDot has no published minSalary number ("Set by Partner"), so it is treated
-  // as always eligible here rather than locked out by a numeric comparison it has no
-  // real value for.
   const eligibleLenders = PARTNER_NBFCS
-    .filter(n => n.minSalary == null || (salary || 0) >= n.minSalary)
+    .filter(n => (salary || 0) >= n.minSalary)
     .sort((a, b) => {
       // If Rupay91 is eligible (salary >= 50k), Rupay91 must ALWAYS be at the very top (#1)!
       if (a.id === 'rupay91') return -1;
       if (b.id === 'rupay91') return 1;
       // Best matching salary tier (highest minSalary) first
-      if ((b.minSalary || 0) !== (a.minSalary || 0)) {
-        return (b.minSalary || 0) - (a.minSalary || 0);
+      if (b.minSalary !== a.minSalary) {
+        return b.minSalary - a.minSalary;
       }
       return b.maxAmount - a.maxAmount;
     });
 
   const ineligibleLenders = PARTNER_NBFCS
-    .filter(n => n.minSalary != null && (salary || 0) < n.minSalary)
-    .sort((a, b) => (a.minSalary || 0) - (b.minSalary || 0));
+    .filter(n => (salary || 0) < n.minSalary)
+    .sort((a, b) => a.minSalary - b.minSalary);
 
   const salaryPresets = [
     { label: '₹25,000', val: 25000 },
