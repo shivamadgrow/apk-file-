@@ -1,26 +1,28 @@
 import React, { useState } from 'react';
 import { Calculator, ArrowRight } from 'lucide-react';
 
+// Models the real product shared by the 5 website-based lending partners (Rupay91,
+// Jhatpat Loans, Insta Rupees, Borrowera, Ticket 2 Loan — see PARTNER_NBFCS in
+// mockData.js): a short-tenure loan with a daily rate and a flat processing fee, not
+// a traditional multi-year amortized EMI. There is no amortization schedule here
+// because none of these partners' products have one. MoneyDot (the 6th partner, an
+// app-based product with a 3-12 month tenure and 24%-60% p.a. APR) has a genuinely
+// different structure and is intentionally not modeled by this calculator — see the
+// footnote below instead of blending it into one misleading slider set.
 export const EmiCalculator = ({ onApplyWithAmount }) => {
-  const [amount, setAmount] = useState(500000);
-  const [rate, setRate] = useState(11.5);
-  const [tenure, setTenure] = useState(36);
+  const [amount, setAmount] = useState(50000);
+  const [dailyRate, setDailyRate] = useState(1.0);
+  const [tenureDays, setTenureDays] = useState(60);
 
-  // EMI Math Formula: P * r * (1+r)^n / ((1+r)^n - 1)
-  const monthlyRate = rate / 12 / 100;
-  const emi = amount > 0 
-    ? Math.round((amount * monthlyRate * Math.pow(1 + monthlyRate, tenure)) / (Math.pow(1 + monthlyRate, tenure) - 1))
-    : 0;
-  const totalPayable = emi * tenure;
-  const totalInterest = Math.max(0, totalPayable - amount);
+  const estimatedInterest = amount > 0 ? Math.round(amount * (dailyRate / 100) * tenureDays) : 0;
+  const totalPayable = amount + estimatedInterest;
 
   const principalPercent = totalPayable > 0 ? Math.round((amount / totalPayable) * 100) : 0;
   const interestPercent = totalPayable > 0 ? 100 - principalPercent : 0;
 
-  // Track percentage calculations for two-tone filled slider tracks
-  const amountPct = Math.min(100, Math.max(0, (amount / 2000000) * 100));
-  const ratePct = Math.min(100, Math.max(0, ((rate - 9.5) / (24.0 - 9.5)) * 100));
-  const tenurePct = Math.min(100, Math.max(0, ((tenure - 6) / (72 - 6)) * 100));
+  const amountPct = Math.min(100, Math.max(0, (amount / 100000) * 100));
+  const ratePct = Math.min(100, Math.max(0, ((dailyRate - 0.8) / (1.0 - 0.8)) * 100));
+  const tenurePct = Math.min(100, Math.max(0, ((tenureDays - 30) / (90 - 30)) * 100));
 
   return (
     <div className="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-xl my-3 text-left space-y-4">
@@ -29,8 +31,8 @@ export const EmiCalculator = ({ onApplyWithAmount }) => {
           <Calculator className="w-5 h-5" />
         </div>
         <div>
-          <h2 className="text-base font-extrabold text-[#223981]">Smart Loan EMI Calculator</h2>
-          <p className="text-xs text-[#717983]">Simulate your exact monthly repayments & total interest.</p>
+          <h2 className="text-base font-extrabold text-[#223981]">Loan Cost Estimator</h2>
+          <p className="text-xs text-[#717983]">Worst-case estimate for our 5 daily-rate lending partners.</p>
         </div>
       </div>
 
@@ -52,7 +54,7 @@ export const EmiCalculator = ({ onApplyWithAmount }) => {
               onFocus={(e) => e.target.select()}
               onChange={(e) => {
                 const raw = e.target.value.replace(/\D/g, '');
-                setAmount(raw === '' ? 0 : Math.min(5000000, Number(raw)));
+                setAmount(raw === '' ? 0 : Math.min(100000, Number(raw)));
               }}
               placeholder="0"
               className="w-28 sm:w-32 text-right text-base sm:text-lg font-black text-[#2563EB] bg-transparent outline-none focus:outline-none"
@@ -60,12 +62,12 @@ export const EmiCalculator = ({ onApplyWithAmount }) => {
           </div>
         </div>
 
-        <input 
+        <input
           type="range"
-          min="0"
-          max="2000000"
+          min="10000"
+          max="100000"
           step="5000"
-          value={Math.min(2000000, amount)}
+          value={Math.min(100000, amount)}
           onChange={(e) => setAmount(Number(e.target.value))}
           style={{
             background: `linear-gradient(to right, #2563EB 0%, #2563EB ${amountPct}%, #E2E8F0 ${amountPct}%, #E2E8F0 100%)`
@@ -74,14 +76,14 @@ export const EmiCalculator = ({ onApplyWithAmount }) => {
         />
 
         <div className="flex justify-between text-[10px] text-slate-500 font-semibold mt-1">
-          <span>₹0</span>
-          <span>₹10 Lakhs</span>
-          <span>₹20 Lakhs</span>
+          <span>₹10,000</span>
+          <span>₹50,000</span>
+          <span>₹1,00,000</span>
         </div>
 
         {/* Quick Amount Preset Chips */}
         <div className="flex items-center space-x-1.5 overflow-x-auto no-scrollbar pt-2.5 border-t border-slate-200/60 mt-2">
-          {[25000, 50000, 100000, 300000, 500000, 1000000].map((preset) => (
+          {[10000, 25000, 50000, 75000, 100000].map((preset) => (
             <button
               key={preset}
               type="button"
@@ -98,83 +100,80 @@ export const EmiCalculator = ({ onApplyWithAmount }) => {
         </div>
       </div>
 
-      {/* Slider 2: Interest Rate */}
+      {/* Slider 2: Daily Rate */}
       <div className="bg-slate-50/80 p-4 rounded-2xl border border-slate-200/90 shadow-2xs">
         <div className="flex justify-between items-center mb-1.5">
           <div>
-            <span className="text-xs font-black text-[#223981] block">Interest Rate</span>
+            <span className="text-xs font-black text-[#223981] block">Daily Rate</span>
             <span className="text-[10px] font-extrabold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/80 inline-block mt-0.5">
-              upto 1.0% / day
+              Varies by partner
             </span>
           </div>
           <div className="text-right">
-            <span className="text-lg font-black text-[#2563EB]">{rate}%</span>
-            <span className="text-[11px] font-bold text-slate-500 ml-1">p.a.</span>
+            <span className="text-lg font-black text-[#2563EB]">{dailyRate.toFixed(1)}%</span>
+            <span className="text-[11px] font-bold text-slate-500 ml-1">/ day</span>
           </div>
         </div>
-        <input 
+        <input
           type="range"
-          min="9.5"
-          max="24.0"
-          step="0.25"
-          value={rate}
-          onChange={(e) => setRate(Number(e.target.value))}
+          min="0.8"
+          max="1.0"
+          step="0.1"
+          value={dailyRate}
+          onChange={(e) => setDailyRate(Number(e.target.value))}
           style={{
             background: `linear-gradient(to right, #2563EB 0%, #2563EB ${ratePct}%, #E2E8F0 ${ratePct}%, #E2E8F0 100%)`
           }}
           className="paisa-slider"
         />
         <div className="flex justify-between text-[10px] text-slate-500 font-semibold mt-1">
-          <span>9.5% (Min)</span>
-          <span>16.5%</span>
-          <span>24.0%</span>
+          <span>0.8% (Min)</span>
+          <span>0.9%</span>
+          <span>1.0% (Max)</span>
         </div>
       </div>
 
-      {/* Slider 3: Tenure Months */}
+      {/* Slider 3: Tenure (Days) */}
       <div className="bg-slate-50/80 p-4 rounded-2xl border border-slate-200/90 shadow-2xs">
         <div className="flex justify-between items-center mb-1.5">
-          <span className="text-xs font-black text-[#223981]">Loan Tenure</span>
-          <span className="text-lg font-black text-[#2563EB]">
-            {tenure} Months <span className="text-xs font-semibold text-slate-500">({(tenure / 12).toFixed(tenure % 12 === 0 ? 0 : 1)} Years)</span>
-          </span>
+          <span className="text-xs font-black text-[#223981]">Repayment Period</span>
+          <span className="text-lg font-black text-[#2563EB]">{tenureDays} Days</span>
         </div>
-        <input 
+        <input
           type="range"
-          min="6"
-          max="72"
-          step="6"
-          value={tenure}
-          onChange={(e) => setTenure(Number(e.target.value))}
+          min="30"
+          max="90"
+          step="5"
+          value={tenureDays}
+          onChange={(e) => setTenureDays(Number(e.target.value))}
           style={{
             background: `linear-gradient(to right, #2563EB 0%, #2563EB ${tenurePct}%, #E2E8F0 ${tenurePct}%, #E2E8F0 100%)`
           }}
           className="paisa-slider"
         />
         <div className="flex justify-between text-[10px] text-slate-500 font-semibold mt-1">
-          <span>6 Months</span>
-          <span>36 Months</span>
-          <span>72 Months</span>
+          <span>30 Days</span>
+          <span>60 Days</span>
+          <span>90 Days</span>
         </div>
       </div>
 
-      {/* EMI Result Summary Card */}
+      {/* Result Summary Card */}
       <div className="bg-gradient-to-br from-[#1E3A8A] via-[#223981] to-[#2563EB] text-white p-5 sm:p-6 rounded-3xl shadow-lg space-y-4">
         {/* Top Header Row */}
         <div className="flex items-center justify-between border-b border-white/15 pb-3">
           <div>
             <span className="text-[11px] font-bold text-blue-200 uppercase tracking-wider block">
-              Monthly EMI Repayment
+              Est. Total Repayable (Worst Case)
             </span>
             <span className="text-[10px] text-blue-300">
-              Total Payable: ₹{totalPayable.toLocaleString('en-IN')}
+              Principal: ₹{amount.toLocaleString('en-IN')}
             </span>
           </div>
           <div className="text-right">
             <span className="text-2xl sm:text-3xl font-black text-amber-300">
-              ₹{emi.toLocaleString('en-IN')}
+              ₹{totalPayable.toLocaleString('en-IN')}
             </span>
-            <span className="text-xs text-white/80 font-bold ml-0.5">/mo</span>
           </div>
         </div>
 
@@ -189,13 +188,13 @@ export const EmiCalculator = ({ onApplyWithAmount }) => {
           <div className="text-center border-x border-white/15 px-1">
             <p className="text-[10px] font-medium text-blue-200">Daily Rate</p>
             <p className="font-extrabold text-emerald-300 text-xs sm:text-sm mt-0.5">
-              upto 1.0%/day
+              {dailyRate.toFixed(1)}%/day
             </p>
           </div>
           <div className="text-right pr-1">
-            <p className="text-[10px] font-medium text-blue-200">Total Interest</p>
+            <p className="text-[10px] font-medium text-blue-200">Est. Interest</p>
             <p className="font-extrabold text-amber-300 text-xs sm:text-sm mt-0.5">
-              ₹{totalInterest.toLocaleString('en-IN')}
+              ₹{estimatedInterest.toLocaleString('en-IN')}
             </p>
           </div>
         </div>
@@ -218,8 +217,14 @@ export const EmiCalculator = ({ onApplyWithAmount }) => {
           </div>
         </div>
 
+        <p className="text-[10px] text-blue-200 leading-relaxed">
+          Worst case at this partner's maximum daily rate — processing fee and GST are
+          charged separately and not included here. Your actual rate, fee, and
+          processing fee depend on the partner you're approved by.
+        </p>
+
         <button
-          onClick={() => onApplyWithAmount && onApplyWithAmount(amount, tenure)}
+          onClick={() => onApplyWithAmount && onApplyWithAmount(amount, tenureDays)}
           disabled={amount <= 0}
           className={`w-full py-3.5 ${
             amount > 0
@@ -233,7 +238,14 @@ export const EmiCalculator = ({ onApplyWithAmount }) => {
           {amount > 0 && <ArrowRight className="w-4 h-4 ml-0.5" />}
         </button>
       </div>
+
+      {/* MoneyDot has a genuinely different product (app-based, 3-12 month tenure,
+          24%-60% p.a. APR) — intentionally not modeled above since blending it into
+          these sliders would misrepresent either product. */}
+      <p className="text-[10.5px] text-slate-400 text-center px-2">
+        MoneyDot (our app-based partner) has different terms — 3 to 12 month tenure
+        at 24%–60% p.a. — see the Loans tab for its exact offer.
+      </p>
     </div>
   );
 };
-
