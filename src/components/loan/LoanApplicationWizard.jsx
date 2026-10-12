@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { MultiLenderComparison } from './MultiLenderComparison';
 import { LeadConsentCheckbox, DISCLOSURE_VERSION } from './LeadConsentCheckbox';
+import { ErrorToast } from '../common/ErrorToast';
 import { api } from '../../services/api';
 import {
   CheckCircle2, ArrowRight, ArrowLeft, Upload, ShieldCheck,
-  FileText, Lock, Landmark, Sparkles, ExternalLink, Loader2, AlertTriangle
+  FileText, Lock, Landmark, Sparkles, ExternalLink, Loader2
 } from 'lucide-react';
 
 export const LoanApplicationWizard = ({ preSelectedProduct = 'personal', onClose }) => {
@@ -171,6 +172,7 @@ export const LoanApplicationWizard = ({ preSelectedProduct = 'personal', onClose
 
   return (
     <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-xl my-4 text-left">
+      <ErrorToast message={submitError} onDismiss={() => setSubmitError('')} />
       {/* Wizard Progress Bar */}
       <div className="mb-6">
         <div className="flex items-center justify-between text-xs font-bold text-[#223981] mb-2">
@@ -349,13 +351,6 @@ export const LoanApplicationWizard = ({ preSelectedProduct = 'personal', onClose
           </div>
 
           <LeadConsentCheckbox checked={leadConsent} onChange={setLeadConsent} />
-
-          {submitError && (
-            <div className="p-3 bg-red-50 text-red-700 text-xs font-semibold rounded-2xl border border-red-200 flex items-center space-x-2">
-              <AlertTriangle className="w-4 h-4 flex-shrink-0" />
-              <span>{submitError}</span>
-            </div>
-          )}
 
           <div className="flex items-center space-x-3 pt-2">
             <button

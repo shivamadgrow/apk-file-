@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { PARTNER_NBFCS } from '../../data/mockData';
 import { api, hasSession, buildPartnerRedirectUrl, buildMoneyDotPlayStoreUrl } from '../../services/api';
 import { LeadConsentCheckbox, DISCLOSURE_VERSION } from './LeadConsentCheckbox';
+import { ErrorToast } from '../common/ErrorToast';
 import {
   ShieldCheck, Lock, Zap, CheckCircle2, ArrowRight,
   Sparkles, AlertCircle, Sliders, Check, Loader2
@@ -18,7 +19,6 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
   const [resolvedLeadCode, setResolvedLeadCode] = useState(leadCode);
   const [submittingSlug, setSubmittingSlug] = useState(null);
   const [applyError, setApplyError] = useState('');
-  const applyErrorRef = useRef(null);
   // Only relevant when this component itself will create the lead (resolvedLeadCode
   // not already supplied by a caller like LoanApplicationWizard, which captures its
   // own consent before ever reaching this screen) — see LeadConsentCheckbox.jsx.
@@ -34,15 +34,6 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
       setInputValue(String(userSalary));
     }
   }, [userSalary]);
-
-  // If the user tapped Apply Now further down the partner list, the error box (up
-  // near the consent checkbox) can be off-screen — scroll it into view so a missing
-  // consent checkbox is never a silent no-op.
-  useEffect(() => {
-    if (applyError && applyErrorRef.current) {
-      applyErrorRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-  }, [applyError]);
 
   const handleInputChange = (e) => {
     const raw = e.target.value.replace(/\D/g, ''); // only allow digits
@@ -167,6 +158,7 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
 
   return (
     <div className="space-y-4 my-2 text-left w-full">
+      <ErrorToast message={applyError} onDismiss={() => setApplyError('')} />
 
       {/* 1. MASTER COMMAND CENTER: Salary Filter */}
       <div className="relative overflow-hidden bg-gradient-to-br from-[#1E3A8A] via-[#1E40AF] to-[#2563EB] text-white rounded-3xl p-5 sm:p-6 shadow-xl border border-white/15">
@@ -304,13 +296,6 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
           in, that consent was already captured and this would be redundant. */}
       {!resolvedLeadCode && (
         <LeadConsentCheckbox checked={leadConsent} onChange={setLeadConsent} />
-      )}
-
-      {applyError && (
-        <div ref={applyErrorRef} className="p-3 bg-red-50 text-red-700 text-xs font-semibold rounded-2xl border border-red-200 flex items-center space-x-2">
-          <AlertCircle className="w-4 h-4 flex-shrink-0" />
-          <span>{applyError}</span>
-        </div>
       )}
 
       {/* 2. SECTION A: ELIGIBLE COMPANIES (TOP - ACTIVE & CLICKABLE) */}
