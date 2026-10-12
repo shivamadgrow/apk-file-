@@ -435,7 +435,7 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
                     <button
                       type="button"
                       onClick={() => handleApplyClick(nbfc)}
-                      disabled={submittingSlug === nbfc.slug || (!resolvedLeadCode && !leadConsent)}
+                      disabled={submittingSlug === nbfc.slug}
                       className="px-4 sm:px-5 py-2.5 bg-gradient-to-r from-[#2563EB] to-[#1D4ED8] hover:from-[#1D4ED8] hover:to-[#1E40AF] text-white font-black text-xs sm:text-sm rounded-xl shadow-md shadow-blue-500/20 flex items-center justify-center space-x-1.5 transition active:scale-98 cursor-pointer whitespace-nowrap disabled:opacity-60"
                     >
                       {submittingSlug === nbfc.slug ? (

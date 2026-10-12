@@ -367,7 +367,7 @@ export const LoanApplicationWizard = ({ preSelectedProduct = 'personal', onClose
             </button>
             <button
               onClick={handleProceedToOffers}
-              disabled={isSubmittingApplication || !leadConsent}
+              disabled={isSubmittingApplication}
               className="flex-1 py-2.5 bg-[#4A8DFF] text-white text-xs font-extrabold rounded-xl shadow flex items-center justify-center space-x-1 disabled:opacity-60"
             >
               {isSubmittingApplication ? (
