@@ -283,10 +283,20 @@ export const api = {
   // always safe — it is never guaranteed to create a second application.
   submitLoanApplication: async (payload) => {
     try {
+      // Without an explicit source, the backend's channel classifier falls back to
+      // the request's Referer header — and a Capacitor WebView fetch sends
+      // `https://localhost`, which the backend has no way to recognize as "this is
+      // our own Android app" (it only knows paisainminutes.com/.tech/.in), so it was
+      // misclassifying every app lead as "Referral". `utm_source: 'androidapp'`
+      // (recognized by src/lib/channel.js on the backend as channel "App") fixes
+      // this at the source — classifyChannel checks utm_source before ever falling
+      // back to the referrer. `referrerPolicy: 'no-referrer'` also stops leaking
+      // that meaningless `https://localhost` value to the server at all.
       const doFetch = async () => fetch(`${API_BASE_URL}/loan-applications/`, {
         method: 'POST',
         headers: await getAuthHeaders(),
-        body: JSON.stringify(payload)
+        referrerPolicy: 'no-referrer',
+        body: JSON.stringify({ utm_source: 'androidapp', ...payload })
       });
       const res = await withAuthRetry(doFetch);
       const data = await res.json();
