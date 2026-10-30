@@ -405,8 +405,8 @@ export const ProfileSettings = () => {
       {/* SECTION 2: INFORMATION & APP PREFERENCES */}
       <div className="bg-white rounded-3xl border border-slate-200/80 divide-y divide-slate-100 overflow-hidden text-xs">
         
-        {/* Refer & Earn */}
-        <div 
+        {/* Refer a Friend */}
+        <div
           onClick={() => setActiveTab('referral')}
           className="p-3.5 hover:bg-slate-50 cursor-pointer flex items-center justify-between transition group"
         >
@@ -414,7 +414,7 @@ export const ProfileSettings = () => {
             <div className="w-8 h-8 rounded-xl bg-[#E4EEFF] text-[#4A8DFF] flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition">
               <Share2 className="w-4.5 h-4.5" />
             </div>
-            <span className="font-extrabold text-[#223981] text-sm">Refer & Earn</span>
+            <span className="font-extrabold text-[#223981] text-sm">Refer a Friend</span>
           </div>
           <ChevronRight className="w-4 h-4 text-[#717983]" />
         </div>

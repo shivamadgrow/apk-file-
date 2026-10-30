@@ -186,14 +186,13 @@ export const SupportModal = () => {
     }
 
     // 9. REFERRAL INTENT ("refer", "earn", "dost", "points", "wallet")
-    // The referral rewards program has no backend ledger or payout mechanism yet
-    // (see src/components/referral/ReferAndEarn.jsx) — never promise a specific
-    // point/cash amount or payout method here until that's real.
+    // There is no referral rewards/points/cash program at all — never imply one
+    // exists or is coming (see src/components/referral/ReferAndEarn.jsx).
     if (text.includes('refer') || text.includes('earn') || text.includes('dost') || text.includes('invite') || text.includes('wallet') || text.includes('point')) {
       return {
-        text: `🎁 **Refer & Earn:**\n• Invite friends & family using your personalized referral link!\n• The rewards program (points/payouts) is still being finalized — check the Refer & Earn screen for the latest.`,
+        text: `🎁 **Refer a Friend:**\n• Invite friends & family using your personalized referral link!\n• There is no cash reward or points program — referring someone just helps them discover loan offers.`,
         suggestions: [
-          { label: '🎁 Open Refer & Earn', actionType: 'referral' },
+          { label: '🎁 Open Refer a Friend', actionType: 'referral' },
           { label: '🚀 Apply Instant Loan', actionType: 'loans' }
         ]
       };
@@ -524,9 +523,9 @@ export const SupportModal = () => {
               </p>
             </div>
             <div className="p-3.5 bg-white rounded-2xl border border-slate-200 shadow-2xs">
-              <h4 className="font-extrabold text-[#223981]">Q: How do Refer & Earn rewards work?</h4>
+              <h4 className="font-extrabold text-[#223981]">Q: Do I get a reward for referring a friend?</h4>
               <p className="text-[#717983] font-medium mt-1 leading-relaxed">
-                A: When your invited friend completes e-KYC and their loan is disbursed, you earn 300 Paisa Points (₹300) directly withdrawable to your UPI ID.
+                A: No — there is no referral rewards or cash program. Referring a friend simply helps them discover loan offers; it does not earn you points, cash, or any other reward.
               </p>
             </div>
           </div>

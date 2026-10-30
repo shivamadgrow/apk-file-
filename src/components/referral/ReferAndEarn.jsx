@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { 
-  ArrowLeft, Gift, Share2, Copy, Check, ChevronDown, ChevronUp, Users, Coins, HelpCircle, Sparkles, Award, Link2, UserCheck, ShieldCheck, CheckCircle2
+import {
+  ArrowLeft, Gift, Share2, Copy, Check, ChevronDown, ChevronUp, Users, Link2, ShieldCheck, CheckCircle2
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
@@ -20,10 +20,6 @@ export const ReferAndEarn = ({ onBack }) => {
   // never be put in a shareable URL (they'd end up in server logs, browser history,
   // and chat/SMS apps' link previews on whoever receives it).
   const dynamicReferralUrl = `https://paisainminutes.com/ref?code=${referralCode}&utm_source=paisainminutesapp`;
-
-  // There is no backend referral ledger yet, so this must never default to a fake
-  // non-zero points balance.
-  const points = user.referralPoints || 0;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(dynamicReferralUrl);
@@ -56,10 +52,9 @@ export const ReferAndEarn = ({ onBack }) => {
     setOpenFaqIdx(openFaqIdx === index ? null : index);
   };
 
-  // NOTE: the referral rewards program (points, cash value, payout mechanics) is not
-  // yet connected to any backend ledger or payout system. These FAQ answers must not
-  // promise specific point amounts, cash values, or timelines until that exists —
-  // doing so would be inventing a business commitment nothing can fulfill.
+  // There is no referral rewards/points/cash program — not "coming soon", not
+  // planned. This screen only ever offers the one real thing it does: sharing a
+  // referral link. No FAQ here may imply a reward exists or is on its way.
   const faqs = [
     {
       q: "How does the referral process work?",
@@ -74,12 +69,8 @@ export const ReferAndEarn = ({ onBack }) => {
       a: "Referrals shared from this app are recorded on this device under the Referrals section."
     },
     {
-      q: "Can I get referral rewards in cash?",
-      a: "The referral rewards program is still being set up. We'll update this page with full details — including how rewards are calculated and paid out — once it's live."
-    },
-    {
-      q: "I referred a friend. How do I know if I'll receive a reward?",
-      a: "We'll contact you directly with reward details once the program is fully live. If you have questions in the meantime, reach out via '24x7 Helpdesk' or email info@paisainminutes.com."
+      q: "Do I get a reward for referring someone?",
+      a: "No — there is no referral rewards or cash program. Referring a friend simply helps them discover loan offers; it does not earn you points, cash, or any other reward."
     }
   ];
 
@@ -95,7 +86,7 @@ export const ReferAndEarn = ({ onBack }) => {
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <h1 className="text-base font-extrabold text-[#223981]">Refer & Earn</h1>
+          <h1 className="text-base font-extrabold text-[#223981]">Refer a Friend</h1>
         </div>
         
         {/* User Profile Pill */}
@@ -120,31 +111,12 @@ export const ReferAndEarn = ({ onBack }) => {
           {/* Main Gift Box Icon */}
           <div className="w-24 h-24 bg-gradient-to-tr from-amber-400 via-amber-300 to-amber-500 rounded-3xl shadow-xl flex items-center justify-center transform hover:scale-105 transition-transform duration-300 border-2 border-white/80 relative">
             <Gift className="w-14 h-14 text-white fill-white/20" />
-            <div className="absolute -top-3 bg-rose-500 text-white text-[10px] font-black px-2.5 py-0.5 rounded-full shadow-md tracking-wider">
-              🎁 WIN CASH
-            </div>
           </div>
         </div>
 
-        {/* Subtitle — no specific point amount is promised until the rewards program is live */}
         <p className="text-sm font-extrabold text-[#223981] max-w-xs mx-auto leading-snug">
-          Refer a friend — <span className="text-[#4A8DFF] underline decoration-2">rewards program coming soon</span>
+          Share your link and help a friend find a loan offer
         </p>
-
-        {/* Paisa Points Balance Pill Box */}
-        <div className="bg-white rounded-2xl p-4 shadow-md border border-slate-200/80 max-w-sm mx-auto flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="w-9.5 h-9.5 rounded-xl bg-[#223981] text-white flex items-center justify-center flex-shrink-0 shadow-sm">
-              <Gift className="w-5 h-5 text-[#6FA8FF]" />
-            </div>
-            <span className="font-extrabold text-[#223981] text-sm sm:text-base">Paisa Points</span>
-          </div>
-          
-          <div className="flex items-center space-x-2 bg-amber-50 px-3 py-1.5 rounded-xl border border-amber-200/80">
-            <Coins className="w-5 h-5 text-amber-500 fill-amber-400" />
-            <span className="text-lg font-black text-[#223981]">{points}</span>
-          </div>
-        </div>
       </div>
 
       {/* DYNAMIC PERSONALIZED REFERRAL LINK & TERMS CARD (CLEAN & PERFECT UI/UX) */}
@@ -228,7 +200,7 @@ export const ReferAndEarn = ({ onBack }) => {
 
               <div className="flex items-start space-x-2 bg-white p-2.5 rounded-xl border border-slate-200/60 shadow-2xs">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" />
-                <span><strong>Term 2:</strong> The referral rewards program is being finalized. Reward amounts and payout details will be shared here once it's live.</span>
+                <span><strong>Term 2:</strong> There is no referral rewards or cash program — sharing your link does not earn you any payment.</span>
               </div>
             </div>
           </div>
