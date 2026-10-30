@@ -1,14 +1,10 @@
 import React, { useState } from 'react';
 import { Calculator, ArrowRight } from 'lucide-react';
 
-// Models the real product shared by the 5 website-based lending partners (Rupay91,
-// Jhatpat Loans, Insta Rupees, Borrowera, Ticket 2 Loan — see PARTNER_NBFCS in
-// mockData.js): a short-tenure loan with a daily rate and a flat processing fee, not
-// a traditional multi-year amortized EMI. There is no amortization schedule here
-// because none of these partners' products have one. MoneyDot (the 6th partner, an
-// app-based product with a 3-12 month tenure and 24%-60% p.a. APR) has a genuinely
-// different structure and is intentionally not modeled by this calculator — see the
-// footnote below instead of blending it into one misleading slider set.
+// Models the real product shared by the active lending partners (live from the
+// backend — see AppContext's `partners`): a short-tenure loan with a daily rate and
+// a flat processing fee, not a traditional multi-year amortized EMI. There is no
+// amortization schedule here because none of these partners' products have one.
 export const EmiCalculator = ({ onApplyWithAmount }) => {
   const [amount, setAmount] = useState(50000);
   const [dailyRate, setDailyRate] = useState(1.0);
@@ -238,14 +234,6 @@ export const EmiCalculator = ({ onApplyWithAmount }) => {
           {amount > 0 && <ArrowRight className="w-4 h-4 ml-0.5" />}
         </button>
       </div>
-
-      {/* MoneyDot has a genuinely different product (app-based, 3-12 month tenure,
-          24%-60% p.a. APR) — intentionally not modeled above since blending it into
-          these sliders would misrepresent either product. */}
-      <p className="text-[10.5px] text-slate-400 text-center px-2">
-        MoneyDot (our app-based partner) has different terms — 3 to 12 month tenure
-        at 24%–60% p.a. — see the Loans tab for its exact offer.
-      </p>
     </div>
   );
 };

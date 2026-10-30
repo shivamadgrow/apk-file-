@@ -14,7 +14,8 @@ const INDIAN_LANGUAGES = [
 ];
 
 export const SupportModal = () => {
-  const { isSupportOpen, setIsSupportOpen, notifications, markNotificationRead, user, activeLoan, setActiveTab } = useApp();
+  const { isSupportOpen, setIsSupportOpen, notifications, markNotificationRead, user, activeLoan, setActiveTab, partners } = useApp();
+  const partnerNamesList = partners.map((p) => p.name).join(', ');
   const [activeTab, setActiveTabLocal] = useState('chat');
 
   const [selectedLang, setSelectedLang] = useState('en');
@@ -118,7 +119,7 @@ export const SupportModal = () => {
     // 3. SPECIFIC EMI CALCULATION INTENT ("emi", "emi kesi h", "emi kitni", "emi kaise", "per month")
     if (text.includes('emi')) {
       return {
-        text: `💰 **Repayment Estimate:**\n\nTenure, interest rate, and fees vary by partner — up to ₹1,00,000, with 5 website partners offering 30–90 days at up to 0.8%–1.0%/day (14%–24% p.a.), and the MoneyDot app offering 3–12 months at 24%–60% p.a. We don't quote one blended number here since your actual terms depend on the partner you pick — open the Loan Comparison screen to see each partner's exact figures for your loan amount.`,
+        text: `💰 **Repayment Estimate:**\n\nTenure, interest rate, and fees vary by partner — up to ₹1,00,000, with our ${partners.length} partners offering 30–90 days at up to 0.8%–1.0%/day (14%–24% p.a.). We don't quote one blended number here since your actual terms depend on the partner you pick — open the Loan Comparison screen to see each partner's exact figures for your loan amount.`,
         suggestions: [
           { label: '📊 Open EMI Calculator', actionType: 'calculator' },
           { label: '🚀 Apply Now', actionType: 'loans' }
@@ -129,7 +130,7 @@ export const SupportModal = () => {
     // 4. ELIGIBILITY & LOW SALARY INTENT ("salary", "12k", "15k", "20k", "eligibility", "patrata", "kam kamai")
     if (text.includes('salary') || text.includes('eligible') || text.includes('patrata') || text.includes('15k') || text.includes('20k') || text.includes('12k') || text.includes('minimum')) {
       return {
-        text: `💡 **Loan Eligibility:**\n• Our 6 lending partners each set their own minimum salary and eligibility criteria (Rupay91, Jhatpat Loans, Insta Rupees, Borrowera, Ticket 2 Loan, and the MoneyDot app).\n• Enter your salary in the Loans tab to see which partners you're eligible for.\n• Final eligibility, KYC, and approval are decided by the partner you choose.`,
+        text: `💡 **Loan Eligibility:**\n• Our ${partners.length} lending partners each set their own minimum salary and eligibility criteria (${partnerNamesList}).\n• Enter your salary in the Loans tab to see which partners you're eligible for.\n• Final eligibility, KYC, and approval are decided by the partner you choose.`,
         suggestions: [
           { label: '🚀 Apply for Loan', actionType: 'loans' },
           { label: '📊 Calculate EMI', actionType: 'calculator' }
@@ -510,9 +511,8 @@ export const SupportModal = () => {
               <h4 className="font-extrabold text-[#223981]">Q: Is Paisa in Minutes an RBI-registered NBFC?</h4>
               <p className="text-[#717983] font-medium mt-1 leading-relaxed">
                 A: No. Paisa in Minutes is a loan aggregator/facilitator, not a lender — we don't lend money ourselves.
-                We connect you with lending partners (Rupay91, Jhatpat Loans, Insta Rupees, Borrowera, Ticket 2 Loan,
-                and the MoneyDot app), and each partner handles its own application, KYC, and loan terms once you're
-                redirected to them.
+                We connect you with lending partners ({partnerNamesList}), and each
+                partner handles its own application, KYC, and loan terms once you're redirected to them.
               </p>
             </div>
             <div className="p-3.5 bg-white rounded-2xl border border-slate-200 shadow-2xs">

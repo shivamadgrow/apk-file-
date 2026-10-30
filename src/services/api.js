@@ -26,13 +26,13 @@ export const hasSession = async () => !!(await getToken());
 export const buildPartnerRedirectUrl = (slug, leadCode, source = 'android_app') =>
   `${API_BASE_URL}/public/redirect/${encodeURIComponent(slug)}?lead_id=${encodeURIComponent(leadCode)}&source=${encodeURIComponent(source)}`;
 
-// MoneyDot is a Play Store app, not a website — the backend's AffiliatePartner table
-// has no row and no schema support for it (no is_app/app_package distinction), so it
-// cannot go through the generic tracked redirect above: that would append UTM/ref
-// params as plain query params, not wrapped inside Play Store's single required
-// `referrer=` param, silently breaking install attribution. This mirrors the
-// website's own loan-offers.php `is_app` branch, which builds the same kind of link
-// directly rather than calling the backend redirect endpoint.
+// Used by MultiLenderComparison.jsx whenever the live partner catalog (see
+// fetchActivePartners below) reports a partner with isApp: true + an appPackage —
+// e.g. MoneyDot, currently INACTIVE in the backend, or whatever app-based partner
+// is active at the time. An app partner can't go through the generic tracked
+// redirect above, since that appends UTM/ref params as plain query params rather
+// than wrapping them inside Play Store's single required `referrer=` param, which
+// would silently break install attribution.
 export const buildMoneyDotPlayStoreUrl = (appPackage, leadCode, source = 'android_app') => {
   const referrerParams = new URLSearchParams({
     utm_source: 'paisainminutes',
@@ -41,6 +41,53 @@ export const buildMoneyDotPlayStoreUrl = (appPackage, leadCode, source = 'androi
     lead_id: leadCode
   }).toString();
   return `https://play.google.com/store/apps/details?id=${encodeURIComponent(appPackage)}&hl=en_IN&referrer=${encodeURIComponent(referrerParams)}`;
+};
+
+// Live partner catalog — GET {API_BASE_URL}/public/partners, the single source of
+// truth for which partners are active and their real terms (no more hand-maintained
+// local partner list to drift out of sync with the backend; see paisa/server's
+// src/routes/partnerPublic.js for the server side). Only a few fields genuinely need
+// to be derived client-side rather than fetched, because they're bundled app assets
+// or purely cosmetic, not business data that can drift: `logo` is a local asset
+// mapped by slug (with the existing onError fallback in MultiLenderComparison if a
+// given partner has no bundled logo yet), and `maxLoanDisplay`/`features` are just
+// formatted/derived from the real numbers and display strings the backend returns.
+export const fetchActivePartners = async () => {
+  try {
+    const res = await fetch(`${API_BASE_URL}/public/partners`, { cache: 'no-store' });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.success) {
+      return { ok: false, partners: [], error: data.error || 'Unable to load lending partners right now.' };
+    }
+    const partners = (data.partners || []).map((p) => {
+      const maxAmount = p.maxAmount ?? 100000;
+      return {
+        id: p.slug,
+        slug: p.slug,
+        name: p.name,
+        logo: `/partners/${p.slug}.png`,
+        isApp: !!p.isApp,
+        appPackage: p.appPackage || null,
+        minSalary: p.minSalary ?? 0,
+        minSalaryDisplay: p.minSalaryDisplay || (p.minSalary ? `₹${p.minSalary.toLocaleString('en-IN')} /mo` : 'Partner Criteria'),
+        minCibilDisplay: p.minCibilDisplay || (p.minCibil ? `${p.minCibil}+` : 'Partner Criteria'),
+        maxAmount,
+        maxLoanDisplay: `₹${maxAmount.toLocaleString('en-IN')}`,
+        interestRateDisplay: p.interestRateDisplay || null,
+        aprDisplay: p.aprDisplay || null,
+        tenureDisplay: p.tenureDisplay || null,
+        processingFeeDisplay: p.processingFeeDisplay || null,
+        tag: null,
+        features: [
+          p.minSalaryDisplay ? `Min Salary ${p.minSalaryDisplay} Required` : null,
+          p.minCibilDisplay ? `CIBIL Score ${p.minCibilDisplay} Required` : null,
+        ].filter(Boolean),
+      };
+    });
+    return { ok: true, partners, error: null };
+  } catch (err) {
+    return { ok: false, partners: [], error: 'Connection error. Please check your network and try again.' };
+  }
 };
 
 // Helper to retrieve auth headers with JWT Bearer token. Async because the token

@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 
 export const LoanApplicationWizard = ({ preSelectedProduct = 'personal', onClose }) => {
-  const { user, setActiveLoan, saveNewLoanApplication, setActiveTab } = useApp();
+  const { user, setActiveLoan, saveNewLoanApplication, setActiveTab, partners } = useApp();
 
   const productTitle = preSelectedProduct === 'business' 
     ? 'Business Loan' 
@@ -20,12 +20,10 @@ export const LoanApplicationWizard = ({ preSelectedProduct = 'personal', onClose
     ? 'Instant Credit Card' 
     : 'Personal Loan';
 
-  // All 6 real lending partners cap at ₹1,00,000 (confirmed against the website's
-  // own config/partners.php, re-checked 2026-10-12). Tenure, APR, and fees now vary
-  // per partner — 30-90 days for the 5 website-based NBFC partners, 3-12 months for
-  // the app-based partner MoneyDot — so they are shown per-offer in Step 4/5 rather
-  // than as a single number here. Every product category here routes to the same 6
-  // partners in Step 4, so none of them can exceed the ₹1,00,000 cap.
+  // All active lending partners (live from the backend, see AppContext's `partners`)
+  // currently cap at ₹1,00,000. Tenure, APR, and fees vary per partner (30-90 days)
+  // — shown per-offer in Step 4/5 rather than as a single number here. Every
+  // product category here routes to the same partner list in Step 4.
   const defaultAmount = 50000;
 
   const defaultPurpose = preSelectedProduct === 'business' 
@@ -38,6 +36,13 @@ export const LoanApplicationWizard = ({ preSelectedProduct = 'personal', onClose
 
   const [step, setStep] = useState(1);
   const [loanAmount, setLoanAmount] = useState(defaultAmount);
+  const [loanAmountInput, setLoanAmountInput] = useState(String(defaultAmount));
+
+  const handleLoanAmountChange = (e) => {
+    const raw = e.target.value.replace(/\D/g, '');
+    setLoanAmountInput(raw);
+    setLoanAmount(raw ? Number(raw) : 0);
+  };
   // Not user-selectable here: real tenure is set by whichever partner the user
   // picks in Step 4 (ranges from 30 days to 12 months — see PARTNER_NBFCS). This is
   // sent to the backend's `tenureMonths` field as a representative placeholder (3
@@ -83,7 +88,11 @@ export const LoanApplicationWizard = ({ preSelectedProduct = 'personal', onClose
     setSubmitError('');
 
     if (!loanAmount || loanAmount <= 0) {
-      setSubmitError('Please select a valid loan amount.');
+      setSubmitError('Please enter a valid loan amount.');
+      return;
+    }
+    if (loanAmount > 100000) {
+      setSubmitError('Our partners cap loans at ₹1,00,000. Please enter an amount up to that limit.');
       return;
     }
     if (!monthlyIncome || monthlyIncome <= 0) {
@@ -195,26 +204,33 @@ export const LoanApplicationWizard = ({ preSelectedProduct = 'personal', onClose
             <p className="text-xs text-[#717983]">Compare up to ₹1,00,000 across our lending partners — exact rate, tenure, and fees are shown per partner in the next step.</p>
           </div>
 
-          {/* Amount Slider */}
-          <div className="bg-[#E4EEFF]/50 p-4 rounded-2xl border border-[#6FA8FF]/30">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-bold text-[#717983]">Required Loan Amount</span>
-              <span className="text-xl font-black text-[#223981]">₹{loanAmount.toLocaleString()}</span>
+          {/* Amount Input */}
+          <div className="bg-[#E4EEFF]/50 p-4 rounded-2xl border border-[#6FA8FF]/30 space-y-2">
+            <label htmlFor="loan-amount-input" className="text-xs font-bold text-[#717983] block">
+              Required Loan Amount
+            </label>
+            <div className="relative flex items-center">
+              <span className="absolute left-3.5 text-lg font-black text-[#223981] pointer-events-none select-none">
+                ₹
+              </span>
+              <input
+                id="loan-amount-input"
+                type="text"
+                inputMode="numeric"
+                value={loanAmountInput}
+                onChange={handleLoanAmountChange}
+                placeholder="e.g. 50000"
+                className="w-full pl-8 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-xl font-black text-[#223981] focus:ring-2 focus:ring-[#4A8DFF] outline-none"
+              />
             </div>
-            <input
-              type="range"
-              min="10000"
-              max="100000"
-              step="5000"
-              value={loanAmount}
-              onChange={(e) => setLoanAmount(Number(e.target.value))}
-              className="w-full accent-[#4A8DFF] h-2 bg-slate-200 rounded-lg cursor-pointer"
-            />
-            <div className="flex justify-between text-[10px] text-[#717983] font-semibold mt-1">
-              <span>₹10,000</span>
-              <span>₹50,000</span>
-              <span>₹1,00,000</span>
-            </div>
+            <p className="text-[10.5px] text-[#717983] font-semibold flex items-center justify-between">
+              <span>Enter the exact amount you need</span>
+              {loanAmount > 100000 ? (
+                <span className="text-red-500 font-bold">Max is ₹1,00,000</span>
+              ) : (
+                <span>Up to ₹1,00,000</span>
+              )}
+            </p>
           </div>
 
           {/* Purpose Selector */}
@@ -241,7 +257,8 @@ export const LoanApplicationWizard = ({ preSelectedProduct = 'personal', onClose
             </div>
             <button
               onClick={handleNextStep}
-              className="px-5 py-2.5 bg-[#4A8DFF] hover:bg-white hover:text-[#223981] text-white text-xs font-extrabold rounded-xl shadow transition flex items-center space-x-1"
+              disabled={!loanAmount || loanAmount <= 0 || loanAmount > 100000}
+              className="px-5 py-2.5 bg-[#4A8DFF] hover:bg-white hover:text-[#223981] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#4A8DFF] disabled:hover:text-white text-white text-xs font-extrabold rounded-xl shadow transition flex items-center space-x-1"
             >
               <span>Continue</span>
               <ArrowRight className="w-4 h-4" />
@@ -386,7 +403,7 @@ export const LoanApplicationWizard = ({ preSelectedProduct = 'personal', onClose
         <div>
           <div className="mb-3">
             <h2 className="text-lg font-extrabold text-[#223981]">Compare & Select Best NBFC Offer</h2>
-            <p className="text-xs text-[#717983]">Side-by-side comparison of 6 partner offers matching your monthly income.</p>
+            <p className="text-xs text-[#717983]">Side-by-side comparison of {partners.length} partner offers matching your monthly income.</p>
           </div>
 
           <MultiLenderComparison

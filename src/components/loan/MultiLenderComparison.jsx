@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
-import { PARTNER_NBFCS } from '../../data/mockData';
 import { api, hasSession, buildPartnerRedirectUrl, buildMoneyDotPlayStoreUrl } from '../../services/api';
 import { LeadConsentCheckbox, DISCLOSURE_VERSION } from './LeadConsentCheckbox';
 import { ErrorToast } from '../common/ErrorToast';
@@ -9,10 +8,10 @@ import {
   Sparkles, AlertCircle, Sliders, Check, Loader2
 } from 'lucide-react';
 
-export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, userSalary = 25000, leadCode = null, onSelectOffer }) => {
-  const { user, currentPhone, setIsAuthOpen } = useApp();
-  const [salary, setSalary] = useState(userSalary || 25000);
-  const [inputValue, setInputValue] = useState(String(userSalary || 25000));
+export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, userSalary = 30000, leadCode = null, onSelectOffer }) => {
+  const { user, currentPhone, setIsAuthOpen, partners, partnersLoading, partnersError, reloadPartners } = useApp();
+  const [salary, setSalary] = useState(userSalary || 30000);
+  const [inputValue, setInputValue] = useState(String(userSalary || 30000));
   // The real backend lead code for this applicant. If the caller (e.g. the wizard,
   // once it has already submitted a fuller application) passes one in, we reuse it
   // instead of creating a second, thinner lead.
@@ -115,12 +114,13 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
     setSubmittingSlug(null);
     if (!code) return; // applyError is already set — never redirect without a real lead
 
-    // MoneyDot is a Play Store app, not a website, and the backend has no schema
-    // support or configured row for it yet (see mockData.js header comment) — so it
-    // is linked to directly, with its own wrapped `referrer=` param for Play Store
-    // install attribution, instead of going through the generic backend redirect
-    // endpoint used for the other (website-based) partners.
-    const targetUrl = nbfc.isApp
+    // An app-based partner (isApp, with an appPackage — e.g. a future reactivated
+    // MoneyDot) links straight to its Play Store listing instead of the generic
+    // tracked backend redirect, since that would break Play Store install
+    // attribution. This now comes from whatever the backend actually reports for
+    // this partner, not a hardcoded slug check — a partner's isApp status can
+    // change without any app code change.
+    const targetUrl = nbfc.isApp && nbfc.appPackage
       ? buildMoneyDotPlayStoreUrl(nbfc.appPackage, code)
       : buildPartnerRedirectUrl(nbfc.slug, code);
     window.open(targetUrl, '_blank');
@@ -130,10 +130,10 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
     }
   };
 
-  const eligibleLenders = PARTNER_NBFCS
+  const eligibleLenders = partners
     .filter(n => (salary || 0) >= n.minSalary)
     .sort((a, b) => {
-      // If Rupay91 is eligible (salary >= 50k), Rupay91 must ALWAYS be at the very top (#1)!
+      // If Rupay91 is eligible, Rupay91 must ALWAYS be at the very top (#1)!
       if (a.id === 'rupay91') return -1;
       if (b.id === 'rupay91') return 1;
       // Best matching salary tier (highest minSalary) first
@@ -143,12 +143,16 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
       return b.maxAmount - a.maxAmount;
     });
 
-  const ineligibleLenders = PARTNER_NBFCS
+  const ineligibleLenders = partners
     .filter(n => (salary || 0) < n.minSalary)
     .sort((a, b) => a.minSalary - b.minSalary);
 
+  // The partner with the lowest salary bar among the currently active set — used by
+  // the "no eligible offers" fallback below. Computed from live data so it's never
+  // stale if the roster or thresholds change.
+  const lowestBarPartner = [...partners].sort((a, b) => a.minSalary - b.minSalary)[0] || null;
+
   const salaryPresets = [
-    { label: '₹25,000', val: 25000 },
     { label: '₹30,000', val: 30000 },
     { label: '₹35,000', val: 35000 },
     { label: '₹40,000', val: 40000 },
@@ -172,7 +176,7 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
                 Compare Offers
               </span>
               <span className="text-[11px] font-bold text-blue-200">
-                6 Regulated Partners
+                {partnersLoading ? 'Loading Partners...' : `${partners.length} Regulated Partners`}
               </span>
             </div>
             <h2 className="text-lg sm:text-xl font-black mt-1 tracking-tight text-white">
@@ -215,7 +219,7 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
               inputMode="numeric"
               value={inputValue}
               onChange={handleInputChange}
-              placeholder="e.g. 25000"
+              placeholder="e.g. 30000"
               className="w-full pl-9 pr-24 py-3 bg-white text-[#1E293B] font-black text-base sm:text-xl rounded-xl shadow-inner focus:outline-none focus:ring-3 focus:ring-amber-400 placeholder:text-slate-400 border border-slate-200 transition"
             />
             <span className="absolute right-3.5 text-xs font-black text-slate-400 select-none uppercase tracking-wide">
@@ -225,8 +229,8 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
 
           <p className="text-[11px] text-blue-100 font-semibold flex items-center justify-between">
             <span>Aap jo salary type karenge, matching offers turant dikhenge.</span>
-            {salary < 25000 && salary > 0 && (
-              <span className="text-amber-300 font-bold">Min requirement is ₹25,000</span>
+            {salary < 30000 && salary > 0 && (
+              <span className="text-amber-300 font-bold">Min requirement is ₹30,000</span>
             )}
           </p>
         </div>
@@ -264,7 +268,7 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
               min="20000"
               max="80000"
               step="2500"
-              value={salary || 25000}
+              value={salary || 30000}
               onChange={handleSliderChange}
               className="w-full h-2 bg-blue-950/50 rounded-lg appearance-none cursor-pointer accent-white"
             />
@@ -298,6 +302,25 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
         <LeadConsentCheckbox checked={leadConsent} onChange={setLeadConsent} />
       )}
 
+      {partnersLoading ? (
+        <div className="bg-white rounded-3xl p-8 border border-slate-200 flex flex-col items-center justify-center space-y-2">
+          <Loader2 className="w-6 h-6 text-[#2563EB] animate-spin" />
+          <p className="text-xs font-semibold text-slate-500">Loading lending partners...</p>
+        </div>
+      ) : partnersError ? (
+        <div className="bg-white rounded-3xl p-6 border border-amber-200 text-center space-y-2">
+          <AlertCircle className="w-7 h-7 text-amber-500 mx-auto" />
+          <p className="text-sm font-bold text-[#1E293B]">{partnersError}</p>
+          <button
+            type="button"
+            onClick={reloadPartners}
+            className="mt-1 px-4 py-1.5 bg-[#2563EB] text-white text-xs font-bold rounded-xl shadow cursor-pointer"
+          >
+            Retry
+          </button>
+        </div>
+      ) : (
+      <>
       {/* 2. SECTION A: ELIGIBLE COMPANIES (TOP - ACTIVE & CLICKABLE) */}
       <div className="space-y-3 pt-1">
         <div className="flex items-center justify-between gap-2 px-1">
@@ -456,15 +479,19 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
             <h4 className="text-sm font-extrabold text-[#1E293B]">
               Salary ₹{salary.toLocaleString()} Par Koi Eligible Offer Nahi Hai
             </h4>
-            <p className="text-xs text-slate-500">
-              Minimum salary criteria ₹25,000/month (Ticket 2 Loan) se shuru hoti hai.
-            </p>
-            <button
-              onClick={() => setSalary(25000)}
-              className="mt-1 px-4 py-1.5 bg-[#2563EB] text-white text-xs font-bold rounded-xl shadow cursor-pointer"
-            >
-              Set Salary to ₹25,000
-            </button>
+            {lowestBarPartner && (
+              <>
+                <p className="text-xs text-slate-500">
+                  Minimum salary criteria {lowestBarPartner.minSalaryDisplay} ({lowestBarPartner.name}) se shuru hoti hai.
+                </p>
+                <button
+                  onClick={() => setSalary(lowestBarPartner.minSalary)}
+                  className="mt-1 px-4 py-1.5 bg-[#2563EB] text-white text-xs font-bold rounded-xl shadow cursor-pointer"
+                >
+                  Set Salary to {lowestBarPartner.minSalaryDisplay}
+                </button>
+              </>
+            )}
           </div>
         )}
       </div>
@@ -579,6 +606,8 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
             ))}
           </div>
         </div>
+      )}
+      </>
       )}
 
     </div>

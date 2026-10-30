@@ -9,8 +9,8 @@ export const ProductGrid = ({ onProductSelect }) => {
 
   const products = [
     {
-      // The only category currently backed by real partner data (the 6 lending
-      // partners in PARTNER_NBFCS). Business/Gold/Credit Card below route through the
+      // The only category currently backed by real partner data (the active lending
+      // partners, live from the backend — see AppContext's `partners`). Business/Gold/Credit Card below route through the
       // same partner comparison — there is no distinct partner data for them yet, so
       // their limit/rate must not assert a specific unverified number.
       id: 'personal',

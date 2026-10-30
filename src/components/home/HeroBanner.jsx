@@ -4,7 +4,7 @@ import { BILINGUAL_TEXT } from '../../data/mockData';
 import { ArrowRight, ShieldCheck, Zap, Lock, Clock, Sparkles } from 'lucide-react';
 
 export const HeroBanner = ({ onApplyClick }) => {
-  const { language } = useApp();
+  const { language, partners, partnersLoading } = useApp();
   const t = BILINGUAL_TEXT[language] || BILINGUAL_TEXT.en;
 
   return (
@@ -35,7 +35,7 @@ export const HeroBanner = ({ onApplyClick }) => {
       <div className="grid grid-cols-3 gap-2">
         <div className="bg-white p-3 rounded-2xl border border-[#E4EEFF] text-center shadow-2xs">
           <Clock className="w-5 h-5 text-[#4A8DFF] mx-auto mb-1" />
-          <p className="text-[11px] font-extrabold text-[#223981]">6 Partners</p>
+          <p className="text-[11px] font-extrabold text-[#223981]">{partnersLoading ? '—' : `${partners.length} Partners`}</p>
           <p className="text-[9.5px] text-[#717983] font-semibold">Compare Offers</p>
         </div>
 

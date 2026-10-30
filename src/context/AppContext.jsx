@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { api, hasSession } from '../services/api';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { api, hasSession, fetchActivePartners } from '../services/api';
 
 const AppContext = createContext();
 
@@ -48,6 +48,31 @@ export const AppProvider = ({ children }) => {
 
   // Referred By Info from Referral Link
   const [referredBy, setReferredBy] = useState(null);
+
+  // Live lending-partner catalog — fetched once from the backend (the single source
+  // of truth for which partners are active and their real terms) instead of a local
+  // hand-maintained list that can drift out of sync with the backend, as happened
+  // before. `partners` stays [] on a failed fetch — callers must show a real error/
+  // retry state, never silently fall back to stale hardcoded data.
+  const [partners, setPartners] = useState([]);
+  const [partnersLoading, setPartnersLoading] = useState(true);
+  const [partnersError, setPartnersError] = useState('');
+
+  const reloadPartners = useCallback(async () => {
+    setPartnersLoading(true);
+    setPartnersError('');
+    const res = await fetchActivePartners();
+    if (res.ok) {
+      setPartners(res.partners);
+    } else {
+      setPartnersError(res.error || 'Unable to load lending partners right now.');
+    }
+    setPartnersLoading(false);
+  }, []);
+
+  useEffect(() => {
+    reloadPartners();
+  }, [reloadPartners]);
 
   // Clean Default Guest User Profile (Unverified, No Fake Data)
   const GUEST_USER = {
@@ -366,6 +391,10 @@ export const AppProvider = ({ children }) => {
       setIsAuthOpen,
       isSupportOpen,
       setIsSupportOpen,
+      partners,
+      partnersLoading,
+      partnersError,
+      reloadPartners,
       user,
       setUser,
       currentPhone,

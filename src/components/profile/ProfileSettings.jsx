@@ -10,7 +10,8 @@ import {
 import confetti from 'canvas-confetti';
 
 export const ProfileSettings = () => {
-  const { user, language, setLanguage, setIsSupportOpen, setActiveTab, setIsAuthOpen, logoutUser, updateLocalProfile, deleteLocalAccount, currentPhone } = useApp();
+  const { user, language, setLanguage, setIsSupportOpen, setActiveTab, setIsAuthOpen, logoutUser, updateLocalProfile, deleteLocalAccount, currentPhone, partners } = useApp();
+  const partnerNamesList = partners.map((p) => p.name).join(', ');
   const t = BILINGUAL_TEXT[language] || BILINGUAL_TEXT.en;
   const isAuthenticated = !!currentPhone;
 
@@ -626,7 +627,7 @@ export const ProfileSettings = () => {
                 <span className="w-6 h-6 rounded-full bg-[#4A8DFF] text-white font-black flex items-center justify-center text-xs flex-shrink-0">1</span>
                 <div>
                   <p className="font-extrabold text-[#223981]">Select Preferred Partner Lender</p>
-                  <p className="text-[11px] text-[#717983] mt-0.5">Browse 6 partner companies (Rupay91, Jhatpat Loans, Insta Rupees, Borrowera, Ticket 2 Loan, MoneyDot) and click 'Apply Now'.</p>
+                  <p className="text-[11px] text-[#717983] mt-0.5">Browse {partners.length} partner companies ({partnerNamesList}) and click 'Apply Now'.</p>
                 </div>
               </div>
 
@@ -934,15 +935,14 @@ export const ProfileSettings = () => {
           <div className="bg-white rounded-3xl p-5 max-w-md w-full space-y-3 shadow-2xl text-left border border-slate-200">
             <h3 className="text-sm font-extrabold text-[#223981]">Lending Partners Disclosure</h3>
             <p className="text-xs text-[#717983] leading-relaxed">
-              Paisa in Minutes is a loan aggregator/facilitator — not a lender. We connect you with 6 NBFC-registered
-              lending partners (Rupay91, Jhatpat Loans, Insta Rupees, Borrowera, Ticket 2 Loan, and the MoneyDot app).
+              Paisa in Minutes is a loan aggregator/facilitator — not a lender. We connect you with {partners.length} NBFC-registered
+              lending partners ({partnerNamesList}).
               Each partner sets and discloses its own interest rate, tenure, and fees — review them on the partner's
               own offer before you proceed.
             </p>
             <div className="bg-slate-50 p-3 rounded-2xl text-[11px] text-[#223981] font-semibold">
-              ✓ All 6 partners cap loans at ₹1,00,000.<br/>
-              ✓ 5 website partners (Rupay91, Jhatpat Loans, Insta Rupees, Borrowera, Ticket 2 Loan): tenure 30–90 days (varies by partner), daily rate up to 0.8%–1.0%/day, APR 14%–24% p.a., processing fee 1%–3% of loan amount + 18% GST.<br/>
-              ✓ MoneyDot (app-based): tenure 3–12 months, APR 24%–60% p.a., processing fee up to 5.1% of loan amount + GST, no daily-rate.<br/>
+              ✓ All {partners.length} partners cap loans at ₹1,00,000.<br/>
+              ✓ Tenure 30–90 days (varies by partner), daily rate up to 0.8%–1.0%/day, APR 14%–24% p.a., processing fee 1%–3% of loan amount + 18% GST.<br/>
               Exact tenure, rate, and fees are decided by whichever partner you select — see their offer for final figures.
             </div>
             <button
