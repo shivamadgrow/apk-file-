@@ -4,17 +4,21 @@ Official Android APK release and application build files for **Paisa in Minutes*
 
 ---
 
-## 📱 Download Android APK
+## 📱 Android APK / App Bundle
 
-You can download the latest Android `.apk` directly from this repository:
+No prebuilt binary is committed to this repository (signed release artifacts
+shouldn't live in git). Build one locally:
 
-- 📥 **[Download app-debug.apk (v1.0.0)](./app-debug.apk)** *(~5.48 MB)*
+```bash
+npm install
+npm run build
+npx cap sync android
+cd android
+./gradlew assembleRelease   # produces app/build/outputs/apk/release/app-release.apk
+./gradlew bundleRelease     # produces app/build/outputs/bundle/release/app-release.aab
+```
 
-### How to Install on Android:
-1. Download **`app-debug.apk`** to your phone (or download on PC and send via USB/WhatsApp/Drive).
-2. Tap the downloaded file in your Android **Files** or **Downloads** app.
-3. If prompted, toggle **"Allow installation from unknown sources"**.
-4. Tap **Install** and open **Paisa in Minutes**!
+Release builds require `android/keystore.properties` — see `android/RELEASE_SIGNING.md`.
 
 ---
 
@@ -22,9 +26,9 @@ You can download the latest Android `.apk` directly from this repository:
 
 - **App ID**: `com.paisainminutes.app`
 - **Framework**: React 18 + Vite + Tailwind CSS
-- **Mobile Engine**: Capacitor 6 (Android)
-- **Min Android SDK**: API 22 (Android 5.1+)
-- **Target Android SDK**: API 34+ (Android 14)
+- **Mobile Engine**: Capacitor 7 (Android)
+- **Min Android SDK**: API 24 (Android 7.0+)
+- **Target Android SDK**: API 36
 
 ---
 
