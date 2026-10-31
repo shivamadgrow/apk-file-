@@ -15,8 +15,8 @@ export const ProductGrid = ({ onProductSelect }) => {
       // their limit/rate must not assert a specific unverified number.
       id: 'personal',
       name: t.personalLoan,
-      limit: 'Up to ₹1 Lakh',
-      rate: 'Up to 1.0% / day',
+      limit: t.upToOneLakh,
+      rate: t.upToOnePercentDay,
       icon: UserCheck,
       color: 'bg-blue-50 text-[#4A8DFF] border-blue-200/80',
       badge: ''
@@ -24,8 +24,8 @@ export const ProductGrid = ({ onProductSelect }) => {
     {
       id: 'business',
       name: t.businessLoan,
-      limit: 'Compare Partner Offers',
-      rate: 'Set by partner',
+      limit: t.comparePartnerOffers,
+      rate: t.setByPartner,
       icon: Briefcase,
       color: 'bg-indigo-50 text-indigo-600 border-indigo-200/80',
       badge: ''
@@ -33,8 +33,8 @@ export const ProductGrid = ({ onProductSelect }) => {
     {
       id: 'gold',
       name: t.goldLoan,
-      limit: 'Compare Partner Offers',
-      rate: 'Set by partner',
+      limit: t.comparePartnerOffers,
+      rate: t.setByPartner,
       icon: Coins,
       color: 'bg-amber-50 text-amber-600 border-amber-200/80',
       badge: ''
@@ -42,8 +42,8 @@ export const ProductGrid = ({ onProductSelect }) => {
     {
       id: 'credit_card',
       name: t.creditCard,
-      limit: 'Compare Partner Offers',
-      rate: 'Set by partner',
+      limit: t.comparePartnerOffers,
+      rate: t.setByPartner,
       icon: CreditCard,
       color: 'bg-emerald-50 text-emerald-600 border-emerald-200/80',
       badge: ''
@@ -54,13 +54,13 @@ export const ProductGrid = ({ onProductSelect }) => {
     <div className="my-4 text-left">
       <div className="flex items-center justify-between mb-2.5">
         <h2 className="text-sm font-extrabold text-[#223981] tracking-tight">
-          Loan Products
+          {t.loanProducts}
         </h2>
-        <button 
+        <button
           onClick={() => setActiveTab('loans')}
           className="text-[11px] font-bold text-[#4A8DFF] flex items-center hover:underline"
         >
-          View All <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
+          {t.viewAll} <ChevronRight className="w-3.5 h-3.5 ml-0.5" />
         </button>
       </div>
 

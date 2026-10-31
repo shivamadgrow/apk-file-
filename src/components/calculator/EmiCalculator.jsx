@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
+import { BILINGUAL_TEXT } from '../../data/mockData';
 import { Calculator, ArrowRight } from 'lucide-react';
 
 // Models the real product shared by the active lending partners (live from the
@@ -7,7 +8,8 @@ import { Calculator, ArrowRight } from 'lucide-react';
 // a flat processing fee, not a traditional multi-year amortized EMI. There is no
 // amortization schedule here because none of these partners' products have one.
 export const EmiCalculator = ({ onApplyWithAmount }) => {
-  const { partners } = useApp();
+  const { partners, language } = useApp();
+  const t = BILINGUAL_TEXT[language] || BILINGUAL_TEXT.en;
   const [amount, setAmount] = useState(50000);
   const [dailyRate, setDailyRate] = useState(1.0);
   const [tenureDays, setTenureDays] = useState(60);
@@ -29,8 +31,8 @@ export const EmiCalculator = ({ onApplyWithAmount }) => {
           <Calculator className="w-5 h-5" />
         </div>
         <div>
-          <h2 className="text-base font-extrabold text-[#223981]">Loan Cost Estimator</h2>
-          <p className="text-xs text-[#717983]">Worst-case estimate for our {partners.length} daily-rate lending partners.</p>
+          <h2 className="text-base font-extrabold text-[#223981]">{t.loanCostEstimator}</h2>
+          <p className="text-xs text-[#717983]">{t.worstCaseEstimateFor} {partners.length} {t.dailyRateLendingPartners}</p>
         </div>
       </div>
 
@@ -38,8 +40,8 @@ export const EmiCalculator = ({ onApplyWithAmount }) => {
       <div className="bg-slate-50/80 p-4 rounded-2xl border border-slate-200/90 shadow-2xs">
         <div className="flex justify-between items-center mb-2 gap-2">
           <div>
-            <span className="text-xs font-black text-[#223981] block">Loan Amount</span>
-            <span className="text-[10px] text-slate-400 font-medium">Type manually or use slider</span>
+            <span className="text-xs font-black text-[#223981] block">{t.loanAmount}</span>
+            <span className="text-[10px] text-slate-400 font-medium">{t.typeManuallyOrSlider}</span>
           </div>
 
           {/* Manual Type Input Box */}
@@ -92,7 +94,7 @@ export const EmiCalculator = ({ onApplyWithAmount }) => {
                   : 'bg-white text-slate-600 border border-slate-200 hover:border-[#2563EB]/60 hover:text-[#2563EB]'
               }`}
             >
-              ₹{preset >= 100000 ? `${preset / 100000} Lakh` : `${preset / 1000}k`}
+              ₹{preset >= 100000 ? `${preset / 100000} ${language === 'hi' ? 'लाख' : 'Lakh'}` : `${preset / 1000}k`}
             </button>
           ))}
         </div>
@@ -102,9 +104,9 @@ export const EmiCalculator = ({ onApplyWithAmount }) => {
       <div className="bg-slate-50/80 p-4 rounded-2xl border border-slate-200/90 shadow-2xs">
         <div className="flex justify-between items-center mb-1.5">
           <div>
-            <span className="text-xs font-black text-[#223981] block">Daily Rate</span>
+            <span className="text-xs font-black text-[#223981] block">{t.dailyRate}</span>
             <span className="text-[10px] font-extrabold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/80 inline-block mt-0.5">
-              Varies by partner
+              {t.variesByPartner}
             </span>
           </div>
           <div className="text-right">
@@ -125,17 +127,17 @@ export const EmiCalculator = ({ onApplyWithAmount }) => {
           className="paisa-slider"
         />
         <div className="flex justify-between text-[10px] text-slate-500 font-semibold mt-1">
-          <span>0.8% (Min)</span>
+          <span>0.8% ({language === 'hi' ? 'न्यूनतम' : 'Min'})</span>
           <span>0.9%</span>
-          <span>1.0% (Max)</span>
+          <span>1.0% ({language === 'hi' ? 'अधिकतम' : 'Max'})</span>
         </div>
       </div>
 
       {/* Slider 3: Tenure (Days) */}
       <div className="bg-slate-50/80 p-4 rounded-2xl border border-slate-200/90 shadow-2xs">
         <div className="flex justify-between items-center mb-1.5">
-          <span className="text-xs font-black text-[#223981]">Repayment Period</span>
-          <span className="text-lg font-black text-[#2563EB]">{tenureDays} Days</span>
+          <span className="text-xs font-black text-[#223981]">{t.repaymentPeriod}</span>
+          <span className="text-lg font-black text-[#2563EB]">{tenureDays} {t.days}</span>
         </div>
         <input
           type="range"
@@ -150,9 +152,9 @@ export const EmiCalculator = ({ onApplyWithAmount }) => {
           className="paisa-slider"
         />
         <div className="flex justify-between text-[10px] text-slate-500 font-semibold mt-1">
-          <span>30 Days</span>
-          <span>60 Days</span>
-          <span>90 Days</span>
+          <span>30 {t.days}</span>
+          <span>60 {t.days}</span>
+          <span>90 {t.days}</span>
         </div>
       </div>
 
@@ -162,10 +164,10 @@ export const EmiCalculator = ({ onApplyWithAmount }) => {
         <div className="flex items-center justify-between border-b border-white/15 pb-3">
           <div>
             <span className="text-[11px] font-bold text-blue-200 uppercase tracking-wider block">
-              Est. Total Repayable (Worst Case)
+              {t.estTotalRepayable}
             </span>
             <span className="text-[10px] text-blue-300">
-              Principal: ₹{amount.toLocaleString('en-IN')}
+              {t.principal}: ₹{amount.toLocaleString('en-IN')}
             </span>
           </div>
           <div className="text-right">
@@ -178,19 +180,19 @@ export const EmiCalculator = ({ onApplyWithAmount }) => {
         {/* 3 Metric Columns with proper Left, Center, Right alignment */}
         <div className="grid grid-cols-3 gap-1.5 bg-white/10 p-3 rounded-2xl border border-white/10 items-center">
           <div className="text-left pl-1">
-            <p className="text-[10px] font-medium text-blue-200">Principal</p>
+            <p className="text-[10px] font-medium text-blue-200">{t.principal}</p>
             <p className="font-extrabold text-white text-xs sm:text-sm mt-0.5">
               ₹{amount.toLocaleString('en-IN')}
             </p>
           </div>
           <div className="text-center border-x border-white/15 px-1">
-            <p className="text-[10px] font-medium text-blue-200">Daily Rate</p>
+            <p className="text-[10px] font-medium text-blue-200">{t.dailyRate}</p>
             <p className="font-extrabold text-emerald-300 text-xs sm:text-sm mt-0.5">
               {dailyRate.toFixed(1)}%/day
             </p>
           </div>
           <div className="text-right pr-1">
-            <p className="text-[10px] font-medium text-blue-200">Est. Interest</p>
+            <p className="text-[10px] font-medium text-blue-200">{t.estInterest}</p>
             <p className="font-extrabold text-amber-300 text-xs sm:text-sm mt-0.5">
               ₹{estimatedInterest.toLocaleString('en-IN')}
             </p>
@@ -206,19 +208,17 @@ export const EmiCalculator = ({ onApplyWithAmount }) => {
           <div className="flex justify-between text-[10.5px] text-blue-100 font-semibold px-0.5">
             <span className="flex items-center">
               <span className="w-2 h-2 rounded-full bg-[#6FA8FF] mr-1.5 flex-shrink-0" />
-              Principal ({principalPercent}%)
+              {t.principal} ({principalPercent}%)
             </span>
             <span className="flex items-center">
               <span className="w-2 h-2 rounded-full bg-amber-400 mr-1.5 flex-shrink-0" />
-              Interest ({interestPercent}%)
+              {t.interestLabel} ({interestPercent}%)
             </span>
           </div>
         </div>
 
         <p className="text-[10px] text-blue-200 leading-relaxed">
-          Worst case at this partner's maximum daily rate — processing fee and GST are
-          charged separately and not included here. Your actual rate, fee, and
-          processing fee depend on the partner you're approved by.
+          {t.worstCaseFooterNote}
         </p>
 
         <button
@@ -231,7 +231,7 @@ export const EmiCalculator = ({ onApplyWithAmount }) => {
           } text-xs sm:text-sm font-black rounded-2xl shadow-md transition-all flex items-center justify-center space-x-1.5 mt-1`}
         >
           <span>
-            {amount > 0 ? `Apply for ₹${amount.toLocaleString('en-IN')} Now` : 'Select Loan Amount to Apply'}
+            {amount > 0 ? `${t.applyForAmountNow} ₹${amount.toLocaleString('en-IN')} ${t.now}` : t.selectLoanAmountToApply}
           </span>
           {amount > 0 && <ArrowRight className="w-4 h-4 ml-0.5" />}
         </button>

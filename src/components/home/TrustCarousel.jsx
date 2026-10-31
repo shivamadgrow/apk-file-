@@ -1,9 +1,11 @@
 import React, { useRef } from 'react';
 import { useApp } from '../../context/AppContext';
+import { BILINGUAL_TEXT } from '../../data/mockData';
 import { ChevronRight, ChevronLeft, Sparkles, Building2, Loader2, AlertCircle } from 'lucide-react';
 
 export const TrustCarousel = () => {
-  const { setActiveTab, partners, partnersLoading, partnersError, reloadPartners } = useApp();
+  const { setActiveTab, partners, partnersLoading, partnersError, reloadPartners, language } = useApp();
+  const t = BILINGUAL_TEXT[language] || BILINGUAL_TEXT.en;
   const scrollRef = useRef(null);
 
   const handleScroll = (direction) => {
@@ -23,11 +25,11 @@ export const TrustCarousel = () => {
           <div className="flex items-center space-x-1.5">
             <Building2 className="w-4 h-4 text-[#2563EB]" />
             <h3 className="text-xs sm:text-sm font-black text-[#223981]">
-              {partnersLoading ? 'Lending Partners' : `${partners.length} Lending Partners`}
+              {partnersLoading ? t.lendingPartnersTab : `${partners.length} ${t.lendingPartnersTab}`}
             </h3>
           </div>
           <p className="text-[10.5px] text-[#717983] mt-0.5">
-            See which partners match your monthly salary
+            {language === 'hi' ? 'देखें कौन से पार्टनर आपकी मासिक सैलरी से मैच करते हैं' : 'See which partners match your monthly salary'}
           </p>
         </div>
 
@@ -132,7 +134,7 @@ export const TrustCarousel = () => {
 
               {/* Bottom Row: Min Salary properly placed in its own dedicated container */}
               <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[10px]">
-                <span className="text-slate-500 font-semibold">Min Salary</span>
+                <span className="text-slate-500 font-semibold">{t.minSalaryLabel}</span>
                 <span className="font-extrabold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200/70 whitespace-nowrap">
                   {partner.minSalaryDisplay}
                 </span>
@@ -150,11 +152,11 @@ export const TrustCarousel = () => {
         <div className="flex items-center space-x-2 min-w-0 pr-2">
           <Sparkles className="w-4 h-4 text-[#2563EB] flex-shrink-0" />
           <p className="text-[10.5px] sm:text-[11px] font-bold text-[#1E3A8A] truncate">
-            Salary ₹25k se lekar ₹50k+ tak ke sabhi offers check karein
+            {language === 'hi' ? '₹25k से ₹50k+ तक की सभी ऑफर्स चेक करें' : 'Check all offers from ₹25k to ₹50k+ salary'}
           </p>
         </div>
         <span className="text-[10px] font-black text-white bg-[#2563EB] group-hover:bg-[#1D4ED8] px-2.5 py-1 rounded-xl shadow-2xs whitespace-nowrap flex-shrink-0 transition-colors">
-          Compare Offers →
+          {t.compareOffers} →
         </span>
       </div>
     </div>

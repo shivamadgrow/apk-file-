@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
+import { BILINGUAL_TEXT } from '../../data/mockData';
 import { api, warmBackend, buildPartnerRedirectUrl } from '../../services/api';
 import { Shield, Phone, ArrowRight, CheckCircle2, Lock, X, User, Mail, FileText, Sparkles, Loader2, RefreshCw, AlertCircle, Zap, Smartphone, ArrowLeft } from 'lucide-react';
 
 export const AuthModal = () => {
-  const { isAuthOpen, setIsAuthOpen, loginUser, referredBy } = useApp();
+  const { isAuthOpen, setIsAuthOpen, loginUser, referredBy, language } = useApp();
+  const t = BILINGUAL_TEXT[language] || BILINGUAL_TEXT.en;
 
   const [step, setStep] = useState('welcome'); // 'welcome' | 'phone' | 'otp' | 'signup'
   const [phone, setPhone] = useState('');
@@ -284,7 +286,7 @@ export const AuthModal = () => {
                 Paisa in Minutes
               </h2>
               <span className="text-[11px] font-bold text-amber-800 bg-amber-50 border border-amber-200/80 px-3.5 py-0.5 rounded-full shadow-2xs">
-                Your trusted loan partner
+                {t.trustedLoanPartner}
               </span>
             </div>
 
@@ -295,18 +297,18 @@ export const AuthModal = () => {
                 className="w-full py-3.5 px-4 bg-[#F59E0B] hover:bg-[#D97706] text-white font-black text-sm rounded-2xl shadow-md transition flex items-center justify-center space-x-2 active:scale-[0.99] cursor-pointer"
               >
                 <Smartphone className="w-4 h-4" />
-                <span>Continue with Mobile</span>
+                <span>{t.continueWithMobile}</span>
               </button>
             </div>
 
             <p className="text-[10.5px] text-[#717983] leading-relaxed pt-2">
-              By continuing, you agree to our{' '}
+              {t.agreeToTerms}{' '}
               <a href="https://paisainminutes.com/terms-and-conditions" target="_blank" rel="noopener noreferrer" className="text-[#2563EB] font-bold underline">
-                Terms of Service
+                {t.termsOfService}
               </a>{' '}
-              and{' '}
+              {t.and}{' '}
               <a href="https://paisainminutes.com/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-[#2563EB] font-bold underline">
-                Privacy Policy
+                {t.privacyPolicy}
               </a>
               .
             </p>
@@ -315,13 +317,13 @@ export const AuthModal = () => {
           <>
             {/* Modal Brand Header with Back Button */}
             <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-              <button 
+              <button
                 type="button"
                 onClick={() => setStep('welcome')}
                 className="flex items-center text-xs font-bold text-[#223981] hover:text-[#4A8DFF] transition"
               >
                 <ArrowLeft className="w-4 h-4 mr-1" />
-                <span>Back</span>
+                <span>{t.back}</span>
               </button>
               <div className="flex items-center space-x-2">
                 <img src="/logo.png" alt="Paisa in Minutes" className="h-8 w-auto object-contain" />
@@ -372,7 +374,7 @@ export const AuthModal = () => {
           <form onSubmit={handleSendOtp} className="space-y-4 pt-1">
             <div>
               <label className="block text-xs font-bold text-[#223981] mb-1.5">
-                Enter 10-Digit Mobile Number
+                {t.enterMobileNumberLabel}
               </label>
               <div className="relative flex items-center">
                 <span className="absolute left-3 text-xs font-bold text-slate-500">+91</span>
@@ -390,12 +392,12 @@ export const AuthModal = () => {
                       warmBackend();
                     }
                   }}
-                  placeholder="Enter Mobile Number"
+                  placeholder={t.enterMobileNumberPlaceholder}
                   className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-extrabold text-[#223981] focus:ring-2 focus:ring-[#4A8DFF] outline-none disabled:opacity-50"
                 />
               </div>
               <p className="text-[10.5px] text-[#717983] mt-1">
-                Real 6-digit SMS OTP will be sent to your mobile phone.
+                {t.realOtpNotice}
               </p>
             </div>
 
@@ -407,11 +409,11 @@ export const AuthModal = () => {
               {isSendingOtp ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Connecting to SMS Gateway...</span>
+                  <span>{t.connectingSmsGateway}</span>
                 </>
               ) : (
                 <>
-                  <span>Send 6-Digit SMS OTP</span>
+                  <span>{t.sendOtpBtn}</span>
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
@@ -424,7 +426,7 @@ export const AuthModal = () => {
           <form onSubmit={handleVerifyOtp} className="space-y-4 pt-1">
             <div className="bg-slate-50 p-3 rounded-2xl border border-slate-200 text-xs flex justify-between items-center">
               <div>
-                <p className="text-[#717983]">OTP sent via SMS to:</p>
+                <p className="text-[#717983]">{t.otpSentTo}</p>
                 <p className="font-bold text-[#223981]">+91 {phone.replace(/\D/g, '').slice(-10)}</p>
               </div>
               <button
@@ -436,13 +438,13 @@ export const AuthModal = () => {
                 }}
                 className="text-[11px] font-bold text-[#4A8DFF] hover:underline"
               >
-                Change
+                {t.change}
               </button>
             </div>
 
             <div>
               <label className="block text-xs font-bold text-[#223981] mb-1.5">
-                Enter 6-Digit SMS OTP
+                {t.enterOtpLabel}
               </label>
               <input
                 type="text"
@@ -458,13 +460,13 @@ export const AuthModal = () => {
                 placeholder="• • • • • •"
                 className="w-full py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xl sm:text-2xl font-black text-center tracking-[0.25em] sm:tracking-[0.35em] text-[#223981] focus:ring-2 focus:ring-[#4A8DFF] outline-none disabled:opacity-50"
               />
-              
+
               {/* Resend OTP Bar */}
               <div className="flex items-center justify-between mt-2 px-1 text-xs">
-                <span className="text-[#717983] text-[11px]">Didn't receive SMS?</span>
+                <span className="text-[#717983] text-[11px]">{t.didntReceiveSms}</span>
                 {resendCooldown > 0 ? (
                   <span className="text-[#717983] text-[11px] font-semibold">
-                    Resend in {resendCooldown}s
+                    {t.resendIn} {resendCooldown}s
                   </span>
                 ) : (
                   <button
@@ -474,7 +476,7 @@ export const AuthModal = () => {
                     className="text-[#4A8DFF] font-bold text-[11px] hover:underline flex items-center space-x-1"
                   >
                     <RefreshCw className="w-3 h-3" />
-                    <span>Resend OTP</span>
+                    <span>{t.resendOtp}</span>
                   </button>
                 )}
               </div>
@@ -490,7 +492,7 @@ export const AuthModal = () => {
                 }}
                 className="px-4 py-3 border border-slate-200 text-[#223981] text-xs font-bold rounded-2xl hover:bg-slate-50 transition"
               >
-                Back
+                {t.back}
               </button>
               <button
                 type="submit"
@@ -500,12 +502,12 @@ export const AuthModal = () => {
                 {isLoading ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Verifying OTP...</span>
+                    <span>{t.verifyingOtp}</span>
                   </>
                 ) : (
                   <>
                     <CheckCircle2 className="w-4 h-4" />
-                    <span>Verify & Continue</span>
+                    <span>{t.verifyAndContinue}</span>
                   </>
                 )}
               </button>
@@ -518,16 +520,20 @@ export const AuthModal = () => {
           <form onSubmit={handleCompleteRegistration} className="space-y-3 pt-1">
             <div className="bg-[#E4EEFF]/70 p-2.5 rounded-2xl border border-[#6FA8FF]/40 text-xs">
               <p className="font-bold text-[#223981] flex items-center">
-                <span>Mobile Verified Successfully! 🎉</span>
+                <span>{t.mobileVerifiedSuccess}</span>
               </p>
               <p className="text-[10.5px] text-[#475569] mt-0.5">
-                All fields marked with <span className="text-red-500 font-black">*</span> are <strong className="text-[#223981]">required</strong> to create your profile.
+                {language === 'hi' ? (
+                  <>लाल <span className="text-red-500 font-black">*</span> वाले फ़ील्ड्स {t.allFieldsRequired} <strong className="text-[#223981]">{t.requiredWord}</strong> {t.toCreateProfile}</>
+                ) : (
+                  <>All fields marked with <span className="text-red-500 font-black">*</span> are <strong className="text-[#223981]">required</strong> to create your profile.</>
+                )}
               </p>
             </div>
 
             <div>
               <label className="block text-[11px] font-bold text-[#223981] mb-1">
-                Full Legal Name (as per PAN) <span className="text-red-500 font-black">*</span>
+                {t.fullLegalName} <span className="text-red-500 font-black">*</span>
               </label>
               <input
                 type="text"
@@ -544,7 +550,7 @@ export const AuthModal = () => {
 
             <div>
               <label className="block text-[11px] font-bold text-[#223981] mb-1">
-                Email Address <span className="text-red-500 font-black">*</span>
+                {t.emailAddressLabel} <span className="text-red-500 font-black">*</span>
               </label>
               <input
                 type="email"
@@ -562,7 +568,7 @@ export const AuthModal = () => {
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <label className="block text-[11px] font-bold text-[#223981] mb-1">
-                  PAN Card <span className="text-red-500 font-black">*</span>
+                  {t.panCardLabel} <span className="text-red-500 font-black">*</span>
                 </label>
                 <input
                   type="text"
@@ -579,7 +585,7 @@ export const AuthModal = () => {
               </div>
               <div>
                 <label className="block text-[11px] font-bold text-[#223981] mb-1">
-                  City <span className="text-red-500 font-black">*</span>
+                  {t.cityLabel} <span className="text-red-500 font-black">*</span>
                 </label>
                 <input
                   type="text"
@@ -603,11 +609,11 @@ export const AuthModal = () => {
               {isLoading ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Saving Profile...</span>
+                  <span>{t.savingProfile}</span>
                 </>
               ) : (
                 <>
-                  <span>Create Account & Access Portal</span>
+                  <span>{t.createAccountBtn}</span>
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
@@ -618,7 +624,7 @@ export const AuthModal = () => {
         <div className="pt-2 border-t border-slate-100 text-center">
           <p className="text-[10px] text-slate-400 font-semibold flex items-center justify-center">
             <Lock className="w-3 h-3 mr-1 text-emerald-600" />
-            256-Bit Encrypted Secure Mobile Authentication
+            {t.secureAuthFooter}
           </p>
         </div>
       </div>

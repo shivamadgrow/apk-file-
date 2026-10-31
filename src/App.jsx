@@ -18,10 +18,12 @@ import { ReferAndEarn } from './components/referral/ReferAndEarn';
 import { AuthModal } from './components/auth/AuthModal';
 import { TermsConsentModal } from './components/common/TermsConsentModal';
 import { warmBackend } from './services/api';
+import { BILINGUAL_TEXT } from './data/mockData';
 import { X, Activity } from 'lucide-react';
 
 const MainAppContent = () => {
-  const { activeTab, setActiveTab, activeLoan, setActiveLoan, saveNewLoanApplication, currentPhone, partners, partnersLoading } = useApp();
+  const { activeTab, setActiveTab, activeLoan, setActiveLoan, saveNewLoanApplication, currentPhone, partners, partnersLoading, language } = useApp();
+  const t = BILINGUAL_TEXT[language] || BILINGUAL_TEXT.en;
   const [selectedProductForLoan, setSelectedProductForLoan] = useState(null);
   const [showWizardModal, setShowWizardModal] = useState(false);
   const [loanViewMode, setLoanViewMode] = useState('lenders'); // 'lenders' | 'wizard'
@@ -96,7 +98,7 @@ const MainAppContent = () => {
                     : 'text-slate-500 hover:text-[#1E3A8A]'
                 }`}
               >
-                <span>🏢 {partnersLoading ? 'Lending Partners' : `${partners.length} Lending Partners`}</span>
+                <span>🏢 {partnersLoading ? t.lendingPartnersTab : `${partners.length} ${t.lendingPartnersTab}`}</span>
               </button>
               <button
                 type="button"
@@ -107,7 +109,7 @@ const MainAppContent = () => {
                     : 'text-slate-500 hover:text-[#1E3A8A]'
                 }`}
               >
-                <span>🪄 Step-by-Step Apply</span>
+                <span>🪄 {t.stepByStepApply}</span>
               </button>
             </div>
 

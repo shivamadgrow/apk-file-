@@ -21,13 +21,13 @@ export const HeroBanner = ({ onApplyClick }) => {
       {/* Two-Tone Bold Headline */}
       <div>
         <h1 className="text-2xl sm:text-3xl font-extrabold text-[#223981] leading-tight tracking-tight">
-          Credit Limit & Loans...{' '}
+          {t.headlineMain}{' '}
           <span className="text-[#4A8DFF] underline decoration-[#6FA8FF]/40 decoration-4">
-            Minutes Mein.
+            {t.headlineSub}
           </span>
         </h1>
         <p className="text-xs text-[#717983] font-medium mt-1.5 leading-relaxed">
-          Compare offers from multiple lending partners, then apply directly with them.
+          {language === 'hi' ? 'कई लेंडिंग पार्टनर्स के ऑफर्स कम्पेयर करें, फिर सीधे उनके साथ अप्लाई करें।' : 'Compare offers from multiple lending partners, then apply directly with them.'}
         </p>
       </div>
 
@@ -35,20 +35,20 @@ export const HeroBanner = ({ onApplyClick }) => {
       <div className="grid grid-cols-3 gap-2">
         <div className="bg-white p-3 rounded-2xl border border-[#E4EEFF] text-center shadow-2xs">
           <Clock className="w-5 h-5 text-[#4A8DFF] mx-auto mb-1" />
-          <p className="text-[11px] font-extrabold text-[#223981]">{partnersLoading ? '—' : `${partners.length} Partners`}</p>
-          <p className="text-[9.5px] text-[#717983] font-semibold">Compare Offers</p>
+          <p className="text-[11px] font-extrabold text-[#223981]">{partnersLoading ? '—' : `${partners.length} ${language === 'hi' ? 'पार्टनर्स' : 'Partners'}`}</p>
+          <p className="text-[9.5px] text-[#717983] font-semibold">{t.compareOffers}</p>
         </div>
 
         <div className="bg-white p-3 rounded-2xl border border-[#E4EEFF] text-center shadow-2xs">
           <Zap className="w-5 h-5 text-amber-500 mx-auto mb-1" />
-          <p className="text-[11px] font-extrabold text-[#223981]">Up to ₹1L</p>
-          <p className="text-[9.5px] text-[#717983] font-semibold">Max Loan Amount</p>
+          <p className="text-[11px] font-extrabold text-[#223981]">{t.upTo} ₹1L</p>
+          <p className="text-[9.5px] text-[#717983] font-semibold">{language === 'hi' ? 'अधिकतम लोन राशि' : 'Max Loan Amount'}</p>
         </div>
 
         <div className="bg-white p-3 rounded-2xl border border-[#E4EEFF] text-center shadow-2xs">
           <ShieldCheck className="w-5 h-5 text-emerald-600 mx-auto mb-1" />
-          <p className="text-[11px] font-extrabold text-[#223981]">NBFC-Registered</p>
-          <p className="text-[9.5px] text-[#717983] font-semibold">Partners</p>
+          <p className="text-[11px] font-extrabold text-[#223981]">{language === 'hi' ? 'NBFC-रजिस्टर्ड' : 'NBFC-Registered'}</p>
+          <p className="text-[9.5px] text-[#717983] font-semibold">{language === 'hi' ? 'पार्टनर्स' : 'Partners'}</p>
         </div>
       </div>
 
@@ -59,13 +59,13 @@ export const HeroBanner = ({ onApplyClick }) => {
           onClick={onApplyClick}
           className="flex-1 py-3 px-5 bg-[#4A8DFF] hover:bg-[#223981] text-white text-xs sm:text-sm font-extrabold rounded-2xl shadow-md shadow-[#4A8DFF]/30 flex items-center justify-center space-x-2 transition-all active:scale-[0.98]"
         >
-          <span>Apply Now</span>
+          <span>{t.applyNow}</span>
           <ArrowRight className="w-4 h-4" />
         </button>
 
         <div className="flex items-center text-emerald-700 text-[11px] font-bold px-3 py-3 bg-emerald-50 rounded-2xl border border-emerald-200/80">
           <Lock className="w-3.5 h-3.5 mr-1" />
-          <span>100% Safe & Secure</span>
+          <span>{language === 'hi' ? '100% सुरक्षित' : '100% Safe & Secure'}</span>
         </div>
       </div>
     </div>

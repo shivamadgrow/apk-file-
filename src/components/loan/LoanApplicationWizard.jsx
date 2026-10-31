@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
+import { BILINGUAL_TEXT } from '../../data/mockData';
 import { MultiLenderComparison } from './MultiLenderComparison';
 import { LeadConsentCheckbox, DISCLOSURE_VERSION } from './LeadConsentCheckbox';
 import { ErrorToast } from '../common/ErrorToast';
@@ -10,7 +11,8 @@ import {
 } from 'lucide-react';
 
 export const LoanApplicationWizard = ({ preSelectedProduct = 'personal', onClose }) => {
-  const { user, setActiveLoan, saveNewLoanApplication, setActiveTab, partners } = useApp();
+  const { user, setActiveLoan, saveNewLoanApplication, setActiveTab, partners, language } = useApp();
+  const t = BILINGUAL_TEXT[language] || BILINGUAL_TEXT.en;
 
   const productTitle = preSelectedProduct === 'business' 
     ? 'Business Loan' 
@@ -200,14 +202,14 @@ export const LoanApplicationWizard = ({ preSelectedProduct = 'personal', onClose
       {step === 1 && (
         <div className="space-y-5">
           <div>
-            <h2 className="text-lg font-extrabold text-[#223981]">Select {productTitle} Amount</h2>
-            <p className="text-xs text-[#717983]">Compare up to ₹1,00,000 across our lending partners — exact rate, tenure, and fees are shown per partner in the next step.</p>
+            <h2 className="text-lg font-extrabold text-[#223981]">{t.selectLoanAmount} {productTitle}</h2>
+            <p className="text-xs text-[#717983]">{t.loanAmountSub}</p>
           </div>
 
           {/* Amount Input */}
           <div className="bg-[#E4EEFF]/50 p-4 rounded-2xl border border-[#6FA8FF]/30 space-y-2">
             <label htmlFor="loan-amount-input" className="text-xs font-bold text-[#717983] block">
-              Required Loan Amount
+              {t.requiredLoanAmount}
             </label>
             <div className="relative flex items-center">
               <span className="absolute left-3.5 text-lg font-black text-[#223981] pointer-events-none select-none">
@@ -224,23 +226,26 @@ export const LoanApplicationWizard = ({ preSelectedProduct = 'personal', onClose
               />
             </div>
             <p className="text-[10.5px] text-[#717983] font-semibold flex items-center justify-between">
-              <span>Enter the exact amount you need</span>
+              <span>{t.enterExactAmount}</span>
               {loanAmount > 100000 ? (
-                <span className="text-red-500 font-bold">Max is ₹1,00,000</span>
+                <span className="text-red-500 font-bold">{language === 'hi' ? 'अधिकतम ₹1,00,000 है' : 'Max is ₹1,00,000'}</span>
               ) : (
-                <span>Up to ₹1,00,000</span>
+                <span>{t.upTo} ₹1,00,000</span>
               )}
             </p>
           </div>
 
           {/* Purpose Selector */}
           <div>
-            <label className="block text-xs font-bold text-[#223981] mb-1">Purpose of Loan</label>
+            <label className="block text-xs font-bold text-[#223981] mb-1">{t.purposeOfLoan}</label>
             <select
               value={purpose}
               onChange={(e) => setPurpose(e.target.value)}
               className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-[#1E293B] focus:ring-2 focus:ring-[#4A8DFF] outline-none"
             >
+              {/* Kept in English — this value is sent to the backend's `purpose` field
+                  and read by partner-facing staff, so it must stay a stable, predictable
+                  value regardless of the display language. */}
               <option>Home Improvement & Renovation</option>
               <option>Medical & Family Emergency</option>
               <option>Business Expansion & Capital</option>
@@ -251,16 +256,16 @@ export const LoanApplicationWizard = ({ preSelectedProduct = 'personal', onClose
 
           <div className="bg-gradient-to-r from-[#223981] to-[#17275A] text-white p-4 rounded-2xl flex items-center justify-between shadow-md">
             <div>
-              <p className="text-[10px] font-bold text-[#6FA8FF] uppercase">Requested Amount</p>
+              <p className="text-[10px] font-bold text-[#6FA8FF] uppercase">{t.requestedAmount}</p>
               <p className="text-2xl font-black text-white">₹{loanAmount.toLocaleString()}</p>
-              <p className="text-[10px] text-emerald-300 font-bold">Rate, tenure & fees vary by partner — see the next step</p>
+              <p className="text-[10px] text-emerald-300 font-bold">{t.rateVariesByPartner}</p>
             </div>
             <button
               onClick={handleNextStep}
               disabled={!loanAmount || loanAmount <= 0 || loanAmount > 100000}
               className="px-5 py-2.5 bg-[#4A8DFF] hover:bg-white hover:text-[#223981] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#4A8DFF] disabled:hover:text-white text-white text-xs font-extrabold rounded-xl shadow transition flex items-center space-x-1"
             >
-              <span>Continue</span>
+              <span>{t.continueBtn}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
@@ -271,8 +276,8 @@ export const LoanApplicationWizard = ({ preSelectedProduct = 'personal', onClose
       {step === 2 && (
         <div className="space-y-4">
           <div>
-            <h2 className="text-lg font-extrabold text-[#223981]">Employment & Income Details</h2>
-            <p className="text-xs text-[#717983]">NBFC partners match loan offers based on your profile.</p>
+            <h2 className="text-lg font-extrabold text-[#223981]">{t.employmentIncomeDetails}</h2>
+            <p className="text-xs text-[#717983]">{t.employmentIncomeSub}</p>
           </div>
 
           <div className="flex bg-slate-100 p-1 rounded-xl">
@@ -282,7 +287,7 @@ export const LoanApplicationWizard = ({ preSelectedProduct = 'personal', onClose
                 employmentType === 'salaried' ? 'bg-[#4A8DFF] text-white shadow' : 'text-[#717983]'
               }`}
             >
-              Salaried Employee
+              {t.salariedEmployee}
             </button>
             <button
               onClick={() => setEmploymentType('self_employed')}
@@ -290,15 +295,15 @@ export const LoanApplicationWizard = ({ preSelectedProduct = 'personal', onClose
                 employmentType === 'self_employed' ? 'bg-[#4A8DFF] text-white shadow' : 'text-[#717983]'
               }`}
             >
-              Self-Employed / Business
+              {t.selfEmployed}
             </button>
           </div>
 
           <div>
             <label className="block text-xs font-bold text-[#223981] mb-1">
-              Net Monthly Take-Home Income (₹)
+              {t.netMonthlyIncome}
             </label>
-            <input 
+            <input
               type="number"
               value={monthlyIncome}
               onChange={(e) => setMonthlyIncome(Number(e.target.value))}
@@ -308,9 +313,9 @@ export const LoanApplicationWizard = ({ preSelectedProduct = 'personal', onClose
 
           <div>
             <label className="block text-xs font-bold text-[#223981] mb-1">
-              {employmentType === 'salaried' ? 'Company Name' : 'Business / Shop Name'}
+              {employmentType === 'salaried' ? t.companyName : t.businessShopName}
             </label>
-            <input 
+            <input
               type="text"
               value={companyName}
               onChange={(e) => setCompanyName(e.target.value)}
@@ -329,7 +334,7 @@ export const LoanApplicationWizard = ({ preSelectedProduct = 'personal', onClose
               onClick={handleNextStep}
               className="flex-1 py-2.5 bg-[#4A8DFF] text-white text-xs font-extrabold rounded-xl shadow flex items-center justify-center space-x-1"
             >
-              <span>Proceed to e-KYC</span>
+              <span>{t.proceedToEkyc}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
@@ -340,14 +345,14 @@ export const LoanApplicationWizard = ({ preSelectedProduct = 'personal', onClose
       {step === 3 && (
         <div className="space-y-4">
           <div>
-            <h2 className="text-lg font-extrabold text-[#223981]">Identity Details</h2>
+            <h2 className="text-lg font-extrabold text-[#223981]">{t.identityDetails}</h2>
             <p className="text-xs text-[#717983]">
-              Your PAN & Aadhaar are verified directly by the lending partner you choose next — not by Paisa in Minutes.
+              {t.identityDetailsSub}
             </p>
           </div>
 
           <div className="bg-slate-50 p-3 rounded-2xl border border-slate-200 space-y-2">
-            <label className="block text-xs font-bold text-[#223981]">PAN Number (optional, for prefill)</label>
+            <label className="block text-xs font-bold text-[#223981]">{t.panOptional}</label>
             <input
               type="text"
               value={panNumber}
@@ -361,9 +366,7 @@ export const LoanApplicationWizard = ({ preSelectedProduct = 'personal', onClose
           <div className="bg-[#E4EEFF]/60 p-3.5 rounded-2xl border border-[#6FA8FF]/40 flex items-start space-x-2.5">
             <ShieldCheck className="w-5 h-5 text-[#2563EB] flex-shrink-0 mt-0.5" />
             <p className="text-[11px] text-[#223981] font-semibold leading-relaxed">
-              After you pick an offer in the next step, you'll be taken to that lender's own site to complete
-              Aadhaar e-KYC and any document verification they require. Paisa in Minutes does not perform or
-              claim to perform identity verification itself.
+              {t.aadharEkycNotice}
             </p>
           </div>
 
@@ -385,11 +388,11 @@ export const LoanApplicationWizard = ({ preSelectedProduct = 'personal', onClose
               {isSubmittingApplication ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Submitting Application...</span>
+                  <span>{t.submittingApplication}</span>
                 </>
               ) : (
                 <>
-                  <span>Submit & View NBFC Offers</span>
+                  <span>{t.submitViewOffers}</span>
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
@@ -402,8 +405,8 @@ export const LoanApplicationWizard = ({ preSelectedProduct = 'personal', onClose
       {step === 4 && (
         <div>
           <div className="mb-3">
-            <h2 className="text-lg font-extrabold text-[#223981]">Compare & Select Best NBFC Offer</h2>
-            <p className="text-xs text-[#717983]">Side-by-side comparison of {partners.length} partner offers matching your monthly income.</p>
+            <h2 className="text-lg font-extrabold text-[#223981]">{t.compareSelectOffer}</h2>
+            <p className="text-xs text-[#717983]">{t.sideBySideComparison} {partners.length} {t.partnerOffersMatching}</p>
           </div>
 
           <MultiLenderComparison

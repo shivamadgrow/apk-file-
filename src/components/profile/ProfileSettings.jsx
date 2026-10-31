@@ -372,7 +372,7 @@ export const ProfileSettings = () => {
         >
           <div className="flex items-center space-x-2.5">
             <Shield className="w-4.5 h-4.5 text-emerald-600 flex-shrink-0" />
-            <span className="font-extrabold text-[#223981] text-xs sm:text-sm">RBI NBFC Partner Disclosures</span>
+            <span className="font-extrabold text-[#223981] text-xs sm:text-sm">{t.rbiDisclosures}</span>
           </div>
           <ChevronRight className="w-4 h-4 text-[#717983]" />
         </div>
@@ -414,7 +414,7 @@ export const ProfileSettings = () => {
             <div className="w-8 h-8 rounded-xl bg-[#E4EEFF] text-[#4A8DFF] flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition">
               <Share2 className="w-4.5 h-4.5" />
             </div>
-            <span className="font-extrabold text-[#223981] text-sm">Refer a Friend</span>
+            <span className="font-extrabold text-[#223981] text-sm">{t.referAFriend}</span>
           </div>
           <ChevronRight className="w-4 h-4 text-[#717983]" />
         </div>
@@ -428,7 +428,7 @@ export const ProfileSettings = () => {
             <div className="w-8 h-8 rounded-xl bg-[#E4EEFF] text-[#4A8DFF] flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition">
               <ListOrdered className="w-4.5 h-4.5" />
             </div>
-            <span className="font-extrabold text-[#223981] text-sm">How to Apply</span>
+            <span className="font-extrabold text-[#223981] text-sm">{t.howToApply}</span>
           </div>
           <ChevronRight className="w-4 h-4 text-[#717983]" />
         </div>

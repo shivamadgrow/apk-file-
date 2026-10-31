@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
+import { BILINGUAL_TEXT } from '../../data/mockData';
 import { api, hasSession, buildPartnerRedirectUrl, buildMoneyDotPlayStoreUrl } from '../../services/api';
 import { LeadConsentCheckbox, DISCLOSURE_VERSION } from './LeadConsentCheckbox';
 import { ErrorToast } from '../common/ErrorToast';
@@ -9,7 +10,8 @@ import {
 } from 'lucide-react';
 
 export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, userSalary = 30000, leadCode = null, onSelectOffer }) => {
-  const { user, currentPhone, setIsAuthOpen, partners, partnersLoading, partnersError, reloadPartners } = useApp();
+  const { user, currentPhone, setIsAuthOpen, partners, partnersLoading, partnersError, reloadPartners, language } = useApp();
+  const t = BILINGUAL_TEXT[language] || BILINGUAL_TEXT.en;
   const [salary, setSalary] = useState(userSalary || 30000);
   const [inputValue, setInputValue] = useState(String(userSalary || 30000));
   // The real backend lead code for this applicant. If the caller (e.g. the wizard,
@@ -173,24 +175,24 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
           <div>
             <div className="flex items-center space-x-2">
               <span className="text-[10px] font-black uppercase tracking-wider bg-white/20 text-white px-2.5 py-0.5 rounded-full backdrop-blur-xs">
-                Compare Offers
+                {t.compareOffers}
               </span>
               <span className="text-[11px] font-bold text-blue-200">
-                {partnersLoading ? 'Loading Partners...' : `${partners.length} Regulated Partners`}
+                {partnersLoading ? '...' : `${partners.length} ${t.regulatedPartners}`}
               </span>
             </div>
             <h2 className="text-lg sm:text-xl font-black mt-1 tracking-tight text-white">
-              Salary Eligibility Check
+              {t.salaryEligibilityCheck}
             </h2>
             <p className="text-xs text-blue-100/90 font-medium">
-              Apni take-home salary manually enter karein ya select karein
+              {t.salaryEligibilitySub}
             </p>
           </div>
 
           {/* Current Salary Badge */}
           <div className="bg-white/15 backdrop-blur-md px-4 py-2 rounded-2xl border border-white/20 flex sm:flex-col items-center sm:items-end justify-between self-start sm:self-auto min-w-[140px]">
             <span className="text-[10px] uppercase font-bold text-blue-200 tracking-wider">
-              Entered Salary
+              {t.enteredSalary}
             </span>
             <span className="text-base sm:text-lg font-black text-white">
               ₹{(salary || 0).toLocaleString()}<span className="text-xs text-blue-200 font-semibold">/mo</span>
@@ -202,10 +204,10 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
         <div className="bg-white/10 backdrop-blur-md p-3.5 sm:p-4 rounded-2xl border border-white/25 mt-3.5 space-y-2">
           <div className="flex items-center justify-between text-xs">
             <label htmlFor="manual-salary-input" className="font-extrabold text-white flex items-center space-x-1.5 cursor-pointer">
-              <span>✍️ Enter Monthly Salary Manually (Type Karein):</span>
+              <span>{t.enterSalaryManually}</span>
             </label>
             <span className="text-[10px] text-blue-200 font-bold bg-white/15 px-2.5 py-0.5 rounded-full">
-              Live Filter
+              {t.liveFilter}
             </span>
           </div>
 
@@ -228,9 +230,9 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
           </div>
 
           <p className="text-[11px] text-blue-100 font-semibold flex items-center justify-between">
-            <span>Aap jo salary type karenge, matching offers turant dikhenge.</span>
+            <span>{t.salaryTypeHint}</span>
             {salary < 30000 && salary > 0 && (
-              <span className="text-amber-300 font-bold">Min requirement is ₹30,000</span>
+              <span className="text-amber-300 font-bold">{t.minRequirementIs} ₹30,000</span>
             )}
           </p>
         </div>
@@ -238,7 +240,7 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
         {/* Quick Chips & Slider */}
         <div className="pt-3 space-y-2">
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-[11px] text-blue-200 font-bold mr-1">Quick Select:</span>
+            <span className="text-[11px] text-blue-200 font-bold mr-1">{t.quickSelect}</span>
             {salaryPresets.map((preset) => {
               const isActive = salary === preset.val;
               return (
@@ -260,7 +262,7 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
           {/* Slider */}
           <div className="pt-1.5 space-y-1">
             <div className="flex justify-between items-center text-[11px] text-blue-200 font-semibold">
-              <span>Or slide to adjust income:</span>
+              <span>{t.orSlideToAdjust}</span>
               <span className="font-extrabold text-white">₹{(salary || 0).toLocaleString()}</span>
             </div>
             <input
@@ -284,12 +286,12 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
         {/* Bottom Trust Indicators */}
         <div className="mt-4 pt-3 border-t border-white/15 flex items-center justify-between text-xs text-blue-200">
           <span className="font-bold text-white">
-            Status: <span className="text-emerald-300 font-black">{eligibleLenders.length} Companies Eligible</span>, {ineligibleLenders.length} Locked
+            Status: <span className="text-emerald-300 font-black">{eligibleLenders.length} {t.statusCompaniesEligible}</span>, {ineligibleLenders.length} {t.statusLocked}
           </span>
           <div className="flex items-center space-x-2 text-[11px]">
             <span className="inline-flex items-center">
               <Zap className="w-3 h-3 text-amber-300 mr-1" />
-              Direct Bank IMPS
+              {t.directBankImps}
             </span>
           </div>
         </div>
@@ -327,11 +329,11 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
           <div className="flex items-center space-x-2 min-w-0 flex-1">
             <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse flex-shrink-0"></div>
             <h3 className="text-sm sm:text-base font-black text-[#1E293B] truncate">
-              Eligible Companies <span className="text-emerald-700 font-extrabold whitespace-nowrap">({eligibleLenders.length} Offers Available)</span>
+              {t.eligibleCompanies} <span className="text-emerald-700 font-extrabold whitespace-nowrap">({eligibleLenders.length} {t.offersAvailable})</span>
             </h3>
           </div>
           <span className="text-[11px] font-extrabold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-0.5 rounded-full shadow-2xs whitespace-nowrap flex-shrink-0">
-            ✓ Ready to Apply
+            {t.readyToApply}
           </span>
         </div>
 
@@ -386,7 +388,7 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
                   <div className="flex-shrink-0 self-start text-right">
                     <span className="inline-flex items-center text-[10.5px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200/90 px-2.5 py-1 rounded-full shadow-2xs whitespace-nowrap">
                       <CheckCircle2 className="w-3.5 h-3.5 mr-1 text-emerald-600 flex-shrink-0" />
-                      Eligible
+                      {language === 'hi' ? 'एलिजिबल' : 'Eligible'}
                     </span>
                   </div>
                 </div>
@@ -395,7 +397,7 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
                 <div className="grid grid-cols-3 gap-1 sm:gap-2 my-3 p-2.5 sm:p-3 rounded-2xl bg-gradient-to-r from-emerald-50/40 via-white to-emerald-50/40 border border-emerald-100 text-center items-center">
                   <div>
                     <span className="text-[9px] sm:text-[9.5px] font-bold text-slate-400 uppercase tracking-wider block whitespace-nowrap">
-                      MAX LOAN
+                      {t.maxLoan}
                     </span>
                     <span className="text-[11.5px] sm:text-sm font-black text-[#2563EB] mt-0.5 block whitespace-nowrap">
                       {nbfc.maxLoanDisplay}
@@ -403,7 +405,7 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
                   </div>
                   <div className="border-x border-slate-200/80 px-1 sm:px-2">
                     <span className="text-[9px] sm:text-[9.5px] font-bold text-slate-400 uppercase tracking-wider block whitespace-nowrap">
-                      {nbfc.interestRateDisplay ? 'INTEREST RATE' : 'APR'}
+                      {nbfc.interestRateDisplay ? t.interestRateLabel : t.aprLabel}
                     </span>
                     <span className="text-[11.5px] sm:text-sm font-black text-emerald-600 mt-0.5 block whitespace-nowrap">
                       {nbfc.interestRateDisplay || nbfc.aprDisplay}
@@ -411,7 +413,7 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
                   </div>
                   <div>
                     <span className="text-[9px] sm:text-[9.5px] font-bold text-slate-400 uppercase tracking-wider block whitespace-nowrap">
-                      MIN SALARY
+                      {t.minSalaryLabel}
                     </span>
                     <span className="text-[11.5px] sm:text-sm font-black text-slate-800 mt-0.5 block whitespace-nowrap">
                       {nbfc.minSalaryDisplay}
@@ -422,15 +424,15 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
                 {/* DISCLOSURE ROW: real per-partner APR / tenure / processing fee */}
                 <div className="grid grid-cols-3 gap-1 sm:gap-2 mb-3 px-0.5 text-center items-start">
                   <div>
-                    <span className="text-[8.5px] font-bold text-slate-400 uppercase tracking-wider block">APR</span>
+                    <span className="text-[8.5px] font-bold text-slate-400 uppercase tracking-wider block">{t.aprLabel}</span>
                     <span className="text-[10px] sm:text-[11px] font-bold text-slate-700 block">{nbfc.aprDisplay}</span>
                   </div>
                   <div>
-                    <span className="text-[8.5px] font-bold text-slate-400 uppercase tracking-wider block">Tenure</span>
+                    <span className="text-[8.5px] font-bold text-slate-400 uppercase tracking-wider block">{t.tenureLabel}</span>
                     <span className="text-[10px] sm:text-[11px] font-bold text-slate-700 block">{nbfc.tenureDisplay}</span>
                   </div>
                   <div>
-                    <span className="text-[8.5px] font-bold text-slate-400 uppercase tracking-wider block">Processing Fee</span>
+                    <span className="text-[8.5px] font-bold text-slate-400 uppercase tracking-wider block">{t.processingFeeLabel}</span>
                     <span className="text-[10px] sm:text-[11px] font-bold text-slate-700 block">{nbfc.processingFeeDisplay}</span>
                   </div>
                 </div>
@@ -459,11 +461,11 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
                       {submittingSlug === nbfc.slug ? (
                         <>
                           <Loader2 className="w-4 h-4 animate-spin" />
-                          <span>Starting...</span>
+                          <span>{language === 'hi' ? 'शुरू हो रहा है...' : 'Starting...'}</span>
                         </>
                       ) : (
                         <>
-                          <span>Apply Now</span>
+                          <span>{t.applyNow}</span>
                           <ArrowRight className="w-4 h-4 ml-0.5" />
                         </>
                       )}
@@ -477,18 +479,18 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
           <div className="bg-white rounded-3xl p-5 border border-amber-200 text-center space-y-2">
             <AlertCircle className="w-7 h-7 text-amber-500 mx-auto" />
             <h4 className="text-sm font-extrabold text-[#1E293B]">
-              Salary ₹{salary.toLocaleString()} Par Koi Eligible Offer Nahi Hai
+              {t.noEligibleOffersFor} ₹{salary.toLocaleString()}
             </h4>
             {lowestBarPartner && (
               <>
                 <p className="text-xs text-slate-500">
-                  Minimum salary criteria {lowestBarPartner.minSalaryDisplay} ({lowestBarPartner.name}) se shuru hoti hai.
+                  {t.minSalaryCriteriaStartsAt} {lowestBarPartner.minSalaryDisplay} ({lowestBarPartner.name}).
                 </p>
                 <button
                   onClick={() => setSalary(lowestBarPartner.minSalary)}
                   className="mt-1 px-4 py-1.5 bg-[#2563EB] text-white text-xs font-bold rounded-xl shadow cursor-pointer"
                 >
-                  Set Salary to {lowestBarPartner.minSalaryDisplay}
+                  {t.setSalaryTo} {lowestBarPartner.minSalaryDisplay}
                 </button>
               </>
             )}
@@ -506,19 +508,19 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
               </div>
               <div className="min-w-0 flex-1">
                 <h3 className="text-xs sm:text-sm font-black text-slate-700 leading-snug">
-                  Not Eligible — Higher Salary Required{' '}
+                  {t.notEligible}{' '}
                   <span className="text-slate-500 font-bold whitespace-nowrap">
-                    ({ineligibleLenders.length} Companies)
+                    ({ineligibleLenders.length} {t.companies})
                   </span>
                 </h3>
                 <p className="text-[10.5px] sm:text-[11px] text-slate-400 mt-0.5 leading-snug">
-                  In companies ke liye aapki monthly income minimum criteria se kam hai (Locked)
+                  {t.ineligibleLockedHint}
                 </p>
               </div>
             </div>
             <span className="flex-shrink-0 inline-flex items-center space-x-1 text-[10px] font-black text-slate-500 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-full uppercase tracking-wider whitespace-nowrap self-start">
               <span>🔒</span>
-              <span>Ineligible</span>
+              <span>{t.ineligibleBadge}</span>
             </span>
           </div>
 
@@ -546,7 +548,7 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
                         {nbfc.name}
                       </h4>
                       <p className="text-[10.5px] sm:text-[11px] text-amber-700 font-bold mt-0.5 whitespace-nowrap">
-                        Requires Min Salary: {nbfc.minSalaryDisplay}
+                        {language === 'hi' ? 'न्यूनतम सैलरी चाहिए:' : 'Requires Min Salary:'} {nbfc.minSalaryDisplay}
                       </p>
                     </div>
                   </div>
@@ -555,7 +557,7 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
                   <div className="flex-shrink-0 self-start text-right">
                     <span className="inline-flex items-center text-[10px] font-extrabold bg-amber-50 text-amber-800 border border-amber-200 px-2.5 py-1 rounded-full whitespace-nowrap">
                       <Lock className="w-3 h-3 mr-1 text-amber-600" />
-                      Min {nbfc.minSalaryDisplay}
+                      {language === 'hi' ? 'न्यूनतम' : 'Min'} {nbfc.minSalaryDisplay}
                     </span>
                   </div>
                 </div>
@@ -564,7 +566,7 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
                 <div className="grid grid-cols-3 gap-1 sm:gap-2 my-3 p-2.5 sm:p-3 rounded-2xl bg-slate-100/80 border border-slate-200/60 text-center items-center">
                   <div>
                     <span className="text-[9px] sm:text-[9.5px] font-bold text-slate-400 uppercase tracking-wider block whitespace-nowrap">
-                      MAX LOAN
+                      {t.maxLoan}
                     </span>
                     <span className="text-[11.5px] sm:text-sm font-bold text-slate-600 mt-0.5 block whitespace-nowrap">
                       {nbfc.maxLoanDisplay}
@@ -572,7 +574,7 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
                   </div>
                   <div className="border-x border-slate-200 px-1 sm:px-2">
                     <span className="text-[9px] sm:text-[9.5px] font-bold text-slate-400 uppercase tracking-wider block whitespace-nowrap">
-                      {nbfc.interestRateDisplay ? 'INTEREST RATE' : 'APR'}
+                      {nbfc.interestRateDisplay ? t.interestRateLabel : t.aprLabel}
                     </span>
                     <span className="text-[11.5px] sm:text-sm font-bold text-emerald-600 mt-0.5 block whitespace-nowrap">
                       {nbfc.interestRateDisplay || nbfc.aprDisplay}
@@ -580,7 +582,7 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
                   </div>
                   <div>
                     <span className="text-[9px] sm:text-[9.5px] font-bold text-slate-400 uppercase tracking-wider block whitespace-nowrap">
-                      MIN SALARY
+                      {t.minSalaryLabel}
                     </span>
                     <span className="text-[11.5px] sm:text-sm font-black text-amber-800 mt-0.5 block whitespace-nowrap">
                       {nbfc.minSalaryDisplay}
@@ -591,7 +593,7 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
                 {/* BOTTOM ROW: Disabled CTA */}
                 <div className="flex items-center justify-between gap-2.5 pt-1">
                   <span className="text-[11px] text-slate-400 font-medium">
-                    Salary criteria unfulfilled
+                    {t.salaryCriteriaUnfulfilled}
                   </span>
                   <button
                     type="button"
@@ -599,7 +601,7 @@ export const MultiLenderComparison = ({ loanAmount = 350000, tenureMonths = 36, 
                     className="px-3.5 py-2 bg-slate-200 text-slate-500 font-bold text-xs rounded-xl cursor-not-allowed flex items-center space-x-1 whitespace-nowrap"
                   >
                     <Lock className="w-3 h-3 mr-1 text-slate-500" />
-                    <span>Ineligible (Min {nbfc.minSalaryDisplay})</span>
+                    <span>{t.ineligibleMin} {nbfc.minSalaryDisplay})</span>
                   </button>
                 </div>
               </div>
