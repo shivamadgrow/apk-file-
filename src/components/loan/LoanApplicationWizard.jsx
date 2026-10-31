@@ -4,14 +4,14 @@ import { BILINGUAL_TEXT } from '../../data/mockData';
 import { MultiLenderComparison } from './MultiLenderComparison';
 import { LeadConsentCheckbox, DISCLOSURE_VERSION } from './LeadConsentCheckbox';
 import { ErrorToast } from '../common/ErrorToast';
-import { api } from '../../services/api';
+import { api, hasSession } from '../../services/api';
 import {
   CheckCircle2, ArrowRight, ArrowLeft, Upload, ShieldCheck,
   FileText, Lock, Landmark, Sparkles, ExternalLink, Loader2
 } from 'lucide-react';
 
 export const LoanApplicationWizard = ({ preSelectedProduct = 'personal', onClose }) => {
-  const { user, setActiveLoan, saveNewLoanApplication, setActiveTab, partners, language } = useApp();
+  const { user, setActiveLoan, saveNewLoanApplication, setActiveTab, partners, language, setIsAuthOpen } = useApp();
   const t = BILINGUAL_TEXT[language] || BILINGUAL_TEXT.en;
 
   const productTitle = preSelectedProduct === 'business' 
@@ -107,6 +107,17 @@ export const LoanApplicationWizard = ({ preSelectedProduct = 'personal', onClose
     }
     if (!leadConsent) {
       setSubmitError('Please accept the consent checkbox before submitting your enquiry.');
+      return;
+    }
+
+    // The backend's lead-intake endpoint technically accepts anonymous
+    // submissions too (softCustomer), but submitting an actual lead requires a
+    // verified phone number by business decision — same gate as MultiLenderComparison's
+    // Apply Now. Browsing (steps 1-3 themselves) stays guest-accessible; only the
+    // final submit is gated.
+    if (!(await hasSession())) {
+      setSubmitError(language === 'hi' ? 'कृपया जारी रखने के लिए अपना मोबाइल नंबर वेरीफाई करें।' : 'Please verify your mobile number to continue.');
+      setIsAuthOpen(true);
       return;
     }
 

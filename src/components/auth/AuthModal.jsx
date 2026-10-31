@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import { BILINGUAL_TEXT } from '../../data/mockData';
 import { api, warmBackend, buildPartnerRedirectUrl } from '../../services/api';
-import { Shield, Phone, ArrowRight, CheckCircle2, Lock, User, Mail, FileText, Sparkles, Loader2, RefreshCw, AlertCircle, Zap, Smartphone, ArrowLeft } from 'lucide-react';
+import { Shield, Phone, ArrowRight, CheckCircle2, Lock, X, User, Mail, FileText, Sparkles, Loader2, RefreshCw, AlertCircle, Zap, Smartphone, ArrowLeft } from 'lucide-react';
 
 export const AuthModal = () => {
   const { isAuthOpen, setIsAuthOpen, loginUser, referredBy, language } = useApp();
@@ -262,10 +262,21 @@ export const AuthModal = () => {
   return (
     <div className="fixed inset-0 z-50 bg-black/65 backdrop-blur-md flex items-center justify-center p-4">
       <div className="bg-white rounded-3xl max-w-sm w-full p-5 space-y-4 shadow-2xl relative text-left border border-slate-200 animate-in fade-in zoom-in duration-200">
-        {/* No close button, deliberately: login (phone + OTP + full profile) is
-            mandatory before any part of the app is usable — there is no guest
-            browsing path. Google Play reviewers use the dedicated reviewer
-            account (see PLAY_REVIEWER_CREDENTIALS.txt) to get past this screen. */}
+
+        {/* Close Button — guest browsing is allowed (home, loan comparison, EMI
+            calculator); this modal only needs to be unavoidable at the moment the
+            user actually tries to submit a lead (Apply Now), where handleApplyClick
+            re-opens it via setIsAuthOpen(true) if there's no session yet. */}
+        <button
+          onClick={() => {
+            setIsAuthOpen(false);
+            setErrorMsg('');
+            setInfoMsg('');
+          }}
+          className="absolute top-4 right-4 p-1.5 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
+        >
+          <X className="w-5 h-5" />
+        </button>
 
         {/* STEP 0: WELCOME SCREEN (Mobile Login Only) */}
         {step === 'welcome' ? (
