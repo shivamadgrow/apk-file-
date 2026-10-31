@@ -44,7 +44,7 @@ export const LoanApplicationWizard = ({ preSelectedProduct = 'personal', onClose
     setLoanAmount(raw ? Number(raw) : 0);
   };
   // Not user-selectable here: real tenure is set by whichever partner the user
-  // picks in Step 4 (ranges from 30 days to 12 months — see PARTNER_NBFCS). This is
+  // picks in Step 4 (live from the backend — see AppContext's `partners`). This is
   // sent to the backend's `tenureMonths` field as a representative placeholder (3
   // months) only for the initial lead record, before a partner is chosen.
   const tenureMonths = 3;

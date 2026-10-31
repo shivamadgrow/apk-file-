@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useApp } from '../../context/AppContext';
 import { Calculator, ArrowRight } from 'lucide-react';
 
 // Models the real product shared by the active lending partners (live from the
@@ -6,6 +7,7 @@ import { Calculator, ArrowRight } from 'lucide-react';
 // a flat processing fee, not a traditional multi-year amortized EMI. There is no
 // amortization schedule here because none of these partners' products have one.
 export const EmiCalculator = ({ onApplyWithAmount }) => {
+  const { partners } = useApp();
   const [amount, setAmount] = useState(50000);
   const [dailyRate, setDailyRate] = useState(1.0);
   const [tenureDays, setTenureDays] = useState(60);
@@ -28,7 +30,7 @@ export const EmiCalculator = ({ onApplyWithAmount }) => {
         </div>
         <div>
           <h2 className="text-base font-extrabold text-[#223981]">Loan Cost Estimator</h2>
-          <p className="text-xs text-[#717983]">Worst-case estimate for our 5 daily-rate lending partners.</p>
+          <p className="text-xs text-[#717983]">Worst-case estimate for our {partners.length} daily-rate lending partners.</p>
         </div>
       </div>
 
